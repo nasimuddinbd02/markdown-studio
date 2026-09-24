@@ -99,3 +99,23 @@ The user approved a continuous loop: build a feature, test it, run it, then comm
 4. A native macOS menu bar, and "Reveal in File Explorer" / "Copy Path" in the explorer context menu.
 5. Performance: trim the highlight.js language set and benchmark 10 MB documents.
 6. Spell-check language setting, and word/character count for the selection.
+
+### Iterations 14–19 (continued loop)
+
+| # | Feature | Commit |
+| --- | --- | --- |
+| 14 | Reusable accessible context menu; explorer Reveal / Copy Path / Copy Relative Path; tab menu (Close Others / to the Right / Saved) | aaab8a3 |
+| 15 | Playwright end-to-end suite (6 workflows) on the installed Edge; CI job with Chromium | f093be8 |
+| 16 | axe-core WCAG 2.1 AA audit in e2e (light and dark); fixed contrast, labels, nested controls and list semantics | 6106913 |
+| 17 | Local file history (30 versions per file) with diff and restore; saving during an in-flight save now queues a re-save | 94cba75 |
+| 18 | Focus Mode, Full Screen (F11) and a searchable Keyboard Shortcuts reference | d30af93 |
+| 19 | Document statistics popover, spell-check toggle, Windows save-rename retry | 6d6c62d |
+
+**Tests:** Vitest 136, Playwright 14 (including 8 accessibility audits), Rust 24. All passing.
+
+**Push status:** still blocked on the GitHub sign-in. 21 commits are waiting locally.
+
+**Questions for the user:**
+
+- Which UI languages should localization cover (besides English)?
+- Auto-update signing key and update URL (UPD-*).
