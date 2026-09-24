@@ -44,6 +44,11 @@ export interface Backend {
   deletePath(path: string): Promise<void>;
   /** Searches Markdown files under an approved folder. */
   searchWorkspace(root: string, options: SearchOptions): Promise<SearchResult>;
+  /**
+   * Saves an image into `assets/` next to a saved document; returns the new
+   * file's absolute path. Never overwrites existing files.
+   */
+  saveImageAsset(docPath: string, fileName: string, dataBase64: string): Promise<string>;
   /** Returns a data: URL for a local image referenced by a document. */
   readImage(path: string): Promise<string>;
   openExternal(url: string): Promise<void>;

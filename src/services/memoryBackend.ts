@@ -328,10 +328,30 @@ export class MemoryBackend implements Backend {
     return result;
   }
 
+  async saveImageAsset(docPath: string, fileName: string, dataBase64: string) {
+    const doc = this.check(docPath);
+    const name = this.validateName(fileName);
+    const dot = name.lastIndexOf(".");
+    const stem = dot > 0 ? name.slice(0, dot) : name;
+    const ext = (dot > 0 ? name.slice(dot + 1) : "png").toLowerCase();
+    if (!["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "avif"].includes(ext)) {
+      throw new AppError("invalidPath", "Only image files can be added to a document");
+    }
+    const dir = join(dirname(doc), "assets");
+    this.check(join(dir, name));
+    let target = join(dir, `${stem}.${ext}`);
+    for (let n = 1; this.files.has(target); n++) target = join(dir, `${stem}-${n}.${ext}`);
+    const mime = ext === "svg" ? "image/svg+xml" : ext === "jpg" ? "image/jpeg" : `image/${ext}`;
+    this.put(target, `data:${mime};base64,${dataBase64}`);
+    this.persist();
+    return target;
+  }
+
   async readImage(path: string) {
     const p = this.validate(path);
     const f = this.files.get(p);
     if (!f) throw new AppError("notFound", "Image not found");
+    if (f.content.startsWith("data:image/")) return f.content;
     if (!p.endsWith(".svg")) throw new AppError("invalidPath", "Only SVG images are available in the demo");
     return "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(f.content)));
   }

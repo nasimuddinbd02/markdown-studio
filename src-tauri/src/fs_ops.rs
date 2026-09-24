@@ -195,6 +195,38 @@ pub fn delete_to_trash(path: &Path) -> AppResult<()> {
     trash::delete(path).map_err(|e| AppError::Io(format!("Could not move to trash: {e}")))
 }
 
+pub const IMAGE_EXTENSIONS: &[&str] = &["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "avif"];
+
+/// Picks a file name in `dir` that doesn't exist yet: `name.png`, `name-1.png`, ...
+pub fn unique_child(dir: &Path, stem: &str, ext: &str) -> PathBuf {
+    let mut candidate = dir.join(format!("{stem}.{ext}"));
+    let mut n = 1;
+    while candidate.exists() {
+        candidate = dir.join(format!("{stem}-{n}.{ext}"));
+        n += 1;
+    }
+    candidate
+}
+
+/// Saves image bytes into an `assets` folder next to a document and returns
+/// the new file's path. Never overwrites an existing file.
+pub fn save_asset(doc_dir: &Path, stem: &str, ext: &str, bytes: &[u8]) -> AppResult<PathBuf> {
+    let ext = ext.to_ascii_lowercase();
+    if !IMAGE_EXTENSIONS.contains(&ext.as_str()) {
+        return Err(AppError::InvalidPath("Only image files can be added to a document".into()));
+    }
+    if bytes.len() as u64 > MAX_ASSET_BYTES {
+        return Err(AppError::TooLarge("Images larger than 20 MB can't be added".into()));
+    }
+    let assets = doc_dir.join("assets");
+    fs::create_dir_all(&assets)?;
+    let target = unique_child(&assets, stem, &ext);
+    let mut file = File::options().write(true).create_new(true).open(&target)?;
+    file.write_all(bytes)?;
+    file.sync_all()?;
+    Ok(target)
+}
+
 pub fn read_image_data_url(path: &Path) -> AppResult<String> {
     use base64::Engine;
     let ext = path
@@ -282,6 +314,17 @@ mod tests {
         ));
         rename(&tmp.path().join("a.md"), &tmp.path().join("c.md")).unwrap();
         assert!(tmp.path().join("c.md").exists());
+    }
+
+    #[test]
+    fn saves_assets_without_overwriting() {
+        let tmp = tempfile::tempdir().unwrap();
+        let a = save_asset(tmp.path(), "shot", "PNG", b"one").unwrap();
+        let b = save_asset(tmp.path(), "shot", "png", b"two").unwrap();
+        assert_eq!(a, tmp.path().join("assets").join("shot.png"));
+        assert_eq!(b, tmp.path().join("assets").join("shot-1.png"));
+        assert_eq!(fs::read(&a).unwrap(), b"one");
+        assert!(matches!(save_asset(tmp.path(), "x", "exe", b"MZ"), Err(AppError::InvalidPath(_))));
     }
 
     #[test]

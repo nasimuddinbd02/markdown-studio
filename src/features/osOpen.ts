@@ -56,7 +56,8 @@ export async function installOsOpenHandlers() {
       }
     });
     window.addEventListener("drop", (e) => {
-      if (!e.dataTransfer?.files.length) return;
+      // The editor handles image drops itself.
+      if (e.defaultPrevented || !e.dataTransfer?.files.length) return;
       e.preventDefault();
       void openDroppedFiles([...e.dataTransfer.files]);
     });

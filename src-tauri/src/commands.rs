@@ -293,6 +293,35 @@ pub async fn delete_path(state: State<'_, AppState>, path: String) -> AppResult<
     state.track("fs.delete", fs_ops::delete_to_trash(&target))
 }
 
+/// Saves a pasted/dropped image next to a saved document (in `assets/`) and
+/// returns its path. The document's folder must be writable in the scope.
+#[tauri::command]
+pub async fn save_image_asset(
+    state: State<'_, AppState>,
+    doc_path: String,
+    file_name: String,
+    data_base64: String,
+) -> AppResult<String> {
+    use base64::Engine;
+    let doc = state.scope.check(Path::new(&doc_path))?;
+    let dir = doc
+        .parent()
+        .ok_or_else(|| AppError::InvalidPath("Document has no folder".into()))?
+        .to_path_buf();
+    scope::validate_file_name(&file_name)?;
+    let name = Path::new(&file_name);
+    let stem = name.file_stem().and_then(|s| s.to_str()).unwrap_or("image");
+    let ext = name.extension().and_then(|s| s.to_str()).unwrap_or("png");
+    // The assets folder must itself be inside the approved scope (a single
+    // opened file only grants that file, not its folder).
+    state.scope.check(&dir.join("assets").join(format!("{stem}.{ext}")))?;
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(data_base64.as_bytes())
+        .map_err(|_| AppError::InvalidPath("Invalid image data".into()))?;
+    let saved = state.track("asset.save", fs_ops::save_asset(&dir, stem, ext, &bytes))?;
+    Ok(fs_ops::path_string(&saved))
+}
+
 #[tauri::command]
 pub async fn read_image(state: State<'_, AppState>, path: String) -> AppResult<String> {
     let file = state.scope.check_asset(Path::new(&path))?;

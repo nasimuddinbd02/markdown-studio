@@ -20,6 +20,7 @@ import { editorShowing, openReplacePanel, registerEditorView } from "../features
 import { scrollSync } from "../features/scrollSync";
 import { editorKeymap } from "../features/commands";
 import { minimalChange } from "../features/saveTransforms";
+import { insertImageFiles, isImageFile } from "../features/images";
 
 /**
  * Markdown-aware syntax colours (FR-020). Colours come from CSS variables so
@@ -105,6 +106,25 @@ export function Editor() {
         syntaxHighlighting(markdownHighlight),
         placeholder("Start writing Markdown…"),
         EditorView.contentAttributes.of({ "aria-label": "Markdown editor", spellcheck: "true" }),
+        // Pasted or dropped images are saved to assets/ and linked.
+        EditorView.domEventHandlers({
+          paste: (e) => {
+            const files = [...(e.clipboardData?.files ?? [])];
+            if (!files.some(isImageFile)) return false;
+            e.preventDefault();
+            void insertImageFiles(files);
+            return true;
+          },
+          drop: (e, view) => {
+            const files = [...(e.dataTransfer?.files ?? [])];
+            if (!files.some(isImageFile)) return false;
+            e.preventDefault();
+            const pos = view.posAtCoords({ x: e.clientX, y: e.clientY });
+            if (pos !== null) view.dispatch({ selection: { anchor: pos } });
+            void insertImageFiles(files);
+            return true;
+          },
+        }),
         keymap.of([
           { key: "Mod-g", run: gotoLine, preventDefault: true },
           { key: "Mod-h", run: openReplacePanel, preventDefault: true },

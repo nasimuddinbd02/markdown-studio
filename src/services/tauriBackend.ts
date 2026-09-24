@@ -32,6 +32,7 @@ export const tauriBackend: Backend = {
   renamePath: (path, newName) => call("rename_path", { path, newName }),
   deletePath: (path) => call("delete_path", { path }),
   readImage: (path) => call("read_image", { path }),
+  saveImageAsset: (docPath, fileName, dataBase64) => call("save_image_asset", { docPath, fileName, dataBase64 }),
   searchWorkspace: (root, options) => call("search_workspace", { root, options }),
   openExternal: (url) => call("open_external", { url }),
   exportFile: (suggestedName, content, kind) => call("export_file", { suggestedName, content, kind }),

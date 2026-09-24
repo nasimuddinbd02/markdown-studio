@@ -72,6 +72,7 @@ pub fn run() {
             commands::rename_path,
             commands::delete_path,
             commands::read_image,
+            commands::save_image_asset,
             commands::open_external,
             commands::export_file,
             commands::take_pending_opens,
