@@ -57,6 +57,11 @@ describe("HTML → Markdown", () => {
     expect(md).not.toContain("alert");
   });
 
+  it("writes compact list markers, including nested and numbered lists", () => {
+    const md = htmlToMarkdown("<ul><li>one<ul><li>inner</li></ul></li><li>two</li></ul><ol start='3'><li>three</li><li>four</li></ol>");
+    expect(md).toBe("- one\n  - inner\n- two\n\n3. three\n4. four\n");
+  });
+
   it("detects whether clipboard HTML is worth converting", () => {
     expect(isRichHtml("<meta charset='utf-8'><div><span style='color:red'>code</span></div>")).toBe(false);
     expect(isRichHtml("<p>Hello <b>world</b></p>")).toBe(true);
@@ -83,6 +88,29 @@ describe("Word (.docx) → Markdown", () => {
     expect(result.images).toHaveLength(1);
     expect(result.images[0].name).toBe("Quarterly-Report-1.png");
     expect(md).toContain("](assets/Quarterly-Report-1.png)");
+  }, 20_000);
+
+  it("keeps the picture description Word stores as alt text", async () => {
+    const doc = new Document({
+      sections: [
+        {
+          children: [
+            new Paragraph({
+              children: [
+                new ImageRun({
+                  type: "png",
+                  data: pngBytes(),
+                  transformation: { width: 10, height: 10 },
+                  altText: { name: "chart", description: "Sales chart", title: "Sales chart" },
+                }),
+              ],
+            }),
+          ],
+        },
+      ],
+    });
+    const result = await docxToMarkdown(await (await Packer.toBlob(doc)).arrayBuffer(), "alt");
+    expect(result.markdown).toContain("![Sales chart](assets/alt-1.png)");
   }, 20_000);
 
   it("rejects files that aren't Word documents", async () => {

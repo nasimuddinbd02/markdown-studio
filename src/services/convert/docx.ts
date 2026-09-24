@@ -54,7 +54,9 @@ export async function docxToMarkdown(data: ArrayBuffer, baseName = "image"): Pro
         const ext = EXT[image.contentType] ?? "png";
         const name = `${stem}-${images.length + 1}.${ext}`;
         images.push({ name, base64, contentType: image.contentType });
-        return { src: `assets/${name}` };
+        // Keep the description Word stores for the picture (accessibility).
+        const alt = (image as { altText?: string }).altText?.trim();
+        return alt ? { src: `assets/${name}`, alt } : { src: `assets/${name}` };
       }),
     },
   );

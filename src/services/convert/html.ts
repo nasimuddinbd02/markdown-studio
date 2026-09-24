@@ -23,6 +23,24 @@ function createService() {
     replacement: (content) => `~~${content}~~`,
   });
   td.remove(["script", "style", "noscript", "iframe", "object", "embed", "form", "button", "select", "textarea", "head", "title", "meta", "link"]);
+  // "- item" / "1. item" (turndown's default pads markers to 4 columns).
+  td.addRule("compactListItems", {
+    filter: "li",
+    replacement: (content, node, options) => {
+      const parent = node.parentNode as HTMLElement | null;
+      let prefix = `${options.bulletListMarker} `;
+      if (parent?.nodeName === "OL") {
+        const start = Number(parent.getAttribute("start") ?? 1);
+        prefix = `${start + Array.prototype.indexOf.call(parent.children, node)}. `;
+      }
+      const indent = " ".repeat(prefix.length);
+      const body = content
+        .replace(/^\n+/, "")
+        .replace(/\n+$/, "\n")
+        .replace(/\n(?!$)/gm, `\n${indent}`);
+      return prefix + body + (node.nextSibling && !/\n$/.test(body) ? "\n" : "");
+    },
+  });
   // Word/HTML bookmarks (<a id="_Toc123"></a>) carry no text.
   td.addRule("emptyAnchors", {
     filter: (node) => node.nodeName === "A" && !node.getAttribute("href") && !node.textContent?.trim(),
