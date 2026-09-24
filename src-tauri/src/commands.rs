@@ -306,6 +306,41 @@ pub fn open_external(app: AppHandle, state: State<'_, AppState>, url: String) ->
     state.track("shell.openUrl", result)
 }
 
+/// Exports rendered content (e.g. HTML) to a location the user picks in a
+/// native Save dialog. The dialog itself is the user's consent for the path.
+#[tauri::command]
+pub async fn export_file(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    suggested_name: String,
+    content: String,
+    kind: String,
+) -> AppResult<Option<String>> {
+    let (filter, exts): (&str, &[&str]) = match kind.as_str() {
+        "html" => ("HTML document", &["html", "htm"]),
+        _ => return Err(AppError::InvalidPath("Unsupported export type".into())),
+    };
+    scope::validate_file_name(&suggested_name)?;
+    let picked = app
+        .dialog()
+        .file()
+        .set_title("Export")
+        .add_filter(filter, exts)
+        .set_file_name(suggested_name)
+        .blocking_save_file();
+    let Some(mut path) = picked.and_then(|p| p.into_path().ok()) else {
+        return Ok(None);
+    };
+    if path.extension().is_none() {
+        path.set_extension(exts[0]);
+    }
+    scope::validate_syntax(&path)?;
+    let result = fs_ops::write_text_atomic(&path, &content, LineEnding::Lf, false, None, true);
+    state.track("export.write", result)?;
+    state.logger.log("info", "export", &kind);
+    Ok(Some(fs_ops::path_string(&path)))
+}
+
 // ---------------------------------------------------------------- settings & recovery
 
 #[tauri::command]

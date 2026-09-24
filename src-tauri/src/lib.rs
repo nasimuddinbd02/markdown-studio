@@ -56,6 +56,7 @@ pub fn run() {
             commands::delete_path,
             commands::read_image,
             commands::open_external,
+            commands::export_file,
             commands::load_settings,
             commands::save_settings,
             commands::load_recovery,

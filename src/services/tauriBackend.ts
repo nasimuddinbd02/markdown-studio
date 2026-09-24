@@ -33,6 +33,7 @@ export const tauriBackend: Backend = {
   deletePath: (path) => call("delete_path", { path }),
   readImage: (path) => call("read_image", { path }),
   openExternal: (url) => call("open_external", { url }),
+  exportFile: (suggestedName, content, kind) => call("export_file", { suggestedName, content, kind }),
 
   loadSettings: () => call("load_settings"),
   saveSettings: (settings) => call("save_settings", { settings }),

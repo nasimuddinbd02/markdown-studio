@@ -2,6 +2,8 @@ import type {
   AppInfo, DirEntry, FileContent, LineEnding, RecentEntry, RecoverySnapshot,
 } from "../types";
 
+export type ExportKind = "html";
+
 export interface WriteRequest {
   path: string;
   content: string;
@@ -43,6 +45,11 @@ export interface Backend {
   /** Returns a data: URL for a local image referenced by a document. */
   readImage(path: string): Promise<string>;
   openExternal(url: string): Promise<void>;
+  /**
+   * Asks the user where to save an exported file (native Save dialog) and
+   * writes it there. Returns the chosen path, or `null` if cancelled.
+   */
+  exportFile(suggestedName: string, content: string, kind: ExportKind): Promise<string | null>;
 
   loadSettings(): Promise<unknown>;
   saveSettings(settings: unknown): Promise<void>;

@@ -11,6 +11,8 @@ The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status pe
 - Tabs with dirty indicators, and Save / Don't Save / Cancel prompts on close and on quit
 - Format menu and shortcuts: bold (Ctrl/Cmd+B), italic (I), link (K), inline code (E), strikethrough, headings (Ctrl/Cmd+Alt+1–3), lists, task lists, quotes, code blocks and tables
 - CodeMirror 6 editor with Markdown syntax highlighting, code-block languages, undo/redo, multi-cursor, find & replace (case-sensitive, regex, whole word) and go to line
+- Export to standalone HTML (styled, images inlined, sanitized), Copy as HTML, and Print / Save as PDF (Ctrl/Cmd+P)
+- Command palette (Ctrl/Cmd+Shift+P) and a document outline panel
 - Live GitHub Flavored Markdown preview (tables, task lists, strikethrough, autolinks, fenced code with highlighting) with a configurable debounce
 - Editor-only, split and preview-only views, resizable panels and synced scrolling
 - Light, dark and system themes; configurable font, font size, line numbers, wrapping and tab size

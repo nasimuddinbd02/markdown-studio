@@ -319,6 +319,22 @@ export class MemoryBackend implements Backend {
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
+  async exportFile(suggestedName: string, content: string, kind: string) {
+    this.lastExport = { name: suggestedName, content };
+    if (typeof URL.createObjectURL !== "function") return suggestedName;
+    const type = kind === "html" ? "text/html" : "text/plain";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([content], { type }));
+    a.download = suggestedName;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    this.lastExport = { name: suggestedName, content };
+    return suggestedName;
+  }
+
+  /** Test hook: the most recent export. */
+  lastExport: { name: string; content: string } | null = null;
+
   async loadSettings() {
     return this.settings;
   }
