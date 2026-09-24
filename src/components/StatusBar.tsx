@@ -4,6 +4,7 @@ import { useUi } from "../stores/uiStore";
 import { useSettings } from "../stores/settingsStore";
 import { countWords } from "../services/textStats";
 import { backend } from "../services";
+import { showProblems } from "../features/editorBridge";
 
 /** Status bar: encoding, language, line/column and save state (SRS §8). */
 export function StatusBar() {
@@ -11,6 +12,8 @@ export function StatusBar() {
   const cursor = useUi((s) => s.cursor);
   const viewMode = useSettings((s) => s.settings.viewMode);
   const autoSave = useSettings((s) => s.settings.autoSave);
+  const lintOn = useSettings((s) => s.settings.lintMarkdown);
+  const problems = useUi((s) => s.problems);
   const words = useMemo(() => (doc ? countWords(doc.content) : 0), [doc?.content]); // eslint-disable-line react-hooks/exhaustive-deps
 
   let state = "";
@@ -34,6 +37,16 @@ export function StatusBar() {
       </div>
       {doc && (
         <div className="status-right">
+          {lintOn && problems && viewMode !== "preview" && (
+            <button
+              className="status-item status-button"
+              onClick={() => void showProblems()}
+              title="Show problems"
+              aria-label={`${problems.warnings + problems.errors} warnings, ${problems.infos} suggestions. Show problems.`}
+            >
+              ⚠ {problems.errors + problems.warnings} · ℹ {problems.infos}
+            </button>
+          )}
           {viewMode !== "preview" && (
             <span className="status-item" title="Line and column">
               Ln {cursor.line}, Col {cursor.col}

@@ -32,6 +32,8 @@ interface UiState {
   aboutOpen: boolean;
   paletteOpen: boolean;
   sidebarView: "explorer" | "search";
+  problems: { errors: number; warnings: number; infos: number } | null;
+  setProblems(p: UiState["problems"]): void;
   /** Incremented to move focus into the search box. */
   searchFocusToken: number;
   cursor: { line: number; col: number; selected: number };
@@ -55,6 +57,8 @@ export const useUi = create<UiState>((set, get) => ({
   aboutOpen: false,
   paletteOpen: false,
   sidebarView: "explorer",
+  problems: null,
+  setProblems: (problems) => set({ problems }),
   searchFocusToken: 0,
   cursor: { line: 1, col: 1, selected: 0 },
   setCursor: (cursor) => set({ cursor }),

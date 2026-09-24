@@ -57,6 +57,7 @@ export interface Settings {
   syncScroll: boolean;
   renderMath: boolean;
   renderDiagrams: boolean;
+  lintMarkdown: boolean;
   restoreSession: boolean;
   autoSave: AutoSaveMode;
   autoSaveDelayMs: number;

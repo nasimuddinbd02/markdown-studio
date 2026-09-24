@@ -14,6 +14,7 @@ The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status pe
 - Format menu and shortcuts: bold (Ctrl/Cmd+B), italic (I), link (K), inline code (E), strikethrough, headings (Ctrl/Cmd+Alt+1–3), lists, task lists, quotes, code blocks and tables
 - CodeMirror 6 editor with Markdown syntax highlighting, code-block languages, undo/redo, multi-cursor, find & replace (case-sensitive, regex, whole word) and go to line
 - Export to standalone HTML (styled, images inlined, sanitized), Copy as HTML, and Print / Save as PDF (Ctrl/Cmd+P)
+- Markdown lint in the editor: broken links, missing images, broken anchors, duplicate headings, skipped heading levels and missing alt text, with a Problems panel
 - Command palette (Ctrl/Cmd+Shift+P), document outline, and Find in Files across the workspace (Ctrl/Cmd+Shift+F; match case, whole word, regex)
 - Mermaid diagrams (lazy-loaded, strict security mode) and LaTeX math (`$…$`, `$$…$$`, rendered as MathML) in the preview and exports
 - Live GitHub Flavored Markdown preview (tables, task lists, strikethrough, autolinks, fenced code with highlighting) with a configurable debounce

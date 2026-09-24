@@ -86,4 +86,4 @@ Status of each [SRS](SRS.md) requirement. **Done** means implemented and tested 
 - A native OS menu bar on macOS (the in-app menu is used on all platforms today).
 - Large-file benchmark (10 MB+) and incremental preview rendering.
 - Playwright end-to-end tests against the Tauri build.
-- Image paste into documents, Markdown lint / Problems panel, table formatter, i18n.
+- Table formatter, link autocompletion, i18n.

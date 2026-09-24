@@ -21,6 +21,7 @@ import { scrollSync } from "../features/scrollSync";
 import { editorKeymap } from "../features/commands";
 import { minimalChange } from "../features/saveTransforms";
 import { insertImageFiles, isImageFile } from "../features/images";
+import { markdownLinter } from "../features/lintExtension";
 
 /**
  * Markdown-aware syntax colours (FR-020). Colours come from CSS variables so
@@ -52,6 +53,7 @@ const appearance = new Compartment();
 const gutters = new Compartment();
 const wrapping = new Compartment();
 const tabs = new Compartment();
+const linting = new Compartment();
 
 function appearanceExt(s: Settings): Extension {
   return EditorView.theme({
@@ -68,6 +70,7 @@ function reconfigure(s: Settings) {
     gutters.reconfigure(s.lineNumbers ? [lineNumbers(), foldGutter(), highlightActiveLineGutter()] : []),
     wrapping.reconfigure(s.lineWrapping ? EditorView.lineWrapping : []),
     tabs.reconfigure([EditorState.tabSize.of(s.tabSize), indentUnit.of(" ".repeat(s.tabSize))]),
+    linting.reconfigure(s.lintMarkdown ? markdownLinter() : []),
   ];
 }
 
@@ -139,6 +142,7 @@ export function Editor() {
         gutters.of(s.lineNumbers ? [lineNumbers(), foldGutter(), highlightActiveLineGutter()] : []),
         wrapping.of(s.lineWrapping ? EditorView.lineWrapping : []),
         tabs.of([EditorState.tabSize.of(s.tabSize), indentUnit.of(" ".repeat(s.tabSize))]),
+        linting.of(s.lintMarkdown ? markdownLinter() : []),
         EditorView.updateListener.of((u) => {
           const id = currentId.current;
           if (!id) return;
@@ -232,7 +236,7 @@ export function Editor() {
   // Apply settings changes (FR-025).
   useEffect(() => {
     viewRef.current?.dispatch({ effects: reconfigure(settings) });
-  }, [settings]);
+  }, [settings.fontSize, settings.fontFamily, settings.lineNumbers, settings.lineWrapping, settings.tabSize, settings.lintMarkdown]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return <div className="editor-host" ref={host} />;
 }

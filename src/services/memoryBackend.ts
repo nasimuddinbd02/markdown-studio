@@ -250,6 +250,7 @@ export class MemoryBackend implements Backend {
 
   async fileMtime(path: string) {
     const p = this.check(path);
+    if (this.dirs.has(p)) return 0;
     return this.files.get(p)?.mtime ?? null;
   }
 

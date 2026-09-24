@@ -62,6 +62,13 @@ export function requestReveal(docId: string, line: number, column: number, lengt
   else pendingReveal = { docId, line, column, length };
 }
 
+/** Opens the Problems (lint) panel. */
+export async function showProblems() {
+  if (!view) return;
+  const { openLintPanel } = await import("@codemirror/lint");
+  openLintPanel(view);
+}
+
 /** Opens the search panel and moves focus to its Replace field (FR-051). */
 export function openReplacePanel(v: EditorView): boolean {
   openSearchPanel(v);

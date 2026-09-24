@@ -1333,3 +1333,50 @@ select {
   place-items: center;
   color: var(--text-muted);
 }
+
+/* ------------------------------------------------------------ lint */
+
+.status-button {
+  background: none;
+  border: none;
+  padding: 0 4px;
+  color: inherit;
+  font-size: inherit;
+  border-radius: 3px;
+}
+.status-button:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.editor-host .cm-lintRange-warning {
+  background-image: none;
+  text-decoration: underline wavy var(--dirty);
+  text-underline-offset: 3px;
+}
+.editor-host .cm-lintRange-info {
+  background-image: none;
+  text-decoration: underline dotted var(--accent);
+  text-underline-offset: 3px;
+}
+.editor-host .cm-lintRange-error {
+  background-image: none;
+  text-decoration: underline wavy var(--danger);
+  text-underline-offset: 3px;
+}
+.editor-host .cm-tooltip-lint,
+.editor-host .cm-panel.cm-panel-lint {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  background: var(--bg);
+  color: var(--text);
+}
+.editor-host .cm-panel.cm-panel-lint ul [aria-selected] {
+  background: var(--accent-soft);
+}
+.editor-host .cm-tooltip {
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
