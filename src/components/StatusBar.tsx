@@ -2,7 +2,9 @@ import { useMemo } from "react";
 import { useDocuments, isDirty } from "../stores/documentsStore";
 import { useUi } from "../stores/uiStore";
 import { useSettings } from "../stores/settingsStore";
-import { countWords } from "../services/textStats";
+import { useState } from "react";
+import { countWords, textStats } from "../services/textStats";
+import { getEditorView } from "../features/editorBridge";
 import { backend } from "../services";
 import { showProblems } from "../features/editorBridge";
 
@@ -53,7 +55,7 @@ export function StatusBar() {
               {cursor.selected > 0 && ` (${cursor.selected} selected)`}
             </span>
           )}
-          <span className="status-item">{words.toLocaleString()} words</span>
+          <WordCount words={words} content={doc.content} />
           {autoSave !== "off" && doc.path && <span className="status-item" title="Auto save is on">Auto save</span>}
           <span className="status-item" title="Line endings are preserved when saving">{doc.lineEnding.toUpperCase()}</span>
           <span className="status-item" title="Text encoding">{doc.bom ? "UTF-8 with BOM" : "UTF-8"}</span>
@@ -61,5 +63,54 @@ export function StatusBar() {
         </div>
       )}
     </footer>
+  );
+}
+
+/** Word count that opens a statistics popover (document and selection). */
+function WordCount({ words, content }: { words: number; content: string }) {
+  const [open, setOpen] = useState(false);
+  const cursor = useUi((s) => s.cursor);
+  let selectionText = "";
+  if (open && cursor.selected > 0) {
+    const view = getEditorView();
+    if (view) selectionText = view.state.selection.ranges.map((r) => view.state.sliceDoc(r.from, r.to)).join("\n");
+  }
+  const stats = open ? textStats(content) : null;
+  const sel = open && selectionText ? textStats(selectionText) : null;
+  const fmt = (n: number) => n.toLocaleString();
+  return (
+    <span className="status-popover-anchor">
+      <button
+        className="status-item status-button"
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        onClick={() => setOpen(!open)}
+        onBlur={(e) => {
+          if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node)) setOpen(false);
+        }}
+        title="Document statistics"
+      >
+        {fmt(words)} words
+      </button>
+      {stats && (
+        <div className="status-popover" role="dialog" aria-label="Document statistics" tabIndex={-1}>
+          <table>
+            <tbody>
+              <tr><th scope="row">Words</th><td>{fmt(stats.words)}</td>{sel && <td>{fmt(sel.words)}</td>}</tr>
+              <tr><th scope="row">Characters</th><td>{fmt(stats.characters)}</td>{sel && <td>{fmt(sel.characters)}</td>}</tr>
+              <tr><th scope="row">Without spaces</th><td>{fmt(stats.charactersNoSpaces)}</td>{sel && <td>{fmt(sel.charactersNoSpaces)}</td>}</tr>
+              <tr><th scope="row">Lines</th><td>{fmt(stats.lines)}</td>{sel && <td>{fmt(sel.lines)}</td>}</tr>
+              <tr><th scope="row">Paragraphs</th><td>{fmt(stats.paragraphs)}</td>{sel && <td>{fmt(sel.paragraphs)}</td>}</tr>
+              <tr><th scope="row">Reading time</th><td>{stats.readingMinutes} min</td>{sel && <td>{sel.readingMinutes} min</td>}</tr>
+            </tbody>
+            {sel && (
+              <thead>
+                <tr><td /><th scope="col">Document</th><th scope="col">Selection</th></tr>
+              </thead>
+            )}
+          </table>
+        </div>
+      )}
+    </span>
   );
 }

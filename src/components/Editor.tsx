@@ -55,6 +55,8 @@ const gutters = new Compartment();
 const wrapping = new Compartment();
 const tabs = new Compartment();
 const linting = new Compartment();
+const spelling = new Compartment();
+const spellAttr = (on: boolean) => EditorView.contentAttributes.of({ spellcheck: on ? "true" : "false" });
 
 function appearanceExt(s: Settings): Extension {
   return EditorView.theme({
@@ -72,6 +74,7 @@ function reconfigure(s: Settings) {
     wrapping.reconfigure(s.lineWrapping ? EditorView.lineWrapping : []),
     tabs.reconfigure([EditorState.tabSize.of(s.tabSize), indentUnit.of(" ".repeat(s.tabSize))]),
     linting.reconfigure(s.lintMarkdown ? markdownLinter() : []),
+    spelling.reconfigure(spellAttr(s.spellCheck)),
   ];
 }
 
@@ -110,7 +113,8 @@ export function Editor() {
         markdown({ base: markdownLanguage, codeLanguages: languages }),
         syntaxHighlighting(markdownHighlight),
         placeholder("Start writing Markdown…"),
-        EditorView.contentAttributes.of({ "aria-label": "Markdown editor", spellcheck: "true" }),
+        EditorView.contentAttributes.of({ "aria-label": "Markdown editor" }),
+        spelling.of(spellAttr(s.spellCheck)),
         // Pasted or dropped images are saved to assets/ and linked.
         EditorView.domEventHandlers({
           paste: (e) => {
@@ -238,7 +242,7 @@ export function Editor() {
   // Apply settings changes (FR-025).
   useEffect(() => {
     viewRef.current?.dispatch({ effects: reconfigure(settings) });
-  }, [settings.fontSize, settings.fontFamily, settings.lineNumbers, settings.lineWrapping, settings.tabSize, settings.lintMarkdown]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [settings.fontSize, settings.fontFamily, settings.lineNumbers, settings.lineWrapping, settings.tabSize, settings.lintMarkdown, settings.spellCheck]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return <div className="editor-host" ref={host} />;
 }

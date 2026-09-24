@@ -1540,3 +1540,36 @@ select {
   background: var(--bg-code);
   color: var(--text);
 }
+
+/* ------------------------------------------------------------ status popover */
+
+.status-popover-anchor {
+  position: relative;
+}
+.status-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  padding: 8px 12px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.status-popover table {
+  border-collapse: collapse;
+}
+.status-popover th,
+.status-popover td {
+  padding: 2px 8px;
+  text-align: right;
+}
+.status-popover th[scope="row"] {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-muted);
+}

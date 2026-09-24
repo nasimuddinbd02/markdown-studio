@@ -50,6 +50,7 @@ export function SettingsDialog() {
           <h3>Editor</h3>
           <label className="check"><input type="checkbox" checked={settings.lineNumbers} onChange={(e) => update({ lineNumbers: e.target.checked })} /> Show line numbers</label>
           <label className="check"><input type="checkbox" checked={settings.lineWrapping} onChange={(e) => update({ lineWrapping: e.target.checked })} /> Wrap long lines</label>
+          <label className="check"><input type="checkbox" checked={settings.spellCheck} onChange={(e) => update({ spellCheck: e.target.checked })} /> Check spelling (uses the system dictionary)</label>
           <label className="check"><input type="checkbox" checked={settings.lintMarkdown} onChange={(e) => update({ lintMarkdown: e.target.checked })} /> Check Markdown for problems (broken links, headings, alt text)</label>
           <label htmlFor="setting-tabSize">Tab size</label>
           <select {...field("tabSize")} onChange={(e) => update({ tabSize: Number(e.target.value) })}>

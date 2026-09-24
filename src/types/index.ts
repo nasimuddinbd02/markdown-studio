@@ -58,6 +58,7 @@ export interface Settings {
   renderMath: boolean;
   renderDiagrams: boolean;
   lintMarkdown: boolean;
+  spellCheck: boolean;
   restoreSession: boolean;
   autoSave: AutoSaveMode;
   autoSaveDelayMs: number;

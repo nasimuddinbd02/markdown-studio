@@ -158,7 +158,7 @@ pub fn write_text_atomic(
             }
             let _ = fs::set_permissions(&tmp_path, meta.permissions());
         }
-        fs::rename(&tmp_path, path)?;
+        rename_with_retry(&tmp_path, path)?;
         Ok(())
     })();
     if result.is_err() {
@@ -166,6 +166,32 @@ pub fn write_text_atomic(
     }
     result?;
     mtime(path)
+}
+
+/// Renames with a few short retries: on Windows, antivirus scanners, search
+/// indexers and sync clients briefly lock freshly written files, which makes
+/// an otherwise valid save fail with "access denied".
+fn rename_with_retry(from: &Path, to: &Path) -> std::io::Result<()> {
+    const ATTEMPTS: u32 = if cfg!(windows) { 6 } else { 1 };
+    let mut delay = std::time::Duration::from_millis(25);
+    let mut last = None;
+    for attempt in 0..ATTEMPTS {
+        match fs::rename(from, to) {
+            Ok(()) => return Ok(()),
+            Err(e) if attempt + 1 < ATTEMPTS && is_transient(&e) => {
+                last = Some(e);
+                std::thread::sleep(delay);
+                delay *= 2;
+            }
+            Err(e) => return Err(e),
+        }
+    }
+    Err(last.unwrap_or_else(|| std::io::Error::other("rename failed")))
+}
+
+fn is_transient(e: &std::io::Error) -> bool {
+    // ERROR_ACCESS_DENIED (5), ERROR_SHARING_VIOLATION (32), ERROR_LOCK_VIOLATION (33)
+    matches!(e.raw_os_error(), Some(5) | Some(32) | Some(33)) || e.kind() == std::io::ErrorKind::PermissionDenied
 }
 
 pub fn create_file(path: &Path) -> AppResult<()> {
