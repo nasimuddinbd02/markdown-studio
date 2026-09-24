@@ -66,6 +66,8 @@ export interface Backend {
    * writes it there. Returns the chosen path, or `null` if cancelled.
    */
   exportFile(suggestedName: string, content: string, kind: ExportKind): Promise<string | null>;
+  /** Like exportFile, for binary formats (Word .docx, PDF). */
+  exportBinaryFile(suggestedName: string, dataBase64: string, kind: "docx" | "pdf"): Promise<string | null>;
 
   /** Earlier versions of a document kept by local history, newest first. */
   listHistory(path: string): Promise<HistoryEntry[]>;

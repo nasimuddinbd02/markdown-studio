@@ -422,6 +422,19 @@ export class MemoryBackend implements Backend {
     return suggestedName;
   }
 
+  async exportBinaryFile(suggestedName: string, dataBase64: string, kind: string) {
+    this.lastExport = { name: suggestedName, content: dataBase64 };
+    if (typeof URL.createObjectURL !== "function") return suggestedName;
+    const bytes = Uint8Array.from(atob(dataBase64), (c) => c.charCodeAt(0));
+    const type = kind === "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([bytes], { type }));
+    a.download = suggestedName;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    return suggestedName;
+  }
+
   /** Test hook: the most recent export. */
   lastExport: { name: string; content: string } | null = null;
 

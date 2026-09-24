@@ -81,6 +81,7 @@ pub fn run() {
             commands::open_external,
             commands::reveal_in_folder,
             commands::export_file,
+            commands::export_binary_file,
             commands::take_pending_opens,
             commands::search_workspace,
             commands::list_workspace_files,

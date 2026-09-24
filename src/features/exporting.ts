@@ -25,6 +25,30 @@ export async function exportActiveAsHtml() {
   }
 }
 
+function bytesToBase64(bytes: Uint8Array): string {
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+
+/** Exports the active document as a Word document (.docx). */
+export async function exportActiveAsDocx() {
+  const doc = activeDoc();
+  if (!doc) return;
+  try {
+    const { markdownToDocx, makeImageLoader } = await import("../services/convert/toDocx");
+    const { documentTitle } = await import("../services/exportHtml");
+    const bytes = await markdownToDocx(doc.content, {
+      title: documentTitle(doc.content, doc.name),
+      loadImage: makeImageLoader(doc.path, loadImage),
+    });
+    const saved = await backend().exportBinaryFile(exportFileName(doc.name, "docx"), bytesToBase64(bytes), "docx");
+    if (saved) notify("success", `Exported to ${saved}`);
+  } catch (e) {
+    notify("error", describeError(e, "export to Word"));
+  }
+}
+
 /** Copies the rendered HTML of the active document to the clipboard. */
 export async function copyActiveAsHtml() {
   const doc = activeDoc();

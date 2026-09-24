@@ -498,6 +498,45 @@ pub async fn read_history(state: State<'_, AppState>, path: String, id: u64) -> 
     Ok(crate::text::decode(&bytes)?.content)
 }
 
+/// Exports binary content (Word .docx, PDF) to a path chosen in a native
+/// Save dialog. Written atomically; the dialog confirms any overwrite.
+#[tauri::command]
+pub async fn export_binary_file(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    suggested_name: String,
+    data_base64: String,
+    kind: String,
+) -> AppResult<Option<String>> {
+    use base64::Engine;
+    let (filter, ext): (&str, &str) = match kind.as_str() {
+        "docx" => ("Word document", "docx"),
+        "pdf" => ("PDF document", "pdf"),
+        _ => return Err(AppError::InvalidPath("Unsupported export type".into())),
+    };
+    scope::validate_file_name(&suggested_name)?;
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(data_base64.as_bytes())
+        .map_err(|_| AppError::InvalidPath("Invalid export data".into()))?;
+    let picked = app
+        .dialog()
+        .file()
+        .set_title("Export")
+        .add_filter(filter, &[ext])
+        .set_file_name(suggested_name)
+        .blocking_save_file();
+    let Some(mut path) = picked.and_then(|p| p.into_path().ok()) else {
+        return Ok(None);
+    };
+    if path.extension().is_none() {
+        path.set_extension(ext);
+    }
+    scope::validate_syntax(&path)?;
+    state.track("export.write", fs_ops::write_bytes_atomic(&path, &bytes))?;
+    state.logger.log("info", "export", &kind);
+    Ok(Some(fs_ops::path_string(&path)))
+}
+
 // ---------------------------------------------------------------- settings & recovery
 
 #[tauri::command]

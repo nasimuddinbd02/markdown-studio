@@ -194,6 +194,30 @@ fn is_transient(e: &std::io::Error) -> bool {
     matches!(e.raw_os_error(), Some(5) | Some(32) | Some(33)) || e.kind() == std::io::ErrorKind::PermissionDenied
 }
 
+/// Writes bytes via a temporary file + rename (same safety as text saves).
+pub fn write_bytes_atomic(path: &Path, bytes: &[u8]) -> AppResult<()> {
+    let dir = path
+        .parent()
+        .ok_or_else(|| AppError::InvalidPath("Path has no parent directory".into()))?;
+    let name = path
+        .file_name()
+        .ok_or_else(|| AppError::InvalidPath("Path has no file name".into()))?
+        .to_string_lossy();
+    let tmp = dir.join(format!(".{}.{}.mdstudio-tmp", name, std::process::id()));
+    let result = (|| -> AppResult<()> {
+        let mut f = File::create(&tmp)?;
+        f.write_all(bytes)?;
+        f.sync_all()?;
+        drop(f);
+        rename_with_retry(&tmp, path)?;
+        Ok(())
+    })();
+    if result.is_err() {
+        let _ = fs::remove_file(&tmp);
+    }
+    result
+}
+
 pub fn create_file(path: &Path) -> AppResult<()> {
     File::options().write(true).create_new(true).open(path)?;
     Ok(())
@@ -358,6 +382,16 @@ mod tests {
         assert_eq!(b, tmp.path().join("assets").join("shot-1.png"));
         assert_eq!(fs::read(&a).unwrap(), b"one");
         assert!(matches!(save_asset(tmp.path(), "x", "exe", b"MZ"), Err(AppError::InvalidPath(_))));
+    }
+
+    #[test]
+    fn writes_bytes_atomically() {
+        let tmp = tempfile::tempdir().unwrap();
+        let f = tmp.path().join("out.docx");
+        write_bytes_atomic(&f, b"PK\x03\x04data").unwrap();
+        write_bytes_atomic(&f, b"PK\x03\x04new").unwrap();
+        assert_eq!(fs::read(&f).unwrap(), b"PK\x03\x04new");
+        assert_eq!(fs::read_dir(tmp.path()).unwrap().count(), 1);
     }
 
     #[test]

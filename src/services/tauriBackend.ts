@@ -40,6 +40,7 @@ export const tauriBackend: Backend = {
   openExternal: (url) => call("open_external", { url }),
   revealInFolder: (path) => call("reveal_in_folder", { path }),
   exportFile: (suggestedName, content, kind) => call("export_file", { suggestedName, content, kind }),
+  exportBinaryFile: (suggestedName, dataBase64, kind) => call("export_binary_file", { suggestedName, dataBase64, kind }),
 
   listHistory: (path) => call("list_history", { path }),
   readHistory: (path, id) => call("read_history", { path, id }),

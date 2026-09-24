@@ -49,22 +49,44 @@ function createService() {
 
 let service: TurndownService | null = null;
 
-/** Promotes the first row of header-less tables so they convert to GFM tables. */
+/**
+ * Shapes tables for GFM: exactly one header row (the first; promoted if the
+ * table has none), no redundant bold in header cells, no block content in cells.
+ */
 function normaliseTables(root: ParentNode) {
   for (const table of root.querySelectorAll("table")) {
-    if (table.querySelector("th")) continue;
-    const firstRow = table.querySelector("tr");
-    if (!firstRow) continue;
-    for (const td of [...firstRow.children]) {
-      const th = td.ownerDocument.createElement("th");
-      th.innerHTML = td.innerHTML;
-      td.replaceWith(th);
-    }
+    const rows = [...table.querySelectorAll("tr")];
+    if (!rows.length) continue;
+    rows.forEach((row, i) => {
+      for (const cell of [...row.children]) {
+        const want = i === 0 ? "TH" : "TD";
+        if (cell.tagName === want) continue;
+        const repl = cell.ownerDocument.createElement(want);
+        repl.innerHTML = cell.innerHTML;
+        for (const a of ["colspan", "rowspan", "align", "style"]) {
+          const v = cell.getAttribute(a);
+          if (v !== null) repl.setAttribute(a, v);
+        }
+        cell.replaceWith(repl);
+      }
+    });
+    // Move every row into a single tbody so converters see one header row.
+    const body = table.ownerDocument.createElement("tbody");
+    for (const row of table.querySelectorAll("tr")) body.appendChild(row);
+    for (const section of [...table.querySelectorAll("thead, tbody, tfoot")]) if (section !== body) section.remove();
+    table.appendChild(body);
   }
-  // GFM cells can't hold block content: flatten paragraphs inside cells.
   for (const cell of root.querySelectorAll("td, th")) {
+    // GFM cells can't hold block content: flatten paragraphs.
     for (const p of [...cell.querySelectorAll("p")]) {
       p.replaceWith(...p.childNodes, cell.ownerDocument.createTextNode(" "));
+    }
+  }
+  for (const th of root.querySelectorAll("th")) {
+    // Header cells are already emphasised; drop bold that wraps the whole cell.
+    const only = [...th.childNodes].filter((n) => n.nodeType !== 3 || n.textContent?.trim());
+    if (only.length === 1 && /^(STRONG|B)$/.test((only[0] as Element).tagName ?? "")) {
+      (only[0] as Element).replaceWith(...(only[0] as Element).childNodes);
     }
   }
 }
