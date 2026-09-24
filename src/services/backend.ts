@@ -54,6 +54,8 @@ export interface Backend {
   /** Returns a data: URL for a local image referenced by a document. */
   readImage(path: string): Promise<string>;
   openExternal(url: string): Promise<void>;
+  /** Shows a file or folder in the system file manager. */
+  revealInFolder(path: string): Promise<void>;
   /**
    * Asks the user where to save an exported file (native Save dialog) and
    * writes it there. Returns the chosen path, or `null` if cancelled.

@@ -1,8 +1,11 @@
-import { useRef, type KeyboardEvent } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 import { useDocuments, isDirty } from "../stores/documentsStore";
 import { closeDocument, newDocument } from "../features/documents";
 import { commands, formatShortcut } from "../features/commands";
 import { Icon } from "./Icon";
+import { ContextMenu } from "./ContextMenu";
+import { closeOthers, closeSaved, closeToTheRight, copyPath, revealInFolder, revealLabel } from "../features/pathActions";
+import { backend } from "../services";
 
 /** Document tabs (FR-040, FR-041). Dirty tabs show a dot *and* a text label (§15). */
 export function TabBar() {
@@ -11,6 +14,8 @@ export function TabBar() {
   const setActive = useDocuments((s) => s.setActive);
   const move = useDocuments((s) => s.move);
   const drag = useRef<{ id: string; x: number; moved: boolean } | null>(null);
+  const [menu, setMenu] = useState<{ x: number; y: number; id: string } | null>(null);
+  const menuDoc = menu ? docs.find((d) => d.id === menu.id) : undefined;
 
   /** Pointer-based reordering (HTML5 drag-and-drop is reserved for OS file drops). */
   const onPointerMove = (e: PointerEvent) => {
@@ -32,6 +37,15 @@ export function TabBar() {
   const list = useRef<HTMLDivElement>(null);
 
   const onKey = (e: KeyboardEvent) => {
+    if (e.key === "ContextMenu" || (e.shiftKey && e.key === "F10")) {
+      const tab = (document.activeElement as HTMLElement | null)?.closest<HTMLElement>("[data-tab-id]");
+      if (tab) {
+        e.preventDefault();
+        const r = tab.getBoundingClientRect();
+        setMenu({ x: r.left + 12, y: r.bottom, id: tab.dataset.tabId! });
+      }
+      return;
+    }
     if (e.key !== "ArrowRight" && e.key !== "ArrowLeft" && e.key !== "Home" && e.key !== "End") return;
     const tabs = [...(list.current?.querySelectorAll<HTMLElement>("[role=tab]") ?? [])];
     const idx = tabs.indexOf(document.activeElement as HTMLElement);
@@ -64,6 +78,10 @@ export function TabBar() {
                 if (e.button === 1) void closeDocument(d.id);
               }}
               data-tab-id={d.id}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setMenu({ x: e.clientX, y: e.clientY, id: d.id });
+              }}
               onPointerDown={(e) => {
                 if (e.button !== 0 || (e.target as HTMLElement).closest(".tab-close")) return;
                 drag.current = { id: d.id, x: e.clientX, moved: false };
@@ -91,6 +109,23 @@ export function TabBar() {
           );
         })}
       </div>
+      {menu && menuDoc && (
+        <ContextMenu
+          x={menu.x}
+          y={menu.y}
+          label={`Actions for ${menuDoc.name}`}
+          onClose={() => setMenu(null)}
+          items={[
+            { label: "Close", run: () => closeDocument(menuDoc.id), shortcut: commands.closeTab.shortcut },
+            { label: "Close Others", run: () => closeOthers(menuDoc.id), disabled: docs.length < 2 },
+            { label: "Close to the Right", run: () => closeToTheRight(menuDoc.id), disabled: docs[docs.length - 1]?.id === menuDoc.id },
+            { label: "Close Saved", run: () => closeSaved() },
+            "separator",
+            { label: "Copy Path", run: () => copyPath(menuDoc.path!), disabled: !menuDoc.path },
+            { label: revealLabel, run: () => revealInFolder(menuDoc.path!), disabled: !menuDoc.path || !backend().isNative },
+          ]}
+        />
+      )}
       <button className="icon-button small new-tab" onClick={() => newDocument()} title={`New file (${formatShortcut(commands.newFile.shortcut)})`} aria-label="New file">
         <Icon name="plus" size={15} />
       </button>

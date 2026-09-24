@@ -74,6 +74,7 @@ pub fn run() {
             commands::read_image,
             commands::save_image_asset,
             commands::open_external,
+            commands::reveal_in_folder,
             commands::export_file,
             commands::take_pending_opens,
             commands::search_workspace,

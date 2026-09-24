@@ -365,6 +365,11 @@ export class MemoryBackend implements Backend {
     return "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(f.content)));
   }
 
+  async revealInFolder(path: string) {
+    this.check(path);
+    throw new AppError("io", "Showing files in a folder is only available in the desktop app.");
+  }
+
   async openExternal(url: string) {
     if (!/^(https?:|mailto:)/i.test(url.trim())) {
       throw new AppError("invalidPath", "Only http, https and mailto links can be opened.");

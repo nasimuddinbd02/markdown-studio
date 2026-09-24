@@ -328,6 +328,17 @@ pub async fn read_image(state: State<'_, AppState>, path: String) -> AppResult<S
     fs_ops::read_image_data_url(&file)
 }
 
+/// Shows a file or folder in the system file manager (Explorer / Finder).
+#[tauri::command]
+pub fn reveal_in_folder(app: AppHandle, state: State<'_, AppState>, path: String) -> AppResult<()> {
+    let target = state.scope.check(Path::new(&path))?;
+    let result = app
+        .opener()
+        .reveal_item_in_dir(&target)
+        .map_err(|e| AppError::Io(e.to_string()));
+    state.track("shell.reveal", result)
+}
+
 /// Opens a link in the user's default browser (SEC-005). Only web and mail
 /// links are allowed; `file:`, `javascript:` and custom schemes are refused.
 #[tauri::command]

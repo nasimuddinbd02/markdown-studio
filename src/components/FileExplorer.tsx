@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 import { useWorkspace } from "../stores/workspaceStore";
 import { useDocuments, isDirty } from "../stores/documentsStore";
 import { basename } from "../services/paths";
@@ -8,6 +8,9 @@ import {
   createFileIn, createFolderIn, deleteEntry, openFolderDialog, refreshWorkspace, renameEntry, toggleDir,
 } from "../features/workspace";
 import { Icon } from "./Icon";
+import { ContextMenu, type MenuEntry } from "./ContextMenu";
+import { copyPath, copyRelativePath, revealInFolder, revealLabel } from "../features/pathActions";
+import { backend } from "../services";
 
 interface ContextMenu {
   x: number;
@@ -41,6 +44,10 @@ function TreeNode({ entry, depth, onContext }: { entry: DirEntry; depth: number;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             activate();
+          } else if (e.key === "ContextMenu" || (e.shiftKey && e.key === "F10")) {
+            e.preventDefault();
+            const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+            onContext({ preventDefault() {}, clientX: r.left + 24, clientY: r.bottom } as unknown as MouseEvent, entry);
           } else if (e.key === "F2") {
             e.preventDefault();
             void renameEntry(entry);
@@ -88,17 +95,6 @@ export function FileExplorer() {
   const [menu, setMenu] = useState<ContextMenu | null>(null);
   const tree = useRef<HTMLUListElement>(null);
 
-  useEffect(() => {
-    if (!menu) return;
-    const close = () => setMenu(null);
-    window.addEventListener("pointerdown", close);
-    window.addEventListener("blur", close);
-    return () => {
-      window.removeEventListener("pointerdown", close);
-      window.removeEventListener("blur", close);
-    };
-  }, [menu]);
-
   const onContext = (e: MouseEvent, entry: DirEntry) => {
     e.preventDefault();
     useWorkspace.getState().select(entry.path);
@@ -134,10 +130,6 @@ export function FileExplorer() {
     );
   }
 
-  const run = (fn: () => unknown) => {
-    setMenu(null);
-    void fn();
-  };
   const menuDir = menu ? (menu.entry.isDir ? menu.entry.path : null) : null;
 
   return (
@@ -171,29 +163,27 @@ export function FileExplorer() {
         )}
       </ul>
       {menu && (
-        <div
-          className="context-menu"
-          role="menu"
-          style={{ left: menu.x, top: menu.y }}
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          {menuDir && (
-            <>
-              <button role="menuitem" className="menu-item" onClick={() => run(() => createFileIn(menuDir))}>New File…</button>
-              <button role="menuitem" className="menu-item" onClick={() => run(() => createFolderIn(menuDir))}>New Folder…</button>
-              <div className="menu-separator" />
-            </>
-          )}
-          {!menu.entry.isDir && (
-            <button role="menuitem" className="menu-item" onClick={() => run(() => openPath(menu.entry.path))}>Open</button>
-          )}
-          <button role="menuitem" className="menu-item" onClick={() => run(() => renameEntry(menu.entry))}>
-            <span className="menu-item-label">Rename…</span><kbd className="menu-item-shortcut">F2</kbd>
-          </button>
-          <button role="menuitem" className="menu-item danger" onClick={() => run(() => deleteEntry(menu.entry))}>
-            <span className="menu-item-label">Delete…</span><kbd className="menu-item-shortcut">Del</kbd>
-          </button>
-        </div>
+        <ContextMenu
+          x={menu.x}
+          y={menu.y}
+          label={`Actions for ${menu.entry.name}`}
+          onClose={() => setMenu(null)}
+          items={[
+            ...(menuDir
+              ? ([
+                  { label: "New File…", run: () => createFileIn(menuDir) },
+                  { label: "New Folder…", run: () => createFolderIn(menuDir) },
+                  "separator",
+                ] as MenuEntry[])
+              : ([{ label: "Open", run: () => openPath(menu.entry.path) }, "separator"] as MenuEntry[])),
+            { label: revealLabel, run: () => revealInFolder(menu.entry.path), disabled: !backend().isNative },
+            { label: "Copy Path", run: () => copyPath(menu.entry.path) },
+            { label: "Copy Relative Path", run: () => copyRelativePath(menu.entry.path) },
+            "separator",
+            { label: "Rename…", run: () => renameEntry(menu.entry), shortcut: "F2" },
+            { label: "Delete…", run: () => deleteEntry(menu.entry), shortcut: "Delete", danger: true },
+          ]}
+        />
       )}
     </aside>
   );

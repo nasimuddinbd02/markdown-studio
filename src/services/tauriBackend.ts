@@ -36,6 +36,7 @@ export const tauriBackend: Backend = {
   searchWorkspace: (root, options) => call("search_workspace", { root, options }),
   listWorkspaceFiles: (root) => call("list_workspace_files", { root }),
   openExternal: (url) => call("open_external", { url }),
+  revealInFolder: (path) => call("reveal_in_folder", { path }),
   exportFile: (suggestedName, content, kind) => call("export_file", { suggestedName, content, kind }),
 
   loadSettings: () => call("load_settings"),
