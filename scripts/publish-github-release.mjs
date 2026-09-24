@@ -5,7 +5,7 @@
 // Requires the GitHub CLI (`gh auth login`) and the release commit pushed.
 //   npm run release:github
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -44,12 +44,28 @@ try {
 } catch {
   exists = false;
 }
+// Small files first; large installers are uploaded one by one with retries,
+// because a network hiccup mid-upload shouldn't lose the whole release.
+const small = files.filter((f) => statSync(f).size < 50 * 1024 * 1024);
+const large = files.filter((f) => !small.includes(f));
 if (exists) {
   console.log(`Updating release ${tag}…`);
   gh("release", "edit", tag, "--notes-file", notesFile);
-  gh("release", "upload", tag, ...files, "--clobber");
+  gh("release", "upload", tag, ...small, "--clobber");
 } else {
   console.log(`Creating release ${tag}…`);
-  gh("release", "create", tag, ...files, "--title", `Markdown Studio ${version}`, "--notes-file", notesFile, "--target", "main", "--latest");
+  gh("release", "create", tag, ...small, "--title", `Markdown Studio ${version}`, "--notes-file", notesFile, "--target", "main", "--latest");
+}
+for (const file of large) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      console.log(`Uploading ${file} (attempt ${attempt})…`);
+      gh("release", "upload", tag, file, "--clobber");
+      break;
+    } catch (e) {
+      if (attempt >= 4) throw e;
+      execFileSync(process.execPath, ["-e", "setTimeout(() => {}, 5000)"]);
+    }
+  }
 }
 console.log(gh("release", "view", tag, "--json", "url,assets", "-q", '.url + "\\n" + ([.assets[] | .name + " (" + (.size|tostring) + " bytes)"] | join("\\n"))'));
