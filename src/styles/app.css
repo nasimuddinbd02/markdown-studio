@@ -1574,3 +1574,31 @@ select {
   font-weight: 500;
   color: var(--text-muted);
 }
+
+/* Link check panel */
+.link-problem {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  white-space: normal;
+}
+.link-problem-icon {
+  flex: none;
+  margin-top: 2px;
+  color: var(--warning-border);
+}
+.link-problem-line {
+  margin-left: auto;
+  padding-left: 6px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.link-button {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}

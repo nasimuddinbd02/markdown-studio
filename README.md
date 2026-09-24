@@ -40,6 +40,7 @@ The app appears in **Settings → Apps → Installed apps** and in **Control Pan
 - Import Word (.docx), PDF and web pages (.html) as Markdown (headings, lists, tables, links, images saved to assets/), and paste rich text from browsers or Word as Markdown
 - CSV/TSV tools: import a .csv or .tsv file as an aligned Markdown table, paste cells copied from Excel or Google Sheets as a table, and Copy Table as CSV for spreadsheets
 - Convert Folder to Markdown (File menu): converts every Word, PDF, HTML and CSV/TSV file in the open folder to a .md file beside it in one step; files that already have a Markdown version are skipped
+- Link check (sidebar → Links, or Edit → Check Links in Folder): finds broken links to files, missing images and `file.md#heading` anchors across every Markdown file in the folder. Click a problem to jump to it
 - Update check: Help → Check for Updates, plus an optional daily check (Settings → Startup) that asks GitHub for the latest release and offers the download page. Nothing else is sent
 - Table of contents: Format → Insert / Update Table of Contents builds a linked, nested TOC that stays up to date on save (Settings → Files)
 - Export to PDF (selectable text, clickable links, heading bookmarks, tables, task checkboxes, images) and to Word (.docx) with real Word headings, numbered/bulleted/task lists, tables, code, links and embedded images

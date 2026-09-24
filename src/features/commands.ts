@@ -177,6 +177,15 @@ export const commands: Record<string, Command> = {
       }
     },
   },
+  checkLinks: {
+    id: "checkLinks",
+    label: "Check Links in Folder",
+    run: () => {
+      useSettings.getState().update({ showExplorer: true });
+      useUi.getState().checkLinks();
+    },
+    enabled: () => !!useWorkspace.getState().root,
+  },
   findInFiles: {
     id: "findInFiles",
     label: "Find in Files",

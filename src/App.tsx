@@ -3,6 +3,7 @@ import { MenuBar } from "./components/MenuBar";
 import { FileExplorer } from "./components/FileExplorer";
 import { Outline } from "./components/Outline";
 import { SearchPanel } from "./components/SearchPanel";
+import { LinkCheckPanel } from "./components/LinkCheckPanel";
 import { Icon } from "./components/Icon";
 import { useUi } from "./stores/uiStore";
 import { commands, formatShortcut } from "./features/commands";
@@ -71,14 +72,25 @@ function Sidebar() {
         >
           <Icon name="search" size={15} /> Search
         </button>
+        <button
+          role="tab"
+          aria-selected={view === "links"}
+          className={`sidebar-tab${view === "links" ? " active" : ""}`}
+          onClick={() => setView("links")}
+          title="Check links in the folder"
+        >
+          <Icon name="link" size={15} /> Links
+        </button>
       </div>
       {view === "explorer" ? (
         <>
           <FileExplorer />
           <Outline />
         </>
-      ) : (
+      ) : view === "search" ? (
         <SearchPanel />
+      ) : (
+        <LinkCheckPanel />
       )}
     </div>
   );

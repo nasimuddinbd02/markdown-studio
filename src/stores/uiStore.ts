@@ -36,7 +36,7 @@ interface UiState {
   /** Distraction-free writing: hides chrome and centres the editor. */
   focusMode: boolean;
   setFocusMode(on: boolean): void;
-  sidebarView: "explorer" | "search";
+  sidebarView: "explorer" | "search" | "links";
   problems: { errors: number; warnings: number; infos: number } | null;
   /** Document whose File History dialog is open. */
   historyDocId: string | null;
@@ -44,12 +44,15 @@ interface UiState {
   setProblems(p: UiState["problems"]): void;
   /** Incremented to move focus into the search box. */
   searchFocusToken: number;
+  /** Incremented to (re)run the workspace link check. */
+  linkCheckToken: number;
+  checkLinks(): void;
   cursor: { line: number; col: number; selected: number };
   setCursor(c: UiState["cursor"]): void;
   setSettingsOpen(open: boolean): void;
   setAboutOpen(open: boolean): void;
   setPaletteOpen(open: boolean): void;
-  setSidebarView(view: "explorer" | "search"): void;
+  setSidebarView(view: UiState["sidebarView"]): void;
   focusSearch(): void;
   closeDialog(id: number, result: { button: string; value?: string }): void;
   notify(kind: Toast["kind"], message: string): void;
@@ -74,12 +77,14 @@ export const useUi = create<UiState>((set, get) => ({
   setHistoryDocId: (historyDocId) => set({ historyDocId }),
   setProblems: (problems) => set({ problems }),
   searchFocusToken: 0,
+  linkCheckToken: 0,
   cursor: { line: 1, col: 1, selected: 0 },
   setCursor: (cursor) => set({ cursor }),
   setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
   setAboutOpen: (aboutOpen) => set({ aboutOpen }),
   setPaletteOpen: (paletteOpen) => set({ paletteOpen }),
   setSidebarView: (sidebarView) => set({ sidebarView }),
+  checkLinks: () => set((s) => ({ sidebarView: "links", linkCheckToken: s.linkCheckToken + 1 })),
   focusSearch: () => set((s) => ({ sidebarView: "search", searchFocusToken: s.searchFocusToken + 1 })),
   closeDialog(id, result) {
     const d = get().dialogs.find((x) => x.id === id);
