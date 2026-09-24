@@ -110,7 +110,12 @@ export async function openRecentFile(path: string) {
   }
 }
 
-type SaveOptions = { saveAs?: boolean; force?: boolean };
+type SaveOptions = {
+  saveAs?: boolean;
+  force?: boolean;
+  /** Auto-save: never opens dialogs; conflicts are surfaced by the change banner. */
+  auto?: boolean;
+};
 
 /**
  * Saves a document (FR-014, FR-015, SRS §10.2). Resolves `true` on success.
@@ -119,6 +124,8 @@ type SaveOptions = { saveAs?: boolean; force?: boolean };
 export async function saveDocument(id: string, opts: SaveOptions = {}): Promise<boolean> {
   const doc = findDoc(id);
   if (!doc || doc.saving) return false;
+  // Auto-save never picks a location or overwrites around a conflict/deletion.
+  if (opts.auto && (!doc.path || doc.externalChange)) return false;
 
   let path = doc.path;
   const isNewPath = opts.saveAs || !path;
@@ -164,14 +171,19 @@ export async function saveDocument(id: string, opts: SaveOptions = {}): Promise<
     return true;
   } catch (e) {
     docs().update(id, { saving: false });
-    return handleSaveError(id, path!, e);
+    return handleSaveError(id, path!, e, !!opts.auto);
   }
 }
 
-async function handleSaveError(id: string, path: string, e: unknown): Promise<boolean> {
+async function handleSaveError(id: string, path: string, e: unknown, auto = false): Promise<boolean> {
   const err = toAppError(e);
-  backend().log("error", "doc.save", err.kind);
+  backend().log("error", auto ? "doc.autosave" : "doc.save", err.kind);
   const name = basename(path);
+  if (auto) {
+    if (err.kind === "conflict") docs().update(id, { externalChange: "modified" });
+    else notify("error", describeError(err, `auto-save “${name}”`) + " Auto-save will retry after your next edit.");
+    return false;
+  }
   switch (err.kind) {
     case "conflict": {
       const choice = await ask({

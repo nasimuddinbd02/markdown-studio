@@ -15,6 +15,8 @@ export const DEFAULT_SETTINGS: Settings = {
   showOutline: true,
   syncScroll: true,
   restoreSession: true,
+  autoSave: "off",
+  autoSaveDelayMs: 1000,
   session: { workspace: null, files: [] },
 };
 
@@ -43,6 +45,8 @@ export function sanitizeSettings(raw: unknown): Settings {
     showOutline: bool(s.showOutline, d.showOutline),
     syncScroll: bool(s.syncScroll, d.syncScroll),
     restoreSession: bool(s.restoreSession, d.restoreSession),
+    autoSave: s.autoSave === "afterDelay" || s.autoSave === "onFocusChange" || s.autoSave === "off" ? s.autoSave : d.autoSave,
+    autoSaveDelayMs: clamp(s.autoSaveDelayMs, 200, 60000, d.autoSaveDelayMs),
     session: {
       workspace: typeof session.workspace === "string" ? session.workspace : null,
       files: Array.isArray(session.files) ? session.files.filter((f): f is string => typeof f === "string").slice(0, 50) : [],

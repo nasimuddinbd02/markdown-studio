@@ -39,6 +39,7 @@ export type ErrorKind =
   | "tooLarge"
   | "io";
 
+export type AutoSaveMode = "off" | "afterDelay" | "onFocusChange";
 export type ViewMode = "editor" | "split" | "preview";
 export type ThemePreference = "system" | "light" | "dark";
 
@@ -55,6 +56,8 @@ export interface Settings {
   showOutline: boolean;
   syncScroll: boolean;
   restoreSession: boolean;
+  autoSave: AutoSaveMode;
+  autoSaveDelayMs: number;
   /** Last session's workspace and open files, restored on launch (FR-003). */
   session: { workspace: string | null; files: string[] };
 }

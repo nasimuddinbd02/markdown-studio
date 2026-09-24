@@ -57,6 +57,29 @@ export function SettingsDialog() {
         </section>
 
         <section>
+          <h3>Files</h3>
+          <label htmlFor="setting-autoSave">Auto save</label>
+          <select {...field("autoSave")} onChange={(e) => update({ autoSave: e.target.value as Settings["autoSave"] })}>
+            <option value="off">Off</option>
+            <option value="afterDelay">After a delay</option>
+            <option value="onFocusChange">When switching tabs or windows</option>
+          </select>
+          {settings.autoSave === "afterDelay" && (
+            <>
+              <label htmlFor="setting-autoSaveDelayMs">Auto save delay</label>
+              <select {...field("autoSaveDelayMs")} onChange={(e) => update({ autoSaveDelayMs: Number(e.target.value) })}>
+                <option value={500}>0.5 seconds</option>
+                <option value={1000}>1 second</option>
+                <option value={3000}>3 seconds</option>
+                <option value={10000}>10 seconds</option>
+                <option value={30000}>30 seconds</option>
+              </select>
+            </>
+          )}
+          <p className="muted small">Untitled documents are never auto-saved. Recovery snapshots are kept either way.</p>
+        </section>
+
+        <section>
           <h3>Preview</h3>
           <label htmlFor="setting-previewDebounceMs">Update delay after typing</label>
           <select {...field("previewDebounceMs")} onChange={(e) => update({ previewDebounceMs: Number(e.target.value) })}>

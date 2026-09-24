@@ -10,6 +10,7 @@ export function StatusBar() {
   const doc = useDocuments((s) => s.docs.find((d) => d.id === s.activeId));
   const cursor = useUi((s) => s.cursor);
   const viewMode = useSettings((s) => s.settings.viewMode);
+  const autoSave = useSettings((s) => s.settings.autoSave);
   const words = useMemo(() => (doc ? countWords(doc.content) : 0), [doc?.content]); // eslint-disable-line react-hooks/exhaustive-deps
 
   let state = "";
@@ -40,6 +41,7 @@ export function StatusBar() {
             </span>
           )}
           <span className="status-item">{words.toLocaleString()} words</span>
+          {autoSave !== "off" && doc.path && <span className="status-item" title="Auto save is on">Auto save</span>}
           <span className="status-item" title="Line endings are preserved when saving">{doc.lineEnding.toUpperCase()}</span>
           <span className="status-item" title="Text encoding">{doc.bom ? "UTF-8 with BOM" : "UTF-8"}</span>
           <span className="status-item">Markdown</span>
