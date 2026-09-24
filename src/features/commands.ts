@@ -134,6 +134,15 @@ export const commands: Record<string, Command> = {
       update({ showExplorer: !settings.showExplorer });
     },
   },
+  toggleOutline: {
+    id: "toggleOutline",
+    label: "Toggle Outline",
+    shortcut: "Mod+Shift+L",
+    run: () => {
+      const { settings, update } = useSettings.getState();
+      update({ showOutline: !settings.showOutline, showExplorer: true });
+    },
+  },
   toggleTheme: {
     id: "toggleTheme",
     label: "Toggle Dark Theme",

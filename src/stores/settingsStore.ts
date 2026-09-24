@@ -12,6 +12,7 @@ export const DEFAULT_SETTINGS: Settings = {
   previewDebounceMs: 150,
   viewMode: "split",
   showExplorer: true,
+  showOutline: true,
   syncScroll: true,
   restoreSession: true,
   session: { workspace: null, files: [] },
@@ -39,6 +40,7 @@ export function sanitizeSettings(raw: unknown): Settings {
     previewDebounceMs: clamp(s.previewDebounceMs, 0, 2000, d.previewDebounceMs),
     viewMode: s.viewMode === "editor" || s.viewMode === "preview" || s.viewMode === "split" ? s.viewMode : d.viewMode,
     showExplorer: bool(s.showExplorer, d.showExplorer),
+    showOutline: bool(s.showOutline, d.showOutline),
     syncScroll: bool(s.syncScroll, d.syncScroll),
     restoreSession: bool(s.restoreSession, d.restoreSession),
     session: {

@@ -52,6 +52,7 @@ export interface Settings {
   previewDebounceMs: number;
   viewMode: ViewMode;
   showExplorer: boolean;
+  showOutline: boolean;
   syncScroll: boolean;
   restoreSession: boolean;
   /** Last session's workspace and open files, restored on launch (FR-003). */

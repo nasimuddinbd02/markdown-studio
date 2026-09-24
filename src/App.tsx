@@ -1,6 +1,7 @@
 import { Group, Panel, Separator, useDefaultLayout, type LayoutStorage } from "react-resizable-panels";
 import { MenuBar } from "./components/MenuBar";
 import { FileExplorer } from "./components/FileExplorer";
+import { Outline } from "./components/Outline";
 import { TabBar } from "./components/TabBar";
 import { Editor } from "./components/Editor";
 import { Preview } from "./components/Preview";
@@ -66,7 +67,10 @@ export default function App() {
         {showExplorer && (
           <>
             <Panel id="explorer" defaultSize="20" minSize={170} maxSize="45">
-              <FileExplorer />
+              <div className="sidebar">
+                <FileExplorer />
+                <Outline />
+              </div>
             </Panel>
             <Separator className="resize-handle" aria-label="Resize file explorer" />
           </>

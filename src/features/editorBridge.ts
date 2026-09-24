@@ -1,4 +1,4 @@
-import type { EditorView } from "@codemirror/view";
+import { EditorView } from "@codemirror/view";
 import type { StateCommand } from "@codemirror/state";
 import { undo, redo, selectAll } from "@codemirror/commands";
 import { openSearchPanel, gotoLine } from "@codemirror/search";
@@ -18,6 +18,15 @@ export function getEditorView() {
 export function runOnEditor(command: StateCommand) {
   if (!view) return;
   command({ state: view.state, dispatch: view.dispatch });
+  view.focus();
+}
+
+/** Moves the cursor to the start of a line and scrolls it to the top of the editor. */
+export function revealLine(line: number) {
+  if (!view) return;
+  const doc = view.state.doc;
+  const pos = doc.line(Math.max(1, Math.min(line, doc.lines))).from;
+  view.dispatch({ selection: { anchor: pos }, effects: EditorView.scrollIntoView(pos, { y: "start", yMargin: 12 }) });
   view.focus();
 }
 

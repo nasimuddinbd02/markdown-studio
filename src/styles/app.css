@@ -421,10 +421,18 @@ select {
 
 /* ------------------------------------------------------------ explorer */
 
-.explorer {
+.sidebar {
   display: flex;
   flex-direction: column;
   height: 100%;
+  background: var(--bg-sidebar);
+}
+
+.explorer {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 60%;
+  min-height: 80px;
   background: var(--bg-sidebar);
   user-select: none;
 }
@@ -1062,4 +1070,90 @@ select {
 .palette-empty {
   padding: 12px;
   color: var(--text-muted);
+}
+
+/* ------------------------------------------------------------ outline */
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-top: 1px solid var(--border);
+}
+.outline {
+  flex: 0 1 40%;
+}
+.outline.collapsed {
+  flex: none;
+}
+.sidebar-section-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 8px;
+  background: none;
+  border: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+  flex: none;
+}
+.sidebar-section-header:hover {
+  color: var(--text);
+}
+.badge {
+  margin-left: auto;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: var(--bg-hover);
+  font-size: 10px;
+  letter-spacing: 0;
+}
+.sidebar-empty {
+  margin: 4px 14px 10px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.outline-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 8px;
+  overflow: auto;
+}
+.outline-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 24px;
+  padding-right: 8px;
+  background: none;
+  border: none;
+  border-left: 2px solid transparent;
+  text-align: left;
+  cursor: default;
+  white-space: nowrap;
+}
+.outline-item:hover {
+  background: var(--bg-hover);
+}
+.outline-item.current {
+  border-left-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-weight: 600;
+}
+.outline-level {
+  font-size: 9px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  flex: none;
+}
+.outline-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
