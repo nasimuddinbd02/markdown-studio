@@ -18,8 +18,8 @@ Choose one installer:
 
 | Installer | Use it when | Size |
 | --- | --- | --- |
-| **Standard**: <!-- installer-link -->[**MarkdownStudio-0.4.0-windows-x64-setup.exe**](../downloads/MarkdownStudio-0.4.0-windows-x64-setup.exe?raw=true)<!-- /installer-link --> | Recommended for almost everyone. If WebView2 is missing, it's downloaded automatically during setup (needs internet only in that case). | ~4 MB |
-| **Offline**: <!-- offline-link -->[**MarkdownStudio-0.4.0-windows-x64-offline-setup.exe**](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.4.0/MarkdownStudio-0.4.0-windows-x64-offline-setup.exe)<!-- /offline-link --> | The PC has **no internet access**, is locked down, or you're deploying to many machines. It includes the WebView2 runtime, so nothing is downloaded. | ~210 MB |
+| **Standard**: <!-- installer-link -->[**MarkdownStudio-0.5.0-windows-x64-setup.exe**](../downloads/MarkdownStudio-0.5.0-windows-x64-setup.exe?raw=true)<!-- /installer-link --> | Recommended for almost everyone. If WebView2 is missing, it's downloaded automatically during setup (needs internet only in that case). | ~4 MB |
+| **Offline**: <!-- offline-link -->[**MarkdownStudio-0.5.0-windows-x64-offline-setup.exe**](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.5.0/MarkdownStudio-0.5.0-windows-x64-offline-setup.exe)<!-- /offline-link --> | The PC has **no internet access**, is locked down, or you're deploying to many machines. It includes the WebView2 runtime, so nothing is downloaded. | ~210 MB |
 
 On GitHub you can also open the [`downloads`](../downloads/) folder, click the `.exe` file, and then click **Download raw file** (the ⬇ button). The offline installer is too large for the repository, so it's published on the project's [Releases page](https://github.com/nasimuddinbd02/markdown-studio/releases/latest).
 
@@ -71,7 +71,7 @@ Open **Settings → Apps → Installed apps** (or **Control Panel → Programs a
 The installer supports unattended installation. Add `/AllUsers` (run elevated) or `/CurrentUser` to choose the scope:
 
 ```powershell
-.\MarkdownStudio-0.4.0-windows-x64-setup.exe /S /AllUsers
+.\MarkdownStudio-0.5.0-windows-x64-setup.exe /S /AllUsers
 ```
 
 To uninstall silently, run `uninstall.exe /S` from the installation folder.

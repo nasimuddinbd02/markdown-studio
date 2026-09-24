@@ -144,3 +144,20 @@ The user asked for conversion tools (DOCX/PDF to Markdown and the reverse) and c
 3. Batch conversion: convert every .docx/.pdf in a folder to Markdown.
 4. Localization: still waiting on the user's language choices.
 5. Auto-update (UPD-*), using GitHub Releases as the update source.
+
+## 2026-09-24: Document tools, released as 0.5.0
+
+| # | Feature | Commit |
+| --- | --- | --- |
+| 25 | Insert / Update Table of Contents (GitHub-style anchors, refreshed on save); CSV/TSV import as a table; paste spreadsheet cells as a table; Copy Table as CSV | 4d83ecd |
+| 26 | Convert Folder to Markdown: batch-converts every .docx/.pdf/.html/.csv/.tsv in the workspace, skipping files that already have a .md | 9be8c7b |
+
+**Release 0.5.0:** the standard installer is 6.3 MB (SHA-256 27a735ea…) and the offline installer is 212 MB (SHA-256 0b34bac0…).
+
+**Tests:** Vitest 174, Playwright 17, Rust 27. All passing.
+
+**Next up:**
+
+1. Auto-update (UPD-*), using GitHub Releases as the update source.
+2. Localization: still waiting on the user's language choices.
+3. Word-count goals and reading time per section; document statistics panel.
