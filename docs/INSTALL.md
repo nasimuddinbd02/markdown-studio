@@ -8,14 +8,20 @@ Markdown Studio is a free, local-first Markdown editor. Your documents stay on y
 
 - Windows 10 (version 1803 or later) or Windows 11, 64-bit (x64)
 - About 20 MB of free disk space
-- Microsoft Edge WebView2 Runtime. It's already included in Windows 11 and up-to-date Windows 10; if it's missing, the installer downloads it automatically.
 - Administrator rights are only needed if you install for everyone on the computer.
+
+**Nothing else needs to be installed.** Markdown Studio is self-contained: its runtime libraries are built in. The only system component it uses is Microsoft Edge **WebView2**, which draws the window. WebView2 is part of Windows 11 and is installed on up-to-date Windows 10 PCs by Windows Update. If it's missing, the installer adds it for you.
 
 ### 1. Download
 
-Download the latest installer: <!-- installer-link -->[**MarkdownStudio-0.3.1-windows-x64-setup.exe**](../downloads/MarkdownStudio-0.3.1-windows-x64-setup.exe?raw=true)<!-- /installer-link -->
+Choose one installer:
 
-On GitHub you can also open the [`downloads`](../downloads/) folder, click the `.exe` file, and then click **Download raw file** (the ⬇ button).
+| Installer | Use it when | Size |
+| --- | --- | --- |
+| **Standard**: <!-- installer-link -->[**MarkdownStudio-0.3.1-windows-x64-setup.exe**](../downloads/MarkdownStudio-0.3.1-windows-x64-setup.exe?raw=true)<!-- /installer-link --> | Recommended for almost everyone. If WebView2 is missing, it's downloaded automatically during setup (needs internet only in that case). | ~4 MB |
+| **Offline**: <!-- offline-link -->[**MarkdownStudio-0.3.1-windows-x64-offline-setup.exe**](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.3.1/MarkdownStudio-0.3.1-windows-x64-offline-setup.exe)<!-- /offline-link --> | The PC has **no internet access**, is locked down, or you're deploying to many machines. It includes the WebView2 runtime, so nothing is downloaded. | ~210 MB |
+
+On GitHub you can also open the [`downloads`](../downloads/) folder, click the `.exe` file, and then click **Download raw file** (the ⬇ button). The offline installer is too large for the repository, so it's published on the project's [Releases page](https://github.com/nasimuddinbd02/markdown-studio/releases/latest).
 
 ### 2. Check the download (optional)
 
@@ -80,7 +86,7 @@ Native builds (`.dmg` for macOS, and `.AppImage` / `.deb` / `.rpm` for Linux) ar
 | --- | --- |
 | "Windows protected your PC" | Click **More info → Run anyway**. The warning appears because the installer isn't code-signed yet. |
 | The browser blocks the download | Choose **Keep** (Edge: **… → Keep → Keep anyway**). |
-| A blank window or "WebView2" error | Install the [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) and start the app again. |
+| A blank window or "WebView2" error | Use the **offline installer**, which includes WebView2, or install the [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/), then start the app again. |
 | Installer says the app is running | Close Markdown Studio, then run the installer again. |
 | Not listed under Installed apps | See the note under *Run the installer*: "Only for me" installs are visible only to the account that installed them. |
 | No "Open with Markdown Studio" in the right-click menu | On Windows 11 choose **Show more options**. If it's still missing, reinstall the latest version (0.3.1 or later). |

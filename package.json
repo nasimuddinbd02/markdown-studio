@@ -16,7 +16,8 @@
     "tauri:build": "tauri build",
     "test:e2e": "playwright test",
     "version:set": "node scripts/set-version.mjs",
-    "release:installer": "node scripts/release-installer.mjs"
+    "release:installer": "node scripts/release-installer.mjs",
+    "release:github": "node scripts/publish-github-release.mjs"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.3",

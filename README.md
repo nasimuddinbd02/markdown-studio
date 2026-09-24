@@ -9,13 +9,16 @@ The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status pe
 <!-- download:start -->
 ### ⬇️ [Download Markdown Studio 0.3.1 for Windows (64-bit)](downloads/MarkdownStudio-0.3.1-windows-x64-setup.exe?raw=true)
 
-| Version | Platform | Size | Released | SHA-256 |
-| --- | --- | --- | --- | --- |
-| 0.3.1 | Windows 10 (1803+) / 11, x64 | 3.6 MB | 2026-09-24 | `a2ff2ba2ceb5355dc03e30c402517acaecc247743256a1826073853db7025824` |
+Released 2026-09-24 for Windows 10 (1803+) and 11, x64. Nothing else needs to be installed: the app is self-contained.
+
+| Installer | When to use it | Size | SHA-256 |
+| --- | --- | --- | --- |
+| **Standard**: [MarkdownStudio-0.3.1-windows-x64-setup.exe](downloads/MarkdownStudio-0.3.1-windows-x64-setup.exe?raw=true) | Recommended. WebView2 is already part of Windows 11 and updated Windows 10; if it's missing, the installer adds it automatically (needs internet) | 3.6 MB | `a2ff2ba2ceb5355dc03e30c402517acaecc247743256a1826073853db7025824` |
+| **Offline**: [MarkdownStudio-0.3.1-windows-x64-offline-setup.exe](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.3.1/MarkdownStudio-0.3.1-windows-x64-offline-setup.exe) | Includes WebView2; no internet needed | 209.4 MB | `6db1c483884a1bd418d6f7f7119732d90fb55f0bfb05538e46b5cb8dd562de04` |
 
 **Install in 3 steps:**
 
-1. **Download** the installer with the link above. On GitHub you can also open [`downloads/`](downloads/), click the `.exe`, then **Download raw file**.
+1. **Download** an installer above (all files are also on the [0.3.1 release page](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.3.1)).
 2. **Run** it and choose **Anyone who uses this computer**, which needs administrator approval, or **Only for me**, which doesn't. The installer isn't code-signed yet, so if Windows SmartScreen says *"Windows protected your PC"*, choose **More info → Run anyway**.
 3. **Start** Markdown Studio from the Start menu, or right-click any `.md` file and choose **Open with Markdown Studio**.
 
@@ -108,14 +111,24 @@ docs/           SRS and requirement traceability
 ## Releasing a new version
 
 ```bash
-npm run version:set 0.3.0
+npm run version:set 0.4.0
 ```
 
 ```bash
-npm run release:installer
+npm run release:installer -- --offline
 ```
 
-The first command updates the version in `package.json`, `tauri.conf.json` and `Cargo.toml`. The second builds the Windows installer, replaces the one in [`downloads/`](downloads/) (only the latest version is kept), writes `SHA256SUMS.txt`, and refreshes the download link at the top of this README. Commit the result.
+```bash
+npm run release:github
+```
+
+1. `version:set` updates the version in `package.json`, `tauri.conf.json` and `Cargo.toml`.
+2. `release:installer -- --offline` builds two Windows installers:
+   - the **standard** installer (~4 MB) replaces the one in [`downloads/`](downloads/), where only the latest version is kept;
+   - the **offline** installer (~210 MB, with the WebView2 runtime) goes to `release-assets/`. It's too large for git, so it's ignored.
+
+   It also writes `SHA256SUMS.txt` and refreshes the download links in this README and in [docs/INSTALL.md](docs/INSTALL.md).
+3. Commit and push, then run `release:github`. It creates or updates the GitHub Release `v<version>` with both installers and the checksums, using the GitHub CLI (`gh auth login` once).
 
 ## Packaging and releases
 

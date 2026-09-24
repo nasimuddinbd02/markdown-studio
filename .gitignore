@@ -8,3 +8,4 @@ src-tauri/gen/schemas/
 .vite/
 playwright-report/
 test-results/
+release-assets/
