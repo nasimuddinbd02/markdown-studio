@@ -5,3 +5,8 @@ declare module "turndown-plugin-gfm" {
   export const strikethrough: TurndownService.Plugin;
   export const taskListItems: TurndownService.Plugin;
 }
+
+declare module "pdfmake/build/standard-fonts/Courier" {
+  const container: unknown;
+  export default container;
+}

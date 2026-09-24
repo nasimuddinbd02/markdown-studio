@@ -49,6 +49,45 @@ export async function exportActiveAsDocx() {
   }
 }
 
+/**
+ * Exports the active document as a PDF file with selectable text, links and
+ * heading bookmarks. Documents with characters the built-in font can't show
+ * (e.g. CJK, Arabic, emoji) are offered Print → Save as PDF instead.
+ */
+export async function exportActiveAsPdf() {
+  const doc = activeDoc();
+  if (!doc) return;
+  try {
+    const { markdownToPdf, pdfExportUnsupportedText } = await import("../services/convert/toPdf");
+    const unsupported = pdfExportUnsupportedText(doc.content);
+    if (unsupported.length) {
+      const { ask } = await import("../stores/uiStore");
+      const choice = await ask({
+        title: "Some characters need a different PDF method",
+        message: `This document contains characters (${unsupported.join(" ")}) that the built-in PDF font can't display. Print → Save as PDF uses your system fonts and shows them correctly.`,
+        buttons: [
+          { id: "cancel", label: "Cancel" },
+          { id: "anyway", label: "Export Anyway" },
+          { id: "print", label: "Use Print → Save as PDF", variant: "primary" },
+        ],
+        cancelId: "cancel",
+      });
+      if (choice === "print") return printActive();
+      if (choice !== "anyway") return;
+    }
+    const { makeImageLoader } = await import("../services/convert/toDocx");
+    const { documentTitle } = await import("../services/exportHtml");
+    const bytes = await markdownToPdf(doc.content, {
+      title: documentTitle(doc.content, doc.name),
+      loadImage: makeImageLoader(doc.path, loadImage),
+    });
+    const saved = await backend().exportBinaryFile(exportFileName(doc.name, "pdf"), bytesToBase64(bytes), "pdf");
+    if (saved) notify("success", `Exported to ${saved}`);
+  } catch (e) {
+    notify("error", describeError(e, "export to PDF"));
+  }
+}
+
 /** Copies the rendered HTML of the active document to the clipboard. */
 export async function copyActiveAsHtml() {
   const doc = activeDoc();

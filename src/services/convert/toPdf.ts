@@ -1,0 +1,266 @@
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkGfm from "remark-gfm";
+import type { Root, RootContent, PhrasingContent, List, Table as MdTable } from "mdast";
+import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
+import type { DocxImageLoader } from "./toDocx";
+
+/**
+ * Markdown → PDF with real, selectable text (pdfmake, vector output):
+ * heading styles with a bookmark tree, emphasis, links, lists (incl. tasks and
+ * nesting), tables, code blocks, quotes, rules and embedded images.
+ * The bundled Roboto font covers Latin, Greek and Cyrillic; documents in
+ * other scripts should use Print → Save as PDF (see `pdfExportUnsupportedText`).
+ */
+
+type Inline = string | { text: Inline | Inline[]; [k: string]: unknown };
+
+const CONTENT_WIDTH = 515; // A4 width minus margins, in points
+
+function plain(node: RootContent | PhrasingContent): string {
+  if ("value" in node && typeof node.value === "string") return node.value;
+  if ("children" in node) return (node.children as Array<RootContent | PhrasingContent>).map(plain).join("");
+  return "";
+}
+
+/** Characters outside the bundled font's coverage (e.g. CJK, Arabic, emoji). */
+export function pdfExportUnsupportedText(markdown: string): string[] {
+  const found = new Set<string>();
+  for (const ch of markdown) {
+    const cp = ch.codePointAt(0)!;
+    const ok =
+      cp < 0x0250 || // Latin incl. extended A/B
+      (cp >= 0x0370 && cp <= 0x04ff) || // Greek, Cyrillic
+      (cp >= 0x1e00 && cp <= 0x1eff) || // Latin extended additional
+      (cp >= 0x2000 && cp <= 0x206f) || // general punctuation (dashes, quotes, …)
+      (cp >= 0x20a0 && cp <= 0x20cf) || // currency symbols
+      (cp >= 0x2100 && cp <= 0x214f) || // letterlike symbols (™, №, ℃)
+      cp === 0xfeff;
+    if (!ok) found.add(ch);
+    if (found.size >= 8) break;
+  }
+  return [...found];
+}
+
+class PdfBuilder {
+  private headingIds: Array<{ depth: number; id: string }> = [];
+  private count = 0;
+  constructor(private loadImage?: DocxImageLoader) {}
+
+  private async inline(nodes: PhrasingContent[], style: Record<string, unknown> = {}): Promise<Inline[]> {
+    const out: Inline[] = [];
+    for (const n of nodes) {
+      switch (n.type) {
+        case "text":
+          out.push(Object.keys(style).length ? { text: n.value.replace(/\n/g, " "), ...style } : n.value.replace(/\n/g, " "));
+          break;
+        case "strong":
+          out.push(...(await this.inline(n.children, { ...style, bold: true })));
+          break;
+        case "emphasis":
+          out.push(...(await this.inline(n.children, { ...style, italics: true })));
+          break;
+        case "delete":
+          out.push(...(await this.inline(n.children, { ...style, decoration: "lineThrough" })));
+          break;
+        case "inlineCode":
+          out.push({ text: n.value, ...style, style: "inlineCode" });
+          break;
+        case "break":
+          out.push("\n");
+          break;
+        case "link":
+          if (/^(https?:|mailto:)/i.test(n.url)) out.push(...(await this.inline(n.children, { ...style, link: n.url, style: "link" })));
+          else out.push(...(await this.inline(n.children, style)));
+          break;
+        case "image":
+          out.push({ text: n.alt ? `[${n.alt}]` : "[image]", italics: true, color: "#666666" });
+          break;
+        case "html":
+          out.push(n.value.replace(/<[^>]+>/g, ""));
+          break;
+        default:
+          out.push(plain(n));
+      }
+    }
+    return out;
+  }
+
+  /** Block images get their own node so they can be sized to the page. */
+  private async imageBlock(url: string, alt: string): Promise<Content> {
+    const img = this.loadImage ? await this.loadImage(url).catch(() => null) : null;
+    if (!img || (img.type !== "png" && img.type !== "jpg")) {
+      return { text: alt ? `[${alt}]` : "[image]", italics: true, color: "#666666", margin: [0, 0, 0, 8] };
+    }
+    let bin = "";
+    for (let i = 0; i < img.data.length; i += 0x8000) bin += String.fromCharCode(...img.data.subarray(i, i + 0x8000));
+    const mime = img.type === "png" ? "image/png" : "image/jpeg";
+    const { imageSize } = await import("./toDocx");
+    const size = imageSize(img.data);
+    const width = size ? Math.min(CONTENT_WIDTH, size.width * 0.75) : CONTENT_WIDTH;
+    return { image: `data:${mime};base64,${btoa(bin)}`, width, margin: [0, 4, 0, 10] };
+  }
+
+  /** Vector checkbox for task-list items (the text font has no ☐/☑ glyphs). */
+  private checkbox(checked: boolean): Content {
+    const box = { type: "rect", x: 0, y: 3, w: 8, h: 8, r: 1, lineWidth: 0.8, lineColor: "#5C6575" };
+    const tick = { type: "polyline", lineWidth: 1.2, lineColor: "#2F5BEA", points: [{ x: 1.6, y: 7 }, { x: 3.4, y: 9 }, { x: 6.8, y: 4.2 }] };
+    return { canvas: (checked ? [box, tick] : [box]) as never, width: 12 };
+  }
+
+  private async list(list: List): Promise<Content> {
+    const items: Content[] = [];
+    for (const item of list.children) {
+      const parts: Content[] = [];
+      for (const child of item.children) {
+        if (child.type === "paragraph") parts.push({ text: await this.inline(child.children), margin: [0, 0, 0, 2] } as Content);
+        else parts.push(...(await this.block(child)));
+      }
+      const body: Content = parts.length === 1 ? parts[0] : { stack: parts };
+      const isTask = item.checked !== null && item.checked !== undefined;
+      items.push(
+        isTask
+          ? ({ columns: [this.checkbox(item.checked === true), { ...(body as object), width: "*" }], columnGap: 4, listType: "none" } as Content)
+          : body,
+      );
+    }
+    return list.ordered
+      ? { ol: items, start: list.start ?? 1, margin: [0, 0, 0, 8] }
+      : { ul: items, margin: [0, 0, 0, 8] };
+  }
+
+  private async table(t: MdTable): Promise<Content> {
+    const align = (i: number) => t.align?.[i] ?? "left";
+    const body = await Promise.all(
+      t.children.map((row, ri) =>
+        Promise.all(
+          row.children.map(async (cell, ci) => ({
+            text: await this.inline(cell.children),
+            bold: ri === 0,
+            fillColor: ri === 0 ? "#EEF0F3" : undefined,
+            alignment: align(ci),
+          })),
+        ),
+      ),
+    );
+    const cols = Math.max(...body.map((r) => r.length));
+    for (const r of body) while (r.length < cols) r.push({ text: [], bold: false, fillColor: undefined, alignment: "left" });
+    return {
+      table: { headerRows: 1, widths: Array(cols).fill("*"), body: body as never },
+      layout: { hLineColor: () => "#C3C9D2", vLineColor: () => "#C3C9D2", paddingTop: () => 3, paddingBottom: () => 3 },
+      margin: [0, 2, 0, 10],
+    };
+  }
+
+  async block(node: RootContent): Promise<Content[]> {
+    switch (node.type) {
+      case "heading": {
+        const id = `h${++this.count}`;
+        while (this.headingIds.length && this.headingIds[this.headingIds.length - 1].depth >= node.depth) this.headingIds.pop();
+        const parent = this.headingIds[this.headingIds.length - 1]?.id;
+        this.headingIds.push({ depth: node.depth, id });
+        return [
+          {
+            text: await this.inline(node.children),
+            style: `h${node.depth}`,
+            id,
+            outline: true,
+            outlineText: plain(node),
+            ...(parent ? { outlineParentId: parent } : {}),
+          } as Content,
+        ];
+      }
+      case "paragraph": {
+        // A paragraph that is just an image renders as a block image.
+        if (node.children.length === 1 && node.children[0].type === "image") {
+          return [await this.imageBlock(node.children[0].url, node.children[0].alt ?? "")];
+        }
+        return [{ text: await this.inline(node.children), margin: [0, 0, 0, 8] }];
+      }
+      case "list":
+        return [await this.list(node)];
+      case "code":
+        return [
+          {
+            table: { widths: ["*"], body: [[{ text: node.value || " ", style: "code" }]] },
+            layout: { fillColor: () => "#F4F5F7", hLineColor: () => "#D9DDE3", vLineColor: () => "#D9DDE3", paddingLeft: () => 8, paddingRight: () => 8, paddingTop: () => 6, paddingBottom: () => 6 },
+            margin: [0, 2, 0, 10],
+          },
+        ];
+      case "blockquote": {
+        const inner: Content[] = [];
+        for (const child of node.children) inner.push(...(await this.block(child)));
+        return [
+          {
+            table: { widths: ["*"], body: [[{ stack: inner, color: "#5C6575" }]] },
+            layout: {
+              hLineWidth: () => 0,
+              vLineWidth: (i: number) => (i === 0 ? 3 : 0),
+              vLineColor: () => "#C3C9D2",
+              paddingLeft: () => 10,
+            },
+            margin: [0, 0, 0, 8],
+          },
+        ];
+      }
+      case "table":
+        return [await this.table(node)];
+      case "thematicBreak":
+        return [{ canvas: [{ type: "line", x1: 0, y1: 0, x2: CONTENT_WIDTH, y2: 0, lineWidth: 1, lineColor: "#C3C9D2" }], margin: [0, 6, 0, 12] }];
+      case "html": {
+        const text = node.value.replace(/<[^>]+>/g, "").trim();
+        return text ? [{ text, margin: [0, 0, 0, 8] }] : [];
+      }
+      default: {
+        const text = plain(node).trim();
+        return text ? [{ text, margin: [0, 0, 0, 8] }] : [];
+      }
+    }
+  }
+}
+
+let fontsReady: Promise<typeof import("pdfmake/build/pdfmake")> | null = null;
+
+async function pdfmake() {
+  fontsReady ??= (async () => {
+    const lib = (await import("pdfmake/build/pdfmake")) as unknown as { default?: unknown };
+    const pm = (lib.default ?? lib) as typeof import("pdfmake/build/pdfmake");
+    const vfsMod = (await import("pdfmake/build/vfs_fonts")) as unknown as { default?: Record<string, string> };
+    const courierMod = (await import("pdfmake/build/standard-fonts/Courier")) as unknown as { default?: unknown };
+    pm.addVirtualFileSystem((vfsMod.default ?? vfsMod) as Record<string, string>);
+    pm.addFontContainer((courierMod.default ?? courierMod) as never);
+    return pm;
+  })();
+  return fontsReady;
+}
+
+/** Markdown → PDF bytes. */
+export async function markdownToPdf(markdown: string, opts: { title?: string; loadImage?: DocxImageLoader } = {}): Promise<Uint8Array> {
+  const tree = unified().use(remarkParse).use(remarkGfm).parse(markdown) as Root;
+  const builder = new PdfBuilder(opts.loadImage);
+  const content: Content[] = [];
+  for (const node of tree.children) content.push(...(await builder.block(node)));
+
+  const doc: TDocumentDefinitions = {
+    info: { title: opts.title, creator: "Markdown Studio", producer: "Markdown Studio" },
+    pageSize: "A4",
+    pageMargins: [40, 48, 40, 56],
+    content,
+    footer: (page, pages) => ({ text: `${page} / ${pages}`, alignment: "center", fontSize: 8, color: "#8A93A3", margin: [0, 20, 0, 0] }),
+    defaultStyle: { font: "Roboto", fontSize: 10.5, lineHeight: 1.3, color: "#1D2330" },
+    styles: {
+      h1: { fontSize: 22, bold: true, margin: [0, 6, 0, 8] },
+      h2: { fontSize: 17, bold: true, margin: [0, 10, 0, 6] },
+      h3: { fontSize: 14, bold: true, margin: [0, 8, 0, 4] },
+      h4: { fontSize: 12, bold: true, margin: [0, 6, 0, 4] },
+      h5: { fontSize: 11, bold: true, margin: [0, 6, 0, 4] },
+      h6: { fontSize: 10.5, bold: true, color: "#5C6575", margin: [0, 6, 0, 4] },
+      link: { color: "#2F5BEA", decoration: "underline" },
+      inlineCode: { font: "Courier", fontSize: 9.5, background: "#F2F3F5" },
+      code: { font: "Courier", fontSize: 9, lineHeight: 1.2, preserveLeadingSpaces: true },
+    },
+  };
+  const pm = await pdfmake();
+  const buffer = await pm.createPdf(doc).getBuffer();
+  return new Uint8Array(buffer);
+}
