@@ -4,7 +4,24 @@ A fast, local-first, privacy-conscious Markdown editor for Windows, macOS and Li
 
 The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status per requirement is in [docs/TRACEABILITY.md](docs/TRACEABILITY.md).
 
-## Features (v0.1 MVP)
+## Download
+
+<!-- download:start -->
+### ⬇️ [Download Markdown Studio 0.2.0 for Windows (64-bit)](downloads/MarkdownStudio-0.2.0-windows-x64-setup.exe?raw=true)
+
+| Version | Platform | Size | Released | SHA-256 |
+| --- | --- | --- | --- | --- |
+| 0.2.0 | Windows 10/11 x64 | 3.5 MB | 2026-09-23 | `bdc752cadf5c42751fb8c0cb75a1b5805ae04c99e705e4e6613743f0cf597140` |
+
+1. Download the installer and run it. No administrator rights are needed; it installs for the current user.
+2. Windows SmartScreen may warn because the installer isn't code-signed yet. Choose **More info → Run anyway**.
+3. Start **Markdown Studio** from the Start menu. `.md` files can be opened by double-clicking them.
+
+Installing a newer version upgrades in place and keeps your settings. Uninstall from **Settings → Apps → Installed apps**.
+macOS and Linux builds are produced by the release workflow (see [Packaging and releases](#packaging-and-releases)).
+<!-- download:end -->
+
+## Features
 
 - Create, open, edit, save and Save As Markdown files (`.md`, `.markdown`) with native dialogs
 - Opens files from the OS: double-click / "Open with" (file association), drag and drop onto the window, and single-instance hand-off
@@ -84,6 +101,18 @@ src-tauri/
 tests/          Vitest tests
 docs/           SRS and requirement traceability
 ```
+
+## Releasing a new version
+
+```bash
+npm run version:set 0.3.0
+```
+
+```bash
+npm run release:installer
+```
+
+The first command updates the version in `package.json`, `tauri.conf.json` and `Cargo.toml`. The second builds the Windows installer, replaces the one in [`downloads/`](downloads/) (only the latest version is kept), writes `SHA256SUMS.txt`, and refreshes the download link at the top of this README. Commit the result.
 
 ## Packaging and releases
 

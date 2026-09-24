@@ -1,0 +1,1 @@
+bdc752cadf5c42751fb8c0cb75a1b5805ae04c99e705e4e6613743f0cf597140  MarkdownStudio-0.2.0-windows-x64-setup.exe
