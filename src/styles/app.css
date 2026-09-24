@@ -1327,3 +1327,9 @@ select {
   color: var(--text);
   border-radius: 2px;
 }
+
+.preview-loading {
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+}

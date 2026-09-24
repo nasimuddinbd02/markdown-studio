@@ -8,7 +8,16 @@ import { useUi } from "./stores/uiStore";
 import { commands, formatShortcut } from "./features/commands";
 import { TabBar } from "./components/TabBar";
 import { Editor } from "./components/Editor";
-import { Preview } from "./components/Preview";
+import { lazy, Suspense } from "react";
+
+// The preview pulls in the Markdown/math/highlighting pipeline; load it in
+// parallel with first paint instead of blocking startup on it.
+const Preview = lazy(() => import("./components/Preview").then((m) => ({ default: m.Preview })));
+const PreviewPane = () => (
+  <Suspense fallback={<div className="preview preview-loading">Loading preview…</div>}>
+    <Preview />
+  </Suspense>
+);
 import { StatusBar } from "./components/StatusBar";
 import { ChangeBanner } from "./components/ChangeBanner";
 import { DialogHost, Toasts } from "./components/Dialogs";
@@ -78,12 +87,12 @@ function EditorArea() {
   const layout = useDefaultLayout({ id: "editor-preview", storage: layoutStorage, panelIds: ["editor", "preview"] });
 
   if (viewMode === "editor") return <div className="pane"><Editor /></div>;
-  if (viewMode === "preview") return <div className="pane"><Preview /></div>;
+  if (viewMode === "preview") return <div className="pane"><PreviewPane /></div>;
   return (
     <Group id="editor-preview" orientation="horizontal" className="split" defaultLayout={layout.defaultLayout} onLayoutChanged={layout.onLayoutChanged}>
       <Panel id="editor" minSize="20" className="pane"><Editor /></Panel>
       <Separator className="resize-handle" aria-label="Resize editor and preview" />
-      <Panel id="preview" minSize="20" className="pane"><Preview /></Panel>
+      <Panel id="preview" minSize="20" className="pane"><PreviewPane /></Panel>
     </Group>
   );
 }

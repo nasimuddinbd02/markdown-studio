@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useDocuments, isDirty } from "../stores/documentsStore";
 import { useUi } from "../stores/uiStore";
 import { useSettings } from "../stores/settingsStore";
-import { countWords } from "../services/markdown";
+import { countWords } from "../services/textStats";
 import { backend } from "../services";
 
 /** Status bar: encoding, language, line/column and save state (SRS §8). */

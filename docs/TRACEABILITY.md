@@ -82,7 +82,7 @@ Status of each [SRS](SRS.md) requirement. **Done** means implemented and tested 
 ## Known gaps and next improvements
 
 - Auto-update (UPD-*), planned for v1.0.
-- Main JavaScript bundle is about 1.4 MB. Lazy-load the preview/export pipeline and highlight.js languages (Mermaid is already lazy).
+- Startup bundle is 612 KB; the preview pipeline, export and Mermaid are lazy-loaded. Further trimming (highlight.js language subset) is possible.
 - A native OS menu bar on macOS (the in-app menu is used on all platforms today).
 - Large-file benchmark (10 MB+) and incremental preview rendering.
 - Playwright end-to-end tests against the Tauri build.

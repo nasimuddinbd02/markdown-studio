@@ -70,7 +70,4 @@ export function classifyLink(href: string | undefined | null): LinkTarget {
   return { type: "document", href: h };
 }
 
-export function countWords(text: string): number {
-  const m = text.match(/[\p{L}\p{N}][\p{L}\p{N}'’_-]*/gu);
-  return m ? m.length : 0;
-}
+export { countWords } from "./textStats";

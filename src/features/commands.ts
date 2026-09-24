@@ -10,7 +10,8 @@ import {
 } from "./documents";
 import { closeWorkspace, createFileIn, openFolderDialog } from "./workspace";
 import { editorCommand, runOnEditor } from "./editorBridge";
-import { copyActiveAsHtml, exportActiveAsHtml, printActive } from "./exporting";
+// Export/print pull in the unified pipeline; load them on first use.
+const exporting = () => import("./exporting");
 import type { StateCommand } from "@codemirror/state";
 import type { KeyBinding } from "@codemirror/view";
 import * as fmt from "./formatting";
@@ -95,9 +96,9 @@ export const commands: Record<string, Command> = {
     enabled: hasActive,
   },
   saveAll: { id: "saveAll", label: "Save All", shortcut: "Mod+Alt+S", run: async () => void (await saveAll()) },
-  exportHtml: { id: "exportHtml", label: "Export as HTML…", run: exportActiveAsHtml, enabled: hasActive },
-  copyHtml: { id: "copyHtml", label: "Copy as HTML", run: copyActiveAsHtml, enabled: hasActive },
-  print: { id: "print", label: "Print / Save as PDF…", shortcut: "Mod+P", run: printActive, enabled: hasActive },
+  exportHtml: { id: "exportHtml", label: "Export as HTML…", run: async () => (await exporting()).exportActiveAsHtml(), enabled: hasActive },
+  copyHtml: { id: "copyHtml", label: "Copy as HTML", run: async () => (await exporting()).copyActiveAsHtml(), enabled: hasActive },
+  print: { id: "print", label: "Print / Save as PDF…", shortcut: "Mod+P", run: async () => (await exporting()).printActive(), enabled: hasActive },
   closeTab: {
     id: "closeTab",
     label: "Close Tab",
