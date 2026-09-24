@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
-import { remarkPlugins, rehypePlugins, classifyLink } from "../services/markdown";
+import { classifyLink, markdownPlugins } from "../services/markdown";
+import { MermaidDiagram } from "./MermaidDiagram";
 import { backend } from "../services";
 import { describeError } from "../services/errors";
 import { isMarkdownPath, resolveRelative } from "../services/paths";
@@ -64,9 +65,25 @@ function LocalImage({ src, alt, title, docPath }: { src?: string; alt?: string; 
   return url ? <img src={url} alt={alt ?? ""} title={title} /> : <span className="preview-missing-image">Loading image…</span>;
 }
 
+/** Returns the text of a mermaid code block if this <pre> holds one. */
+function mermaidSource(node: unknown): string | null {
+  type HastLike = { tagName?: string; properties?: { className?: unknown }; children?: Array<{ value?: string }> };
+  const code = (node as { children?: HastLike[] } | undefined)?.children?.[0];
+  const classes = code?.properties?.className;
+  if (code?.tagName !== "code" || !Array.isArray(classes) || !classes.includes("language-mermaid")) return null;
+  return (code.children ?? []).map((c) => c.value ?? "").join("");
+}
+
 const MarkdownView = memo(function MarkdownView({ text, docPath }: { text: string; docPath: string | null }) {
+  const renderMath = useSettings((s) => s.settings.renderMath);
+  const renderDiagrams = useSettings((s) => s.settings.renderDiagrams);
+  const plugins = useMemo(() => markdownPlugins({ math: renderMath }), [renderMath]);
   const components = useMemo<Components>(
     () => ({
+      pre: ({ node, children, ...rest }) => {
+        const source = renderDiagrams ? mermaidSource(node) : null;
+        return source !== null ? <MermaidDiagram code={source} /> : <pre {...rest}>{children}</pre>;
+      },
       img: ({ src, alt, title }) => (
         <LocalImage src={typeof src === "string" ? src : undefined} alt={alt} title={title} docPath={docPath} />
       ),
@@ -76,10 +93,10 @@ const MarkdownView = memo(function MarkdownView({ text, docPath }: { text: strin
         </a>
       ),
     }),
-    [docPath],
+    [docPath, renderDiagrams],
   );
   return (
-    <ReactMarkdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins} components={components}>
+    <ReactMarkdown remarkPlugins={plugins.remarkPlugins} rehypePlugins={plugins.rehypePlugins} components={components}>
       {text}
     </ReactMarkdown>
   );

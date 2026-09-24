@@ -244,3 +244,39 @@
 .hljs-strong {
   font-weight: 700;
 }
+
+/* Mermaid diagrams and math */
+.mermaid-diagram {
+  margin: 0 0 1em;
+  text-align: center;
+  overflow-x: auto;
+}
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+.mermaid-diagram.loading {
+  padding: 16px;
+  color: var(--text-muted);
+  border: 1px dashed var(--border-strong);
+  border-radius: 7px;
+}
+.mermaid-error {
+  margin: 0 0 1em;
+  padding: 10px 12px;
+  border: 1px solid var(--danger);
+  border-radius: 7px;
+  color: var(--danger);
+}
+.mermaid-error pre {
+  margin: 8px 0 0;
+  color: var(--text);
+}
+.markdown-body math[display="block"] {
+  display: block;
+  margin: 0.8em 0;
+  padding: 4px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  font-size: 1.1em;
+}

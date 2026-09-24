@@ -3,6 +3,12 @@ import { describeError } from "../services/errors";
 import { buildHtmlDocument, exportFileName, renderHtml } from "../services/exportHtml";
 import { activeDoc } from "../stores/documentsStore";
 import { notify } from "../stores/uiStore";
+import { useSettings } from "../stores/settingsStore";
+
+const features = () => {
+  const s = useSettings.getState().settings;
+  return { math: s.renderMath, diagrams: s.renderDiagrams };
+};
 
 const loadImage = (path: string) => backend().readImage(path);
 
@@ -11,7 +17,7 @@ export async function exportActiveAsHtml() {
   const doc = activeDoc();
   if (!doc) return;
   try {
-    const html = await buildHtmlDocument({ markdown: doc.content, name: doc.name, docPath: doc.path, loadImage });
+    const html = await buildHtmlDocument({ markdown: doc.content, name: doc.name, docPath: doc.path, loadImage, features: features() });
     const saved = await backend().exportFile(exportFileName(doc.name, "html"), html, "html");
     if (saved) notify("success", `Exported to ${saved}`);
   } catch (e) {
@@ -24,7 +30,7 @@ export async function copyActiveAsHtml() {
   const doc = activeDoc();
   if (!doc) return;
   try {
-    const html = await renderHtml(doc.content, doc.path, loadImage);
+    const html = await renderHtml(doc.content, doc.path, loadImage, features());
     await navigator.clipboard.writeText(html);
     notify("success", "HTML copied to the clipboard.");
   } catch (e) {
@@ -42,7 +48,7 @@ export async function printActive() {
   if (!doc) return;
   let container: HTMLElement | null = null;
   try {
-    const html = await renderHtml(doc.content, doc.path, loadImage);
+    const html = await renderHtml(doc.content, doc.path, loadImage, features());
     container = document.createElement("div");
     container.id = "print-root";
     container.innerHTML = `<article class="markdown-body">${html}</article>`;

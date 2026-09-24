@@ -55,6 +55,8 @@ export interface Settings {
   showExplorer: boolean;
   showOutline: boolean;
   syncScroll: boolean;
+  renderMath: boolean;
+  renderDiagrams: boolean;
   restoreSession: boolean;
   autoSave: AutoSaveMode;
   autoSaveDelayMs: number;

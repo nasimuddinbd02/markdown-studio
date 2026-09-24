@@ -80,7 +80,28 @@ This <kbd>Ctrl</kbd> + <kbd>S</kbd> text is inside a sanitized details element.
 
 </details>
 `,
-  "/demo/notes/todo.md": `# Todo
+  "/demo/docs/diagrams-and-math.md": `# Diagrams and math
+
+## Mermaid
+
+\`\`\`mermaid
+flowchart LR
+  A[Write Markdown] --> B{Preview}
+  B -->|Looks good| C[Save]
+  B -->|Needs work| A
+\`\`\`
+
+## LaTeX math
+
+Inline: the famous identity $e^{i\\pi} + 1 = 0$.
+
+Display:
+
+$$
+\\int_0^1 x^2\\,dx = \\frac{1}{3}
+$$
+`,
+  "/demo/notes/todo.md":`# Todo
 
 - [ ] Write release notes
 - [ ] Test on Windows, macOS and Linux

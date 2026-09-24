@@ -1,16 +1,12 @@
 import { unified } from "unified";
 import remarkParse from "remark-parse";
-import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize from "rehype-sanitize";
-import rehypeHighlight from "rehype-highlight";
-import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import { visit } from "unist-util-visit";
 import type { Root, Element } from "hast";
 import markdownCss from "../styles/markdown.css?raw";
-import { sanitizeSchema } from "./markdown";
+import { markdownPlugins, type MarkdownFeatures } from "./markdown";
+import { inlineMermaidDiagrams } from "./mermaid";
 import { basename, resolveRelative } from "./paths";
 
 /** Theme tokens used by markdown.css, so exported files look like the preview. */
@@ -73,19 +69,23 @@ function rehypeInlineImages(docPath: string | null, load: ImageLoader | undefine
  * Renders Markdown to sanitized HTML using the same policy as the preview
  * (FR-034): raw HTML is parsed, then filtered through the GitHub allow-list.
  */
-export async function renderHtml(markdown: string, docPath: string | null = null, loadImage?: ImageLoader) {
+export async function renderHtml(
+  markdown: string,
+  docPath: string | null = null,
+  loadImage?: ImageLoader,
+  features: MarkdownFeatures & { diagrams?: boolean } = { math: true, diagrams: true },
+) {
+  const { remarkPlugins, rehypePlugins } = markdownPlugins(features);
   const file = await unified()
     .use(remarkParse)
-    .use(remarkGfm)
+    .use(remarkPlugins)
     .use(remarkRehype, { allowDangerousHtml: true })
-    .use(rehypeRaw)
-    .use(rehypeSanitize, sanitizeSchema)
-    .use(rehypeHighlight, { detect: false })
-    .use(rehypeSlug)
+    .use(rehypePlugins)
     .use(() => rehypeInlineImages(docPath, loadImage))
     .use(rehypeStringify)
     .process(markdown);
-  return String(file);
+  const html = String(file);
+  return features.diagrams && typeof document !== "undefined" ? inlineMermaidDiagrams(html) : html;
 }
 
 function escapeHtml(s: string) {
@@ -103,8 +103,9 @@ export async function buildHtmlDocument(opts: {
   name: string;
   docPath: string | null;
   loadImage?: ImageLoader;
+  features?: MarkdownFeatures & { diagrams?: boolean };
 }) {
-  const body = await renderHtml(opts.markdown, opts.docPath, opts.loadImage);
+  const body = await renderHtml(opts.markdown, opts.docPath, opts.loadImage, opts.features);
   const title = escapeHtml(documentTitle(opts.markdown, opts.name));
   return `<!doctype html>
 <html lang="en">

@@ -89,6 +89,8 @@ export function SettingsDialog() {
             <option value={600}>600 ms</option>
             <option value={1000}>1 second</option>
           </select>
+          <label className="check"><input type="checkbox" checked={settings.renderMath} onChange={(e) => update({ renderMath: e.target.checked })} /> Render LaTeX math ($…$ and $$…$$)</label>
+          <label className="check"><input type="checkbox" checked={settings.renderDiagrams} onChange={(e) => update({ renderDiagrams: e.target.checked })} /> Render Mermaid diagrams</label>
           <label className="check"><input type="checkbox" checked={settings.syncScroll} onChange={(e) => update({ syncScroll: e.target.checked })} /> Sync editor and preview scrolling</label>
         </section>
 

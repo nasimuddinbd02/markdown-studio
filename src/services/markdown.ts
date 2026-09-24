@@ -3,6 +3,8 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeHighlight from "rehype-highlight";
 import rehypeSlug from "rehype-slug";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import type { Options } from "react-markdown";
 
 /**
@@ -14,6 +16,11 @@ import type { Options } from "react-markdown";
  */
 export const sanitizeSchema = {
   ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    // Keep the classes remark-math uses to mark formulas.
+    code: [["className", /^language-./, "math-inline", "math-display"]],
+  },
   protocols: {
     ...defaultSchema.protocols,
     href: ["http", "https", "mailto"],
@@ -21,13 +28,30 @@ export const sanitizeSchema = {
   },
 };
 
-export const remarkPlugins: Options["remarkPlugins"] = [remarkGfm];
-export const rehypePlugins: Options["rehypePlugins"] = [
-  rehypeRaw,
-  [rehypeSanitize, sanitizeSchema],
-  [rehypeHighlight, { detect: false }],
-  rehypeSlug,
-];
+export interface MarkdownFeatures {
+  /** `$inline$` and `$$display$$` LaTeX math, rendered as MathML. */
+  math: boolean;
+}
+
+/**
+ * The Markdown pipeline shared by the preview and exports. Math is rendered
+ * by KaTeX to native MathML (no fonts or stylesheets needed) *after*
+ * sanitizing, so it cannot be used to smuggle in unsafe markup.
+ */
+export function markdownPlugins(features: MarkdownFeatures = { math: true }) {
+  const remarkPlugins: NonNullable<Options["remarkPlugins"]> = [remarkGfm];
+  const rehypePlugins: NonNullable<Options["rehypePlugins"]> = [rehypeRaw, [rehypeSanitize, sanitizeSchema]];
+  if (features.math) {
+    remarkPlugins.push([remarkMath, { singleDollarTextMath: true }]);
+    rehypePlugins.push([rehypeKatex, { output: "mathml", throwOnError: false, strict: "ignore", trust: false }]);
+  }
+  rehypePlugins.push([rehypeHighlight, { detect: false, plainText: ["mermaid", "math"] }], rehypeSlug);
+  return { remarkPlugins, rehypePlugins };
+}
+
+const defaults = markdownPlugins();
+export const remarkPlugins = defaults.remarkPlugins;
+export const rehypePlugins = defaults.rehypePlugins;
 
 /** How a link clicked in the preview should be handled. */
 export type LinkTarget =
