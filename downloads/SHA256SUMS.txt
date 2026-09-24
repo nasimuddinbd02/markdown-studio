@@ -1,1 +1,1 @@
-2143d8d077dc401b463dd84cf64fdc1055a9ba11a5cf90b4b1f7411a4f169257  MarkdownStudio-0.3.0-windows-x64-setup.exe
+a2ff2ba2ceb5355dc03e30c402517acaecc247743256a1826073853db7025824  MarkdownStudio-0.3.1-windows-x64-setup.exe

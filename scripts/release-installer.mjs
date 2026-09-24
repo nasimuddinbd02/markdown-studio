@@ -55,10 +55,10 @@ const section = `<!-- download:start -->
 **Install in 3 steps:**
 
 1. **Download** the installer with the link above. On GitHub you can also open [\`downloads/\`](${outDir}/), click the \`.exe\`, then **Download raw file**.
-2. **Run** it. No administrator rights are needed; it installs for your user account. The installer isn't code-signed yet, so if Windows SmartScreen says *"Windows protected your PC"*, choose **More info → Run anyway**.
-3. **Start** Markdown Studio from the Start menu, or double-click any \`.md\` file.
+2. **Run** it and choose **Anyone who uses this computer**, which needs administrator approval, or **Only for me**, which doesn't. The installer isn't code-signed yet, so if Windows SmartScreen says *"Windows protected your PC"*, choose **More info → Run anyway**.
+3. **Start** Markdown Studio from the Start menu, or right-click any \`.md\` file and choose **Open with Markdown Studio**.
 
-Newer versions install over older ones and keep your settings. For requirements, checksum verification, silent install, uninstalling and troubleshooting, see the **[installation guide](docs/INSTALL.md)**.
+The app appears in **Settings → Apps → Installed apps** and in **Control Panel → Programs and Features**, where it can be uninstalled. Newer versions install over older ones and keep your settings. For requirements, checksum verification, silent install, uninstalling and troubleshooting, see the **[installation guide](docs/INSTALL.md)**.
 <!-- download:end -->`;
 
 let readme = readFileSync("README.md", "utf8");

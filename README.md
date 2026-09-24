@@ -7,24 +7,25 @@ The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status pe
 ## Download
 
 <!-- download:start -->
-### ⬇️ [Download Markdown Studio 0.3.0 for Windows (64-bit)](downloads/MarkdownStudio-0.3.0-windows-x64-setup.exe?raw=true)
+### ⬇️ [Download Markdown Studio 0.3.1 for Windows (64-bit)](downloads/MarkdownStudio-0.3.1-windows-x64-setup.exe?raw=true)
 
 | Version | Platform | Size | Released | SHA-256 |
 | --- | --- | --- | --- | --- |
-| 0.3.0 | Windows 10 (1803+) / 11, x64 | 3.6 MB | 2026-09-23 | `2143d8d077dc401b463dd84cf64fdc1055a9ba11a5cf90b4b1f7411a4f169257` |
+| 0.3.1 | Windows 10 (1803+) / 11, x64 | 3.6 MB | 2026-09-24 | `a2ff2ba2ceb5355dc03e30c402517acaecc247743256a1826073853db7025824` |
 
 **Install in 3 steps:**
 
 1. **Download** the installer with the link above. On GitHub you can also open [`downloads/`](downloads/), click the `.exe`, then **Download raw file**.
-2. **Run** it. No administrator rights are needed; it installs for your user account. The installer isn't code-signed yet, so if Windows SmartScreen says *"Windows protected your PC"*, choose **More info → Run anyway**.
-3. **Start** Markdown Studio from the Start menu, or double-click any `.md` file.
+2. **Run** it and choose **Anyone who uses this computer**, which needs administrator approval, or **Only for me**, which doesn't. The installer isn't code-signed yet, so if Windows SmartScreen says *"Windows protected your PC"*, choose **More info → Run anyway**.
+3. **Start** Markdown Studio from the Start menu, or right-click any `.md` file and choose **Open with Markdown Studio**.
 
-Newer versions install over older ones and keep your settings. For requirements, checksum verification, silent install, uninstalling and troubleshooting, see the **[installation guide](docs/INSTALL.md)**.
+The app appears in **Settings → Apps → Installed apps** and in **Control Panel → Programs and Features**, where it can be uninstalled. Newer versions install over older ones and keep your settings. For requirements, checksum verification, silent install, uninstalling and troubleshooting, see the **[installation guide](docs/INSTALL.md)**.
 <!-- download:end -->
 
 ## Features
 
 - Create, open, edit, save and Save As Markdown files (`.md`, `.markdown`) with native dialogs
+- Windows shell integration: "Open with Markdown Studio" in the right-click menu, listed under Open with and Default apps, Installed apps / Programs and Features entry, install for "Only me" or "Everyone"
 - Opens files from the OS: double-click / "Open with" (file association), drag and drop onto the window, and single-instance hand-off
 - Paste or drop images into a document: they are saved to an `assets/` folder next to it and linked automatically
 - Workspace folders with a file explorer: new file/folder, rename (F2), delete to the Trash/Recycle Bin, Reveal in File Explorer, Copy (Relative) Path
