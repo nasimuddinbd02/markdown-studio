@@ -80,3 +80,9 @@ export interface RecoverySnapshot {
   savedAt: number;
   docs: Array<Pick<Doc, "path" | "name" | "content" | "lineEnding" | "bom" | "mtime">>;
 }
+
+/** Files and folders the OS asked the app to open (launch args, drop, second instance). */
+export interface OpenPaths {
+  files: string[];
+  folders: string[];
+}

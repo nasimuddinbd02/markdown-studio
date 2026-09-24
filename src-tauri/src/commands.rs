@@ -38,6 +38,8 @@ pub struct AppState {
     /// Recent files/folders are owned by the backend (not the UI) so a path can
     /// only be re-opened without a dialog if the user opened it before (FR-044).
     pub recents: Mutex<Vec<RecentEntry>>,
+    /// Files/folders passed on the command line, waiting for the UI to start.
+    pub pending_open: Mutex<crate::open_paths::OpenPaths>,
 }
 
 impl AppState {
@@ -57,7 +59,7 @@ impl AppState {
         }
     }
 
-    fn remember(&self, path: &Path, kind: RecentKind) {
+    pub(crate) fn remember(&self, path: &Path, kind: RecentKind) {
         let path = fs_ops::path_string(path);
         let snapshot = {
             let mut list = self.recents.lock().unwrap();
@@ -158,6 +160,12 @@ pub async fn pick_save_path(
     let resolved = state.track("dialog.save", state.scope.allow_file(&path))?;
     state.remember(&resolved, RecentKind::File);
     Ok(Some(fs_ops::path_string(&resolved)))
+}
+
+/// Returns (once) the files and folders the app was launched with.
+#[tauri::command]
+pub fn take_pending_opens(state: State<'_, AppState>) -> crate::open_paths::OpenPaths {
+    std::mem::take(&mut *state.pending_open.lock().unwrap())
 }
 
 // ---------------------------------------------------------------- recents

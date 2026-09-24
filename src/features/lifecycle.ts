@@ -7,6 +7,7 @@ import type { RecoverySnapshot } from "../types";
 import { handleGlobalKeydown } from "./commands";
 import { checkExternalChanges, closeAllDocuments, openPath } from "./documents";
 import { refreshWorkspace, setWorkspace } from "./workspace";
+import { installOsOpenHandlers } from "./osOpen";
 
 const RECOVERY_INTERVAL_MS = 5000;
 const EXTERNAL_CHECK_INTERVAL_MS = 3000;
@@ -201,6 +202,7 @@ export async function startApp() {
 
   await restoreSession();
   await offerRecovery();
+  await installOsOpenHandlers();
 
   useDocuments.subscribe((s, prev) => {
     if (s.docs !== prev.docs) scheduleRecoverySave();

@@ -10,7 +10,25 @@ export function TabBar() {
   const activeId = useDocuments((s) => s.activeId);
   const setActive = useDocuments((s) => s.setActive);
   const move = useDocuments((s) => s.move);
-  const dragId = useRef<string | null>(null);
+  const drag = useRef<{ id: string; x: number; moved: boolean } | null>(null);
+
+  /** Pointer-based reordering (HTML5 drag-and-drop is reserved for OS file drops). */
+  const onPointerMove = (e: PointerEvent) => {
+    const d = drag.current;
+    if (!d) return;
+    if (!d.moved && Math.abs(e.clientX - d.x) < 6) return;
+    d.moved = true;
+    const over = (document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null)?.closest<HTMLElement>("[data-tab-id]");
+    const targetId = over?.dataset.tabId;
+    if (!targetId || targetId === d.id) return;
+    const docsNow = useDocuments.getState().docs;
+    move(d.id, docsNow.findIndex((x) => x.id === targetId));
+  };
+  const endDrag = () => {
+    drag.current = null;
+    window.removeEventListener("pointermove", onPointerMove);
+    window.removeEventListener("pointerup", endDrag);
+  };
   const list = useRef<HTMLDivElement>(null);
 
   const onKey = (e: KeyboardEvent) => {
@@ -30,7 +48,7 @@ export function TabBar() {
   return (
     <div className="tabbar">
       <div className="tabs" role="tablist" aria-label="Open documents" ref={list} onKeyDown={onKey}>
-        {docs.map((d, i) => {
+        {docs.map((d) => {
           const dirty = isDirty(d);
           const active = d.id === activeId;
           return (
@@ -45,12 +63,12 @@ export function TabBar() {
               onAuxClick={(e) => {
                 if (e.button === 1) void closeDocument(d.id);
               }}
-              draggable
-              onDragStart={() => (dragId.current = d.id)}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={() => {
-                if (dragId.current && dragId.current !== d.id) move(dragId.current, i);
-                dragId.current = null;
+              data-tab-id={d.id}
+              onPointerDown={(e) => {
+                if (e.button !== 0 || (e.target as HTMLElement).closest(".tab-close")) return;
+                drag.current = { id: d.id, x: e.clientX, moved: false };
+                window.addEventListener("pointermove", onPointerMove);
+                window.addEventListener("pointerup", endDrag);
               }}
             >
               <Icon name="file" size={14} className="tab-icon" />

@@ -1,7 +1,7 @@
 import type { Backend, WriteRequest } from "./backend";
 import { AppError } from "./errors";
 import { basename, dirname, isMarkdownPath, join } from "./paths";
-import type { DirEntry, RecentEntry, RecoverySnapshot } from "../types";
+import type { DirEntry, OpenPaths, RecentEntry, RecoverySnapshot } from "../types";
 import { DEMO_FILES } from "./demoContent";
 
 interface MemFile {
@@ -352,6 +352,21 @@ export class MemoryBackend implements Backend {
   async clearRecovery() {
     this.recovery = null;
     this.persist();
+  }
+
+  async takePendingOpens() {
+    return { files: [], folders: [] };
+  }
+  private openListeners = new Set<(p: OpenPaths) => void>();
+  async onOpenPaths(handler: (p: OpenPaths) => void) {
+    this.openListeners.add(handler);
+    return () => void this.openListeners.delete(handler);
+  }
+  /** Test hook: simulates the OS asking the app to open paths. */
+  simulateOpen(paths: OpenPaths) {
+    for (const p of paths.folders) this.roots.add(p);
+    for (const p of paths.files) this.allowedFiles.add(p);
+    this.openListeners.forEach((h) => h(paths));
   }
 
   log(level: string, category: string, message: string) {

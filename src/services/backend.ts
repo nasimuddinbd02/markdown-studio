@@ -1,5 +1,5 @@
 import type {
-  AppInfo, DirEntry, FileContent, LineEnding, RecentEntry, RecoverySnapshot,
+  AppInfo, OpenPaths, DirEntry, FileContent, LineEnding, RecentEntry, RecoverySnapshot,
 } from "../types";
 
 export type ExportKind = "html";
@@ -56,6 +56,11 @@ export interface Backend {
   loadRecovery(): Promise<RecoverySnapshot | null>;
   saveRecovery(snapshot: RecoverySnapshot): Promise<void>;
   clearRecovery(): Promise<void>;
+
+  /** Paths the app was launched with (consumed once). */
+  takePendingOpens(): Promise<OpenPaths>;
+  /** Subscribes to paths opened later (drop, second launch). Returns an unsubscribe function. */
+  onOpenPaths(handler: (paths: OpenPaths) => void): Promise<() => void>;
 
   log(level: "error" | "warn" | "info" | "debug", category: string, message: string): void;
   exportLogs(): Promise<string | null>;

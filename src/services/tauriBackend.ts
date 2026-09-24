@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { Backend, WriteRequest } from "./backend";
 import { toAppError } from "./errors";
-import type { RecoverySnapshot } from "../types";
+import type { OpenPaths, RecoverySnapshot } from "../types";
 
 async function call<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
   try {
@@ -40,6 +40,12 @@ export const tauriBackend: Backend = {
   loadRecovery: async () => (await call<RecoverySnapshot | null>("load_recovery")) ?? null,
   saveRecovery: (snapshot) => call("save_recovery", { snapshot }),
   clearRecovery: () => call("clear_recovery"),
+
+  takePendingOpens: () => call("take_pending_opens"),
+  onOpenPaths: async (handler) => {
+    const { listen } = await import("@tauri-apps/api/event");
+    return listen<OpenPaths>("open-paths", (e) => handler(e.payload));
+  },
 
   log: (level, category, message) => {
     invoke("log_event", { level, category, message }).catch(() => {});

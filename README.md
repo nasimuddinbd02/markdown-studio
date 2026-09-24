@@ -7,6 +7,7 @@ The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status pe
 ## Features (v0.1 MVP)
 
 - Create, open, edit, save and Save As Markdown files (`.md`, `.markdown`) with native dialogs
+- Opens files from the OS: double-click / "Open with" (file association), drag and drop onto the window, and single-instance hand-off
 - Workspace folders with a file explorer: new file/folder, rename (F2), delete to the Trash/Recycle Bin
 - Tabs with dirty indicators, and Save / Don't Save / Cancel prompts on close and on quit
 - Format menu and shortcuts: bold (Ctrl/Cmd+B), italic (I), link (K), inline code (E), strikethrough, headings (Ctrl/Cmd+Alt+1–3), lists, task lists, quotes, code blocks and tables
