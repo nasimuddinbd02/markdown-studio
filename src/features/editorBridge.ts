@@ -1,4 +1,5 @@
 import type { EditorView } from "@codemirror/view";
+import type { StateCommand } from "@codemirror/state";
 import { undo, redo, selectAll } from "@codemirror/commands";
 import { openSearchPanel, gotoLine } from "@codemirror/search";
 
@@ -11,6 +12,13 @@ export function registerEditorView(v: EditorView | null) {
 
 export function getEditorView() {
   return view;
+}
+
+/** Runs a CodeMirror command against the active editor and returns focus to it. */
+export function runOnEditor(command: StateCommand) {
+  if (!view) return;
+  command({ state: view.state, dispatch: view.dispatch });
+  view.focus();
 }
 
 /** Opens the search panel and moves focus to its Replace field (FR-051). */

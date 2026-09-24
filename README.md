@@ -9,6 +9,7 @@ The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status pe
 - Create, open, edit, save and Save As Markdown files (`.md`, `.markdown`) with native dialogs
 - Workspace folders with a file explorer: new file/folder, rename (F2), delete to the Trash/Recycle Bin
 - Tabs with dirty indicators, and Save / Don't Save / Cancel prompts on close and on quit
+- Format menu and shortcuts: bold (Ctrl/Cmd+B), italic (I), link (K), inline code (E), strikethrough, headings (Ctrl/Cmd+Alt+1–3), lists, task lists, quotes, code blocks and tables
 - CodeMirror 6 editor with Markdown syntax highlighting, code-block languages, undo/redo, multi-cursor, find & replace (case-sensitive, regex, whole word) and go to line
 - Live GitHub Flavored Markdown preview (tables, task lists, strikethrough, autolinks, fenced code with highlighting) with a configurable debounce
 - Editor-only, split and preview-only views, resizable panels and synced scrolling

@@ -54,6 +54,10 @@ Unicode works too: héllo, 世界, 🚀.
 | Find / Replace | Ctrl/Cmd+F / Ctrl/Cmd+H |
 | Go to line | Ctrl/Cmd+G |
 | Toggle view mode | Ctrl/Cmd+\\\\ |
+| Bold / Italic / Link | Ctrl/Cmd+B / I / K |
+| Heading 1–3 | Ctrl/Cmd+Alt+1–3 |
+| Bulleted / Numbered / Task list | Ctrl/Cmd+Shift+8 / 7 / 9 |
+| Toggle file explorer | Ctrl/Cmd+Shift+E |
 | Settings | Ctrl/Cmd+, |
 
 [Back to README](../README.md)

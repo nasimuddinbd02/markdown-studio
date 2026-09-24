@@ -18,6 +18,7 @@ import { useUi } from "../stores/uiStore";
 import type { Settings } from "../types";
 import { openReplacePanel, registerEditorView } from "../features/editorBridge";
 import { scrollSync } from "../features/scrollSync";
+import { editorKeymap } from "../features/commands";
 
 /**
  * Markdown-aware syntax colours (FR-020). Colours come from CSS variables so
@@ -106,6 +107,7 @@ export function Editor() {
         keymap.of([
           { key: "Mod-g", run: gotoLine, preventDefault: true },
           { key: "Mod-h", run: openReplacePanel, preventDefault: true },
+          ...editorKeymap(),
           ...defaultKeymap,
           ...searchKeymap,
           ...historyKeymap,

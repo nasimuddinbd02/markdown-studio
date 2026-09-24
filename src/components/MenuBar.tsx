@@ -27,6 +27,15 @@ const MENUS: { label: string; items: (recent: RecentEntry[]) => Item[] }[] = [
     items: () => [c("undo"), c("redo"), sep, c("find"), c("replace"), c("gotoLine"), sep, c("selectAll")],
   },
   {
+    label: "Format",
+    items: () => [
+      c("bold"), c("italic"), c("strikethrough"), c("inlineCode"), c("link"), sep,
+      c("heading1"), c("heading2"), c("heading3"), c("paragraph"), sep,
+      c("bulletList"), c("orderedList"), c("taskList"), c("quote"), sep,
+      c("codeBlock"), c("table"), c("horizontalRule"),
+    ],
+  },
+  {
     label: "View",
     items: () => [
       c("viewEditor"), c("viewSplit"), c("viewPreview"), c("toggleView"), sep, c("toggleExplorer"), c("toggleTheme"),

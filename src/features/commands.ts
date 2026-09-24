@@ -9,7 +9,9 @@ import {
   closeDocument, newDocument, openFileDialog, saveAll, saveDocument,
 } from "./documents";
 import { closeWorkspace, createFileIn, openFolderDialog } from "./workspace";
-import { editorCommand } from "./editorBridge";
+import { editorCommand, runOnEditor } from "./editorBridge";
+import type { StateCommand } from "@codemirror/state";
+import * as fmt from "./formatting";
 
 export const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
@@ -20,9 +22,35 @@ export interface Command {
   shortcut?: string;
   run(): void | Promise<void>;
   enabled?(): boolean;
+  /** Set for editor commands; they are also bound inside CodeMirror's keymap. */
+  editor?: StateCommand;
 }
 
 const hasActive = () => !!activeDoc();
+
+function formatCommand(id: string, label: string, editor: StateCommand, shortcut?: string): Command {
+  return { id, label, shortcut, editor, run: () => runOnEditor(editor), enabled: hasActive };
+}
+
+/** Markdown formatting (Format menu). */
+export const formatCommands: Record<string, Command> = {
+  bold: formatCommand("bold", "Bold", fmt.toggleBold, "Mod+B"),
+  italic: formatCommand("italic", "Italic", fmt.toggleItalic, "Mod+I"),
+  strikethrough: formatCommand("strikethrough", "Strikethrough", fmt.toggleStrikethrough, "Mod+Shift+X"),
+  inlineCode: formatCommand("inlineCode", "Inline Code", fmt.toggleInlineCode, "Mod+E"),
+  link: formatCommand("link", "Insert Link", fmt.insertLink, "Mod+K"),
+  heading1: formatCommand("heading1", "Heading 1", fmt.setHeading(1), "Mod+Alt+1"),
+  heading2: formatCommand("heading2", "Heading 2", fmt.setHeading(2), "Mod+Alt+2"),
+  heading3: formatCommand("heading3", "Heading 3", fmt.setHeading(3), "Mod+Alt+3"),
+  paragraph: formatCommand("paragraph", "Normal Text", fmt.setHeading(0), "Mod+Alt+0"),
+  bulletList: formatCommand("bulletList", "Bulleted List", fmt.toggleBulletList, "Mod+Shift+8"),
+  orderedList: formatCommand("orderedList", "Numbered List", fmt.toggleOrderedList, "Mod+Shift+7"),
+  taskList: formatCommand("taskList", "Task List", fmt.toggleTaskList, "Mod+Shift+9"),
+  quote: formatCommand("quote", "Quote", fmt.toggleQuote, "Mod+Shift+."),
+  codeBlock: formatCommand("codeBlock", "Code Block", fmt.insertCodeBlock, "Mod+Alt+C"),
+  table: formatCommand("table", "Insert Table", fmt.insertTable),
+  horizontalRule: formatCommand("horizontalRule", "Horizontal Rule", fmt.insertHorizontalRule),
+};
 const VIEW_ORDER: ViewMode[] = ["split", "editor", "preview"];
 
 export const commands: Record<string, Command> = {
@@ -100,7 +128,7 @@ export const commands: Record<string, Command> = {
   toggleExplorer: {
     id: "toggleExplorer",
     label: "Toggle File Explorer",
-    shortcut: "Mod+B",
+    shortcut: "Mod+Shift+E",
     run: () => {
       const { settings, update } = useSettings.getState();
       update({ showExplorer: !settings.showExplorer });
@@ -133,6 +161,19 @@ export const commands: Record<string, Command> = {
     },
   },
 };
+
+Object.assign(commands, formatCommands);
+
+/** CodeMirror keymap for editor commands, derived from the shortcuts above. */
+export function editorKeymap() {
+  return Object.values(formatCommands)
+    .filter((c) => c.shortcut && c.editor)
+    .map((c) => ({
+      key: c.shortcut!.replace(/\+/g, "-").replace(/-([A-Z])$/, (_, k: string) => "-" + k.toLowerCase()),
+      run: c.editor!,
+      preventDefault: true,
+    }));
+}
 
 function bumpFont(delta: number) {
   const { settings, update } = useSettings.getState();
@@ -167,6 +208,7 @@ export function eventToShortcut(e: KeyboardEvent): string {
   if (e.code?.startsWith("Digit")) key = e.code.slice(5);
   if (e.code === "Backslash") key = "\\";
   if (e.code === "Comma") key = ",";
+  if (e.code === "Period") key = ".";
   if (e.code === "Equal") key = "=";
   if (e.code === "Minus") key = "-";
   if (e.code?.startsWith("Key") && (e.altKey || e.shiftKey)) key = e.code.slice(3);
@@ -193,7 +235,7 @@ export function handleGlobalKeydown(e: KeyboardEvent) {
   const cmd = byShortcut.get(eventToShortcut(e));
   if (!cmd) return;
   const inEditor = (e.target as HTMLElement | null)?.closest?.(".cm-editor");
-  if (EDITOR_OWNED.has(cmd.id) && inEditor) return;
+  if ((EDITOR_OWNED.has(cmd.id) || cmd.editor) && inEditor) return;
   // Leave clipboard/undo shortcuts alone inside ordinary text fields.
   const inField = (e.target as HTMLElement | null)?.closest?.("input, textarea, select");
   if (inField && ["undo", "redo", "selectAll"].includes(cmd.id)) return;
