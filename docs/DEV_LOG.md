@@ -156,8 +156,23 @@ The user asked for conversion tools (DOCX/PDF to Markdown and the reverse) and c
 
 **Tests:** Vitest 174, Playwright 17, Rust 27. All passing.
 
+**Next up:** see 0.6.0 below.
+
+## 2026-09-24: Updates and link checking, released as 0.6.0
+
+| # | Feature | Commit |
+| --- | --- | --- |
+| 27 | Check for updates: Help menu plus an optional daily check against the GitHub Releases API. Offers Download, Later or Skip This Version (UPD-001/002/004). CSP `connect-src` allows only `api.github.com` | a6dbc00 |
+| 28 | Workspace link check (sidebar → Links): missing files and images, bad `#anchors` within and across files, empty links; click a problem to jump to it | 2102208 |
+
+**Native check:** installed 0.6.0 and drove Help → Check for Updates through UI Automation. It reported "You're up to date", so the request to GitHub passes the production CSP.
+
+**Release 0.6.0:** standard installer SHA-256 c0fd2549…; offline installer SHA-256 d4425112….
+
+**Tests:** Vitest 182, Playwright 17, Rust 27. All passing.
+
 **Next up:**
 
-1. Auto-update (UPD-*), using GitHub Releases as the update source.
+1. Signed in-app updates (`tauri-plugin-updater`). This needs a signing key held by the maintainer.
 2. Localization: still waiting on the user's language choices.
-3. Word-count goals and reading time per section; document statistics panel.
+3. Export a folder (all .md) to PDF or Word in one step; merge several files into one document.
