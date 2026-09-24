@@ -14,3 +14,5 @@ if (typeof Range !== "undefined") {
   Range.prototype.getBoundingClientRect ??= rect;
   Range.prototype.getClientRects ??= () => ({ length: 0, item: () => null, [Symbol.iterator]: [][Symbol.iterator] }) as unknown as DOMRectList;
 }
+
+Element.prototype.scrollIntoView ??= function scrollIntoView() {};

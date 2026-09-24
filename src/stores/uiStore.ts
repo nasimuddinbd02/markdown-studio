@@ -30,10 +30,12 @@ interface UiState {
   toasts: Toast[];
   settingsOpen: boolean;
   aboutOpen: boolean;
+  paletteOpen: boolean;
   cursor: { line: number; col: number; selected: number };
   setCursor(c: UiState["cursor"]): void;
   setSettingsOpen(open: boolean): void;
   setAboutOpen(open: boolean): void;
+  setPaletteOpen(open: boolean): void;
   closeDialog(id: number, result: { button: string; value?: string }): void;
   notify(kind: Toast["kind"], message: string): void;
   dismissToast(id: number): void;
@@ -46,10 +48,12 @@ export const useUi = create<UiState>((set, get) => ({
   toasts: [],
   settingsOpen: false,
   aboutOpen: false,
+  paletteOpen: false,
   cursor: { line: 1, col: 1, selected: 0 },
   setCursor: (cursor) => set({ cursor }),
   setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
   setAboutOpen: (aboutOpen) => set({ aboutOpen }),
+  setPaletteOpen: (paletteOpen) => set({ paletteOpen }),
   closeDialog(id, result) {
     const d = get().dialogs.find((x) => x.id === id);
     set({ dialogs: get().dialogs.filter((x) => x.id !== id) });

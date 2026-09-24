@@ -146,6 +146,12 @@ export const commands: Record<string, Command> = {
   zoomIn: { id: "zoomIn", label: "Increase Font Size", shortcut: "Mod+=", run: () => bumpFont(1) },
   zoomOut: { id: "zoomOut", label: "Decrease Font Size", shortcut: "Mod+-", run: () => bumpFont(-1) },
   zoomReset: { id: "zoomReset", label: "Reset Font Size", shortcut: "Mod+0", run: () => useSettings.getState().update({ fontSize: 15 }) },
+  commandPalette: {
+    id: "commandPalette",
+    label: "Command Palette…",
+    shortcut: "Mod+Shift+P",
+    run: () => useUi.getState().setPaletteOpen(!useUi.getState().paletteOpen),
+  },
   settings: { id: "settings", label: "Settings…", shortcut: "Mod+,", run: () => useUi.getState().setSettingsOpen(true) },
   about: { id: "about", label: "About Markdown Studio", run: () => useUi.getState().setAboutOpen(true) },
   exportLogs: {
@@ -232,7 +238,8 @@ const byShortcut = (() => {
 
 export function handleGlobalKeydown(e: KeyboardEvent) {
   if (e.defaultPrevented || e.isComposing) return;
-  const cmd = byShortcut.get(eventToShortcut(e));
+  const shortcut = eventToShortcut(e);
+  const cmd = shortcut === "F1" ? commands.commandPalette : byShortcut.get(shortcut);
   if (!cmd) return;
   const inEditor = (e.target as HTMLElement | null)?.closest?.(".cm-editor");
   if ((EDITOR_OWNED.has(cmd.id) || cmd.editor) && inEditor) return;
