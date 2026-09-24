@@ -25,6 +25,7 @@ import { AboutDialog, SettingsDialog } from "./components/SettingsDialog";
 import { Welcome } from "./components/Welcome";
 import { CommandPalette } from "./components/CommandPalette";
 import { HistoryDialog } from "./components/HistoryDialog";
+import { ShortcutsDialog } from "./components/ShortcutsDialog";
 import { useSettings } from "./stores/settingsStore";
 import { useDocuments } from "./stores/documentsStore";
 
@@ -84,7 +85,10 @@ function Sidebar() {
 }
 
 function EditorArea() {
-  const viewMode = useSettings((s) => s.settings.viewMode);
+  const focusMode = useUi((s) => s.focusMode);
+  const settingsViewMode = useSettings((s) => s.settings.viewMode);
+  // Focus mode writes without the preview (unless the preview is all you have open).
+  const viewMode = focusMode && settingsViewMode === "split" ? "editor" : settingsViewMode;
   const layout = useDefaultLayout({ id: "editor-preview", storage: layoutStorage, panelIds: ["editor", "preview"] });
 
   if (viewMode === "editor") return <div className="pane"><Editor /></div>;
@@ -99,13 +103,14 @@ function EditorArea() {
 }
 
 export default function App() {
-  const showExplorer = useSettings((s) => s.settings.showExplorer);
+  const focusMode = useUi((s) => s.focusMode);
+  const showExplorer = useSettings((s) => s.settings.showExplorer) && !focusMode;
   const hasDocs = useDocuments((s) => s.docs.length > 0);
   const panelIds = showExplorer ? ["explorer", "main"] : ["main"];
   const layout = useDefaultLayout({ id: "workbench", storage: layoutStorage, panelIds });
 
   return (
-    <div className="app">
+    <div className={`app${focusMode ? " focus-mode" : ""}`}>
       <MenuBar />
       <Group
         id="workbench"
@@ -127,7 +132,7 @@ export default function App() {
           <main className="main-area">
             {hasDocs ? (
               <>
-                <TabBar />
+                {!focusMode && <TabBar />}
                 <ChangeBanner />
                 <div className="editor-area">
                   <EditorArea />
@@ -139,11 +144,12 @@ export default function App() {
           </main>
         </Panel>
       </Group>
-      <StatusBar />
+      {!focusMode && <StatusBar />}
       <SettingsDialog />
       <AboutDialog />
       <CommandPalette />
       <HistoryDialog />
+      <ShortcutsDialog />
       <DialogHost />
       <Toasts />
     </div>

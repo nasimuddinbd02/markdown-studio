@@ -50,6 +50,10 @@ for (const theme of ["light", "dark"] as const) {
       await page.keyboard.press(`${mod}+Shift+P`);
       await expect(page.getByRole("combobox")).toBeFocused();
       await audit(page, "palette");
+      await page.keyboard.type("keyboard shortcuts");
+      await page.keyboard.press("Enter");
+      await expect(page.getByRole("dialog", { name: "Keyboard Shortcuts" })).toBeVisible();
+      await audit(page, "shortcuts");
     });
 
     test("search view with results", async ({ page }) => {

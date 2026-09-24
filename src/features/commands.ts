@@ -193,6 +193,17 @@ export const commands: Record<string, Command> = {
     run: () => useUi.getState().setPaletteOpen(!useUi.getState().paletteOpen),
   },
   settings: { id: "settings", label: "Settings…", shortcut: "Mod+,", run: () => useUi.getState().setSettingsOpen(true) },
+  focusMode: {
+    id: "focusMode",
+    label: "Toggle Focus Mode",
+    shortcut: "Mod+Shift+Enter",
+    run: () => {
+      const ui = useUi.getState();
+      ui.setFocusMode(!ui.focusMode);
+    },
+  },
+  fullScreen: { id: "fullScreen", label: "Toggle Full Screen", shortcut: "F11", run: () => toggleFullScreen() },
+  shortcuts: { id: "shortcuts", label: "Keyboard Shortcuts", run: () => useUi.getState().setShortcutsOpen(true) },
   about: { id: "about", label: "About Markdown Studio", run: () => useUi.getState().setAboutOpen(true) },
   exportLogs: {
     id: "exportLogs",
@@ -227,6 +238,18 @@ export function editorKeymap(): KeyBinding[] {
     },
   };
   return [app, ...format];
+}
+
+async function toggleFullScreen() {
+  if ("__TAURI_INTERNALS__" in window) {
+    const { getCurrentWindow } = await import("@tauri-apps/api/window");
+    const win = getCurrentWindow();
+    await win.setFullscreen(!(await win.isFullscreen()));
+  } else if (document.fullscreenElement) {
+    await document.exitFullscreen();
+  } else {
+    await document.documentElement.requestFullscreen?.().catch(() => {});
+  }
 }
 
 function bumpFont(delta: number) {
@@ -286,6 +309,10 @@ const byShortcut = (() => {
 
 export function handleGlobalKeydown(e: KeyboardEvent) {
   if (e.defaultPrevented || e.isComposing) return;
+  if (e.key === "Escape" && useUi.getState().focusMode && useUi.getState().dialogs.length === 0) {
+    useUi.getState().setFocusMode(false);
+    return;
+  }
   const shortcut = eventToShortcut(e);
   const cmd = shortcut === "F1" ? commands.commandPalette : byShortcut.get(shortcut);
   if (!cmd) return;

@@ -38,11 +38,11 @@ const MENUS: { label: string; items: (recent: RecentEntry[]) => Item[] }[] = [
   {
     label: "View",
     items: () => [
-      c("viewEditor"), c("viewSplit"), c("viewPreview"), c("toggleView"), sep, c("commandPalette"), sep, c("toggleExplorer"), c("toggleOutline"), c("toggleTheme"),
+      c("viewEditor"), c("viewSplit"), c("viewPreview"), c("toggleView"), sep, c("commandPalette"), sep, c("toggleExplorer"), c("toggleOutline"), c("toggleTheme"), sep, c("focusMode"), c("fullScreen"),
       sep, c("zoomIn"), c("zoomOut"), c("zoomReset"), sep, c("nextTab"), c("prevTab"),
     ],
   },
-  { label: "Help", items: () => [c("about"), c("exportLogs")] },
+  { label: "Help", items: () => [c("shortcuts"), c("commandPalette"), sep, c("exportLogs"), c("about")] },
 ];
 
 function Menu({ label, items, open, onOpen, onClose }: {

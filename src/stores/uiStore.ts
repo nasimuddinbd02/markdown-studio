@@ -31,6 +31,11 @@ interface UiState {
   settingsOpen: boolean;
   aboutOpen: boolean;
   paletteOpen: boolean;
+  shortcutsOpen: boolean;
+  setShortcutsOpen(open: boolean): void;
+  /** Distraction-free writing: hides chrome and centres the editor. */
+  focusMode: boolean;
+  setFocusMode(on: boolean): void;
   sidebarView: "explorer" | "search";
   problems: { errors: number; warnings: number; infos: number } | null;
   /** Document whose File History dialog is open. */
@@ -59,6 +64,10 @@ export const useUi = create<UiState>((set, get) => ({
   settingsOpen: false,
   aboutOpen: false,
   paletteOpen: false,
+  shortcutsOpen: false,
+  setShortcutsOpen: (shortcutsOpen) => set({ shortcutsOpen }),
+  focusMode: false,
+  setFocusMode: (focusMode) => set({ focusMode }),
   sidebarView: "explorer",
   problems: null,
   historyDocId: null,
