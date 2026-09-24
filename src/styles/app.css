@@ -878,6 +878,7 @@ select {
   line-height: 1.5;
 }
 .modal-detail {
+  white-space: pre-line;
   margin: 0 0 8px;
   color: var(--text-muted);
   word-break: break-word;

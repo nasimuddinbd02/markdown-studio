@@ -110,6 +110,7 @@ export function SettingsDialog() {
         <section>
           <h3>Startup</h3>
           <label className="check"><input type="checkbox" checked={settings.restoreSession} onChange={(e) => update({ restoreSession: e.target.checked })} /> Reopen last folder and files</label>
+          <label className="check"><input type="checkbox" checked={settings.checkForUpdates} onChange={(e) => update({ checkForUpdates: e.target.checked })} /> Check for updates once a day (asks GitHub for the latest version; nothing else is sent)</label>
         </section>
       </div>
       <div className="modal-buttons">

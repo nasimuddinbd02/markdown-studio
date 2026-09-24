@@ -61,6 +61,7 @@ export interface Settings {
   spellCheck: boolean;
   pasteRichTextAsMarkdown: boolean;
   updateTocOnSave: boolean;
+  checkForUpdates: boolean;
   restoreSession: boolean;
   autoSave: AutoSaveMode;
   autoSaveDelayMs: number;

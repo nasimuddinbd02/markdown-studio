@@ -42,7 +42,7 @@ const MENUS: { label: string; items: (recent: RecentEntry[]) => Item[] }[] = [
       sep, c("zoomIn"), c("zoomOut"), c("zoomReset"), sep, c("nextTab"), c("prevTab"),
     ],
   },
-  { label: "Help", items: () => [c("shortcuts"), c("commandPalette"), sep, c("exportLogs"), c("about")] },
+  { label: "Help", items: () => [c("shortcuts"), c("commandPalette"), sep, c("exportLogs"), c("checkUpdates"), c("about")] },
 ];
 
 function Menu({ label, items, open, onOpen, onClose }: {

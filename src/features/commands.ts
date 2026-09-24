@@ -225,6 +225,11 @@ export const commands: Record<string, Command> = {
   },
   fullScreen: { id: "fullScreen", label: "Toggle Full Screen", shortcut: "F11", run: () => toggleFullScreen() },
   shortcuts: { id: "shortcuts", label: "Keyboard Shortcuts", run: () => useUi.getState().setShortcutsOpen(true) },
+  checkUpdates: {
+    id: "checkUpdates",
+    label: "Check for Updates…",
+    run: async () => void (await (await import("./updates")).checkForUpdates({ manual: true })),
+  },
   about: { id: "about", label: "About Markdown Studio", run: () => useUi.getState().setAboutOpen(true) },
   exportLogs: {
     id: "exportLogs",

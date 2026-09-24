@@ -66,7 +66,8 @@ Status of each [SRS](SRS.md) requirement. **Done** means implemented and tested 
 | SEC-005 | Done | `open_external` accepts only http, https and mailto |
 | SEC-006/007 | N/A | No AI or secrets in the MVP |
 | SEC-008 | Partial | Signing hooks exist in the release workflow; certificates are needed |
-| UPD-001..006 | Planned (v1.0) | Add `tauri-plugin-updater` with a signing key and update endpoint |
+| UPD-001, UPD-002, UPD-004 | Implemented | `features/updates.ts`: optional daily check against the GitHub Releases API (Settings → Startup) and Help → Check for Updates. Shows the current and available versions, with Skip This Version and Later. Tests: `tests/updates.test.ts` |
+| UPD-003, UPD-005, UPD-006 | Partial | The app never downloads or runs installers itself. Users download from the release page (SHA-256 published) and the installer upgrades in place. In-app signed installs (`tauri-plugin-updater`) need a maintainer-held signing key |
 
 ## Beyond the MVP (delivered early)
 

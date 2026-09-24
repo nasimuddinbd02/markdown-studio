@@ -207,6 +207,7 @@ export async function startApp() {
   await installOsOpenHandlers();
   installAutoSave();
   await installWorkspaceWatcher();
+  void import("./updates").then((m) => m.scheduleUpdateCheck());
 
   useDocuments.subscribe((s, prev) => {
     if (s.docs !== prev.docs) scheduleRecoverySave();
