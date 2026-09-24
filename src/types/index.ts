@@ -89,3 +89,27 @@ export interface OpenPaths {
   files: string[];
   folders: string[];
 }
+
+export interface SearchOptions {
+  query: string;
+  caseSensitive: boolean;
+  wholeWord: boolean;
+  regex: boolean;
+  maxResults?: number;
+}
+
+/** Positions are UTF-16 offsets (JavaScript string indices). */
+export interface SearchMatch {
+  line: number;
+  column: number;
+  length: number;
+  preview: string;
+  previewStart: number;
+}
+
+export interface SearchResult {
+  files: Array<{ path: string; matches: SearchMatch[] }>;
+  totalMatches: number;
+  filesSearched: number;
+  truncated: boolean;
+}

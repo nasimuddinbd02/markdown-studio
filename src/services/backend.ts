@@ -1,5 +1,5 @@
 import type {
-  AppInfo, OpenPaths, DirEntry, FileContent, LineEnding, RecentEntry, RecoverySnapshot,
+  AppInfo, OpenPaths, SearchOptions, SearchResult, DirEntry, FileContent, LineEnding, RecentEntry, RecoverySnapshot,
 } from "../types";
 
 export type ExportKind = "html";
@@ -42,6 +42,8 @@ export interface Backend {
   createFolder(directory: string, name: string): Promise<string>;
   renamePath(path: string, newName: string): Promise<string>;
   deletePath(path: string): Promise<void>;
+  /** Searches Markdown files under an approved folder. */
+  searchWorkspace(root: string, options: SearchOptions): Promise<SearchResult>;
   /** Returns a data: URL for a local image referenced by a document. */
   readImage(path: string): Promise<string>;
   openExternal(url: string): Promise<void>;

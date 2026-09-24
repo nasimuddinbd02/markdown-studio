@@ -30,6 +30,38 @@ export function revealLine(line: number) {
   view.focus();
 }
 
+/** A selection to apply once a given document is shown in the editor. */
+let pendingReveal: { docId: string; line: number; column: number; length: number } | null = null;
+let currentDocId: string | null = null;
+
+/** Called by the editor whenever it switches documents. */
+export function editorShowing(docId: string | null) {
+  currentDocId = docId;
+  if (pendingReveal && pendingReveal.docId === docId) {
+    const r = pendingReveal;
+    pendingReveal = null;
+    // Wait for the new state to be laid out before scrolling.
+    requestAnimationFrame(() => selectRange(r.line, r.column, r.length));
+  }
+}
+
+/** Selects `length` characters at line/column (UTF-16) and scrolls them into view. */
+export function selectRange(line: number, column: number, length: number) {
+  if (!view) return;
+  const doc = view.state.doc;
+  const l = doc.line(Math.max(1, Math.min(line, doc.lines)));
+  const from = Math.min(l.from + column, l.to);
+  const to = Math.min(from + length, l.to);
+  view.dispatch({ selection: { anchor: from, head: to }, effects: EditorView.scrollIntoView(from, { y: "center" }) });
+  view.focus();
+}
+
+/** Reveals a match in a document, now if it is showing or as soon as it is. */
+export function requestReveal(docId: string, line: number, column: number, length: number) {
+  if (currentDocId === docId && view) selectRange(line, column, length);
+  else pendingReveal = { docId, line, column, length };
+}
+
 /** Opens the search panel and moves focus to its Replace field (FR-051). */
 export function openReplacePanel(v: EditorView): boolean {
   openSearchPanel(v);

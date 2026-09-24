@@ -349,6 +349,24 @@ pub async fn export_file(
     Ok(Some(fs_ops::path_string(&path)))
 }
 
+/// Searches Markdown files under an approved folder ("Find in Files").
+#[tauri::command]
+pub async fn search_workspace(
+    state: State<'_, AppState>,
+    root: String,
+    options: crate::search::SearchOptions,
+) -> AppResult<crate::search::SearchResult> {
+    let dir = state.scope.check(Path::new(&root))?;
+    if !dir.is_dir() {
+        return Err(AppError::InvalidPath("Search root is not a folder".into()));
+    }
+    // Searching can take a while on large trees; keep it off the async runtime threads.
+    let result = tauri::async_runtime::spawn_blocking(move || crate::search::search_workspace(&dir, &options))
+        .await
+        .map_err(|e| AppError::Io(e.to_string()))?;
+    state.track("search", result)
+}
+
 // ---------------------------------------------------------------- settings & recovery
 
 #[tauri::command]

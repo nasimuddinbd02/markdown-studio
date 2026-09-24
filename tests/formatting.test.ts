@@ -93,7 +93,7 @@ describe("blocks", () => {
 
 describe("editor keymap", () => {
   it("derives CodeMirror key names from menu shortcuts", () => {
-    const keys = editorKeymap().map((k) => k.key);
+    const keys = editorKeymap().map((k) => k.key).filter(Boolean);
     expect(keys).toEqual(expect.arrayContaining(["Mod-b", "Mod-i", "Mod-k", "Mod-Shift-x", "Mod-Alt-1", "Mod-Shift-8", "Mod-Alt-c"]));
   });
 });

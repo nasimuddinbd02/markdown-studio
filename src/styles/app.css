@@ -1197,3 +1197,133 @@ select {
     break-after: avoid;
   }
 }
+
+/* ------------------------------------------------------------ sidebar tabs & search */
+
+.sidebar-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 4px 6px 0;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+.sidebar-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.sidebar-tab:hover {
+  color: var(--text);
+}
+.sidebar-tab.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+.search-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+.search-box {
+  position: relative;
+  margin: 0 10px 6px;
+}
+.search-box .text-input {
+  padding-right: 84px;
+}
+.search-toggles {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 2px;
+}
+.search-toggle {
+  min-width: 24px;
+  height: 22px;
+  padding: 0 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.search-toggle:hover {
+  background: var(--bg-hover);
+}
+.search-toggle.on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+}
+.search-summary {
+  min-height: 18px;
+  padding: 0 12px 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.search-error {
+  color: var(--danger);
+}
+.search-results,
+.search-results ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.search-results {
+  flex: 1;
+  overflow: auto;
+  padding-bottom: 12px;
+}
+.search-file,
+.search-match {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.search-file {
+  height: 24px;
+  padding: 0 8px 0 6px;
+}
+.search-file-name {
+  font-weight: 600;
+}
+.search-file-dir {
+  color: var(--text-muted);
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.search-match {
+  display: block;
+  padding: 3px 8px 3px 42px;
+  text-overflow: ellipsis;
+  color: var(--text-muted);
+}
+.search-file:hover,
+.search-match:hover {
+  background: var(--bg-hover);
+}
+.search-match mark {
+  background: rgba(233, 196, 106, 0.45);
+  color: var(--text);
+  border-radius: 2px;
+}

@@ -2,6 +2,10 @@ import { Group, Panel, Separator, useDefaultLayout, type LayoutStorage } from "r
 import { MenuBar } from "./components/MenuBar";
 import { FileExplorer } from "./components/FileExplorer";
 import { Outline } from "./components/Outline";
+import { SearchPanel } from "./components/SearchPanel";
+import { Icon } from "./components/Icon";
+import { useUi } from "./stores/uiStore";
+import { commands, formatShortcut } from "./features/commands";
 import { TabBar } from "./components/TabBar";
 import { Editor } from "./components/Editor";
 import { Preview } from "./components/Preview";
@@ -31,6 +35,43 @@ const layoutStorage: LayoutStorage = {
     }
   },
 };
+
+function Sidebar() {
+  const view = useUi((s) => s.sidebarView);
+  const setView = useUi((s) => s.setSidebarView);
+  return (
+    <div className="sidebar">
+      <div className="sidebar-tabs" role="tablist" aria-label="Sidebar">
+        <button
+          role="tab"
+          aria-selected={view === "explorer"}
+          className={`sidebar-tab${view === "explorer" ? " active" : ""}`}
+          onClick={() => setView("explorer")}
+          title={`Explorer (${formatShortcut(commands.toggleExplorer.shortcut)})`}
+        >
+          <Icon name="files" size={15} /> Explorer
+        </button>
+        <button
+          role="tab"
+          aria-selected={view === "search"}
+          className={`sidebar-tab${view === "search" ? " active" : ""}`}
+          onClick={() => useUi.getState().focusSearch()}
+          title={`Search (${formatShortcut(commands.findInFiles.shortcut)})`}
+        >
+          <Icon name="search" size={15} /> Search
+        </button>
+      </div>
+      {view === "explorer" ? (
+        <>
+          <FileExplorer />
+          <Outline />
+        </>
+      ) : (
+        <SearchPanel />
+      )}
+    </div>
+  );
+}
 
 function EditorArea() {
   const viewMode = useSettings((s) => s.settings.viewMode);
@@ -67,10 +108,7 @@ export default function App() {
         {showExplorer && (
           <>
             <Panel id="explorer" defaultSize="20" minSize={170} maxSize="45">
-              <div className="sidebar">
-                <FileExplorer />
-                <Outline />
-              </div>
+              <Sidebar />
             </Panel>
             <Separator className="resize-handle" aria-label="Resize file explorer" />
           </>

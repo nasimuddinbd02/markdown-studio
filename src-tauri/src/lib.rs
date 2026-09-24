@@ -3,6 +3,7 @@ mod error;
 mod fs_ops;
 mod open_paths;
 mod scope;
+mod search;
 mod storage;
 mod text;
 
@@ -74,6 +75,7 @@ pub fn run() {
             commands::open_external,
             commands::export_file,
             commands::take_pending_opens,
+            commands::search_workspace,
             commands::load_settings,
             commands::save_settings,
             commands::load_recovery,

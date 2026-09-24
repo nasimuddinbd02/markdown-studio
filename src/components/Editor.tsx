@@ -16,7 +16,7 @@ import { useDocuments } from "../stores/documentsStore";
 import { useSettings } from "../stores/settingsStore";
 import { useUi } from "../stores/uiStore";
 import type { Settings } from "../types";
-import { openReplacePanel, registerEditorView } from "../features/editorBridge";
+import { editorShowing, openReplacePanel, registerEditorView } from "../features/editorBridge";
 import { scrollSync } from "../features/scrollSync";
 import { editorKeymap } from "../features/commands";
 
@@ -168,6 +168,7 @@ export function Editor() {
       // Keep the current document's state (undo history) across remounts.
       if (currentId.current) states.set(currentId.current, view.state);
       currentId.current = null;
+      editorShowing(null);
       unsub();
       off();
       registerEditorView(null);
@@ -189,6 +190,7 @@ export function Editor() {
     const state = cached && cached.doc.toString() === doc.content ? cached : createState(activeId, doc.content);
     view.setState(state);
     view.dispatch({ effects: reconfigure(useSettings.getState().settings) });
+    editorShowing(activeId);
     const sel = state.selection.main;
     const line = state.doc.lineAt(sel.head);
     useUi.getState().setCursor({ line: line.number, col: sel.head - line.from + 1, selected: 0 });

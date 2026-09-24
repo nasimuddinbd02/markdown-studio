@@ -1,0 +1,163 @@
+import { useEffect, useRef, useState } from "react";
+import { useWorkspace } from "../stores/workspaceStore";
+import { useUi } from "../stores/uiStore";
+import { backend } from "../services";
+import { toAppError } from "../services/errors";
+import { basename } from "../services/paths";
+import { openPath } from "../features/documents";
+import { openFolderDialog } from "../features/workspace";
+import { requestReveal } from "../features/editorBridge";
+import type { SearchMatch, SearchResult } from "../types";
+import { Icon } from "./Icon";
+
+function relative(path: string, root: string) {
+  const rel = path.startsWith(root) ? path.slice(root.length).replace(/^[\\/]/, "") : path;
+  const idx = Math.max(rel.lastIndexOf("/"), rel.lastIndexOf("\\"));
+  return idx > 0 ? rel.slice(0, idx) : "";
+}
+
+function Toggle({ label, title, on, set }: { label: string; title: string; on: boolean; set(v: boolean): void }) {
+  return (
+    <button
+      type="button"
+      className={`search-toggle${on ? " on" : ""}`}
+      title={title}
+      aria-label={title}
+      aria-pressed={on}
+      onClick={() => set(!on)}
+    >
+      {label}
+    </button>
+  );
+}
+
+/** Find in Files across the open workspace. */
+export function SearchPanel() {
+  const root = useWorkspace((s) => s.root);
+  const focusToken = useUi((s) => s.searchFocusToken);
+  const [query, setQuery] = useState("");
+  const [caseSensitive, setCase] = useState(false);
+  const [wholeWord, setWord] = useState(false);
+  const [regex, setRegex] = useState(false);
+  const [result, setResult] = useState<SearchResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const input = useRef<HTMLInputElement>(null);
+  const run = useRef(0);
+
+  useEffect(() => {
+    input.current?.focus();
+    input.current?.select();
+  }, [focusToken]);
+
+  useEffect(() => {
+    if (!root || !query) {
+      setResult(null);
+      setError(null);
+      return;
+    }
+    const id = ++run.current;
+    const t = setTimeout(async () => {
+      setBusy(true);
+      try {
+        const r = await backend().searchWorkspace(root, { query, caseSensitive, wholeWord, regex });
+        if (id === run.current) {
+          setResult(r);
+          setError(null);
+        }
+      } catch (e) {
+        if (id === run.current) {
+          setResult(null);
+          setError(toAppError(e).message);
+        }
+      } finally {
+        if (id === run.current) setBusy(false);
+      }
+    }, 250);
+    return () => clearTimeout(t);
+  }, [root, query, caseSensitive, wholeWord, regex]);
+
+  const open = async (path: string, m: SearchMatch) => {
+    const id = await openPath(path);
+    if (id) requestReveal(id, m.line, m.column, m.length);
+  };
+
+  if (!root) {
+    return (
+      <section className="search-panel" aria-label="Search">
+        <div className="explorer-header"><span className="explorer-title">Search</span></div>
+        <div className="explorer-empty">
+          <p>Open a folder to search across its files.</p>
+          <button className="button primary" onClick={() => void openFolderDialog()}>
+            <Icon name="folderOpen" /> Open Folder
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="search-panel" aria-label="Search">
+      <div className="explorer-header"><span className="explorer-title">Search</span></div>
+      <div className="search-box">
+        <input
+          ref={input}
+          className="text-input"
+          placeholder="Search in files"
+          aria-label="Search in files"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          spellCheck={false}
+        />
+        <div className="search-toggles">
+          <Toggle label="Aa" title="Match case" on={caseSensitive} set={setCase} />
+          <Toggle label="ab" title="Match whole word" on={wholeWord} set={setWord} />
+          <Toggle label=".*" title="Use regular expression" on={regex} set={setRegex} />
+        </div>
+      </div>
+      <div className="search-summary" role="status" aria-live="polite">
+        {error
+          ? <span className="search-error">{error}</span>
+          : busy && !result
+            ? "Searching…"
+            : result
+              ? result.totalMatches === 0
+                ? `No results in ${result.filesSearched} file${result.filesSearched === 1 ? "" : "s"}.`
+                : `${result.totalMatches}${result.truncated ? "+" : ""} result${result.totalMatches === 1 ? "" : "s"} in ${result.files.length} file${result.files.length === 1 ? "" : "s"}${result.truncated ? " (limit reached)" : ""}`
+              : ""}
+      </div>
+      {result && (
+        <ul className="search-results" role="tree" aria-label="Search results">
+          {result.files.map((f) => {
+            const isCollapsed = !!collapsed[f.path];
+            return (
+              <li key={f.path} role="treeitem" aria-expanded={!isCollapsed}>
+                <button className="search-file" title={f.path} onClick={() => setCollapsed((c) => ({ ...c, [f.path]: !isCollapsed }))}>
+                  <Icon name={isCollapsed ? "chevronRight" : "chevronDown"} size={14} />
+                  <Icon name="file" size={14} className="tree-file-icon" />
+                  <span className="search-file-name">{basename(f.path)}</span>
+                  <span className="search-file-dir">{relative(f.path, root)}</span>
+                  <span className="badge">{f.matches.length}</span>
+                </button>
+                {!isCollapsed && (
+                  <ul role="group">
+                    {f.matches.map((m, i) => (
+                      <li key={i}>
+                        <button className="search-match" title={`Line ${m.line}`} onClick={() => void open(f.path, m)}>
+                          {m.preview.slice(0, m.previewStart)}
+                          <mark>{m.preview.slice(m.previewStart, m.previewStart + m.length)}</mark>
+                          {m.preview.slice(m.previewStart + m.length)}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}

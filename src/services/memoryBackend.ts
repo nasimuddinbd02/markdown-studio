@@ -1,7 +1,8 @@
 import type { Backend, WriteRequest } from "./backend";
 import { AppError } from "./errors";
 import { basename, dirname, isMarkdownPath, join } from "./paths";
-import type { DirEntry, OpenPaths, RecentEntry, RecoverySnapshot } from "../types";
+import type { DirEntry, OpenPaths, RecentEntry, RecoverySnapshot, SearchOptions, SearchResult } from "../types";
+import { buildSearchRegex, searchText } from "./search";
 import { DEMO_FILES } from "./demoContent";
 
 interface MemFile {
@@ -302,6 +303,29 @@ export class MemoryBackend implements Backend {
     this.dirs = new Set([...this.dirs].filter((d) => d !== p && !d.startsWith(p + "/")));
     this.files = new Map([...this.files].filter(([k]) => !k.startsWith(p + "/")));
     this.persist();
+  }
+
+  async searchWorkspace(root: string, options: SearchOptions): Promise<SearchResult> {
+    const dir = this.check(root);
+    const re = buildSearchRegex(options);
+    const limit = Math.min(Math.max(options.maxResults ?? 2000, 1), 10000);
+    const result: SearchResult = { files: [], totalMatches: 0, filesSearched: 0, truncated: false };
+    const paths = [...this.files.keys()]
+      .filter((p) => p.startsWith(dir + "/") && isMarkdownPath(p) && !p.slice(dir.length).split("/").some((s) => s.startsWith(".")))
+      .sort();
+    for (const path of paths) {
+      if (result.totalMatches >= limit) {
+        result.truncated = true;
+        break;
+      }
+      result.filesSearched++;
+      const matches = searchText(this.files.get(path)!.content, re, limit - result.totalMatches);
+      if (matches.length) {
+        result.totalMatches += matches.length;
+        result.files.push({ path, matches });
+      }
+    }
+    return result;
   }
 
   async readImage(path: string) {

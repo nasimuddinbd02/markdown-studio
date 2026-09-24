@@ -31,11 +31,16 @@ interface UiState {
   settingsOpen: boolean;
   aboutOpen: boolean;
   paletteOpen: boolean;
+  sidebarView: "explorer" | "search";
+  /** Incremented to move focus into the search box. */
+  searchFocusToken: number;
   cursor: { line: number; col: number; selected: number };
   setCursor(c: UiState["cursor"]): void;
   setSettingsOpen(open: boolean): void;
   setAboutOpen(open: boolean): void;
   setPaletteOpen(open: boolean): void;
+  setSidebarView(view: "explorer" | "search"): void;
+  focusSearch(): void;
   closeDialog(id: number, result: { button: string; value?: string }): void;
   notify(kind: Toast["kind"], message: string): void;
   dismissToast(id: number): void;
@@ -49,11 +54,15 @@ export const useUi = create<UiState>((set, get) => ({
   settingsOpen: false,
   aboutOpen: false,
   paletteOpen: false,
+  sidebarView: "explorer",
+  searchFocusToken: 0,
   cursor: { line: 1, col: 1, selected: 0 },
   setCursor: (cursor) => set({ cursor }),
   setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
   setAboutOpen: (aboutOpen) => set({ aboutOpen }),
   setPaletteOpen: (paletteOpen) => set({ paletteOpen }),
+  setSidebarView: (sidebarView) => set({ sidebarView }),
+  focusSearch: () => set((s) => ({ sidebarView: "search", searchFocusToken: s.searchFocusToken + 1 })),
   closeDialog(id, result) {
     const d = get().dialogs.find((x) => x.id === id);
     set({ dialogs: get().dialogs.filter((x) => x.id !== id) });

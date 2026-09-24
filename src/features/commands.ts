@@ -12,6 +12,7 @@ import { closeWorkspace, createFileIn, openFolderDialog } from "./workspace";
 import { editorCommand, runOnEditor } from "./editorBridge";
 import { copyActiveAsHtml, exportActiveAsHtml, printActive } from "./exporting";
 import type { StateCommand } from "@codemirror/state";
+import type { KeyBinding } from "@codemirror/view";
 import * as fmt from "./formatting";
 
 export const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
@@ -135,7 +136,21 @@ export const commands: Record<string, Command> = {
     shortcut: "Mod+Shift+E",
     run: () => {
       const { settings, update } = useSettings.getState();
-      update({ showExplorer: !settings.showExplorer });
+      const ui = useUi.getState();
+      if (settings.showExplorer && ui.sidebarView !== "explorer") ui.setSidebarView("explorer");
+      else {
+        ui.setSidebarView("explorer");
+        update({ showExplorer: !settings.showExplorer });
+      }
+    },
+  },
+  findInFiles: {
+    id: "findInFiles",
+    label: "Find in Files",
+    shortcut: "Mod+Shift+F",
+    run: () => {
+      useSettings.getState().update({ showExplorer: true });
+      useUi.getState().focusSearch();
     },
   },
   toggleOutline: {
@@ -184,14 +199,22 @@ export const commands: Record<string, Command> = {
 Object.assign(commands, formatCommands);
 
 /** CodeMirror keymap for editor commands, derived from the shortcuts above. */
-export function editorKeymap() {
-  return Object.values(formatCommands)
+export function editorKeymap(): KeyBinding[] {
+  const toKey = (shortcut: string) => shortcut.replace(/\+/g, "-").replace(/-([A-Z])$/, (_, k: string) => "-" + k.toLowerCase());
+  const format = Object.values(formatCommands)
     .filter((c) => c.shortcut && c.editor)
-    .map((c) => ({
-      key: c.shortcut!.replace(/\+/g, "-").replace(/-([A-Z])$/, (_, k: string) => "-" + k.toLowerCase()),
-      run: c.editor!,
-      preventDefault: true,
-    }));
+    .map((c) => ({ key: toKey(c.shortcut!), run: c.editor!, preventDefault: true }));
+  // App shortcuts CodeMirror would otherwise capture: some keyboards/IMEs report
+  // Ctrl+Shift+F as a lowercase "f", which CodeMirror treats as Mod-f (find).
+  const app = {
+    any: (_view: unknown, e: KeyboardEvent) => {
+      if (eventToShortcut(e) !== commands.findInFiles.shortcut) return false;
+      e.preventDefault();
+      void commands.findInFiles.run();
+      return true;
+    },
+  };
+  return [app, ...format];
 }
 
 function bumpFont(delta: number) {

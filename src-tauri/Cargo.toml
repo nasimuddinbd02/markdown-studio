@@ -24,6 +24,7 @@ serde_json = "1"
 dunce = "1"
 trash = "5"
 base64 = "0.22"
+regex = "1"
 
 [dev-dependencies]
 tempfile = "3"
