@@ -7,11 +7,11 @@ The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status pe
 ## Download
 
 <!-- download:start -->
-### ⬇️ [Download Markdown Studio 0.2.0 for Windows (64-bit)](downloads/MarkdownStudio-0.2.0-windows-x64-setup.exe?raw=true)
+### ⬇️ [Download Markdown Studio 0.3.0 for Windows (64-bit)](downloads/MarkdownStudio-0.3.0-windows-x64-setup.exe?raw=true)
 
 | Version | Platform | Size | Released | SHA-256 |
 | --- | --- | --- | --- | --- |
-| 0.2.0 | Windows 10/11 x64 | 3.5 MB | 2026-09-23 | `bdc752cadf5c42751fb8c0cb75a1b5805ae04c99e705e4e6613743f0cf597140` |
+| 0.3.0 | Windows 10/11 x64 | 3.6 MB | 2026-09-23 | `2143d8d077dc401b463dd84cf64fdc1055a9ba11a5cf90b4b1f7411a4f169257` |
 
 1. Download the installer and run it. No administrator rights are needed; it installs for the current user.
 2. Windows SmartScreen may warn because the installer isn't code-signed yet. Choose **More info → Run anyway**.
