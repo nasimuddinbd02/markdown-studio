@@ -1,0 +1,47 @@
+import { invoke } from "@tauri-apps/api/core";
+import type { Backend, WriteRequest } from "./backend";
+import { toAppError } from "./errors";
+import type { RecoverySnapshot } from "../types";
+
+async function call<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
+  try {
+    return await invoke<T>(cmd, args);
+  } catch (e) {
+    throw toAppError(e);
+  }
+}
+
+export const tauriBackend: Backend = {
+  isNative: true,
+  appInfo: () => call("app_info"),
+
+  pickOpenFile: () => call("pick_open_file"),
+  pickOpenFolder: () => call("pick_open_folder"),
+  pickSavePath: (suggestedName, directory) => call("pick_save_path", { suggestedName, directory }),
+
+  listRecent: () => call("list_recent"),
+  openRecent: (path) => call("open_recent", { path }),
+  removeRecent: (path) => call("remove_recent", { path }),
+
+  listDir: (path) => call("list_dir", { path }),
+  readTextFile: (path) => call("read_text_file", { path }),
+  writeTextFile: (req: WriteRequest) => call("write_text_file", { ...req }),
+  fileMtime: (path) => call("file_mtime", { path }),
+  createFile: (directory, name) => call("create_file", { directory, name }),
+  createFolder: (directory, name) => call("create_folder", { directory, name }),
+  renamePath: (path, newName) => call("rename_path", { path, newName }),
+  deletePath: (path) => call("delete_path", { path }),
+  readImage: (path) => call("read_image", { path }),
+  openExternal: (url) => call("open_external", { url }),
+
+  loadSettings: () => call("load_settings"),
+  saveSettings: (settings) => call("save_settings", { settings }),
+  loadRecovery: async () => (await call<RecoverySnapshot | null>("load_recovery")) ?? null,
+  saveRecovery: (snapshot) => call("save_recovery", { snapshot }),
+  clearRecovery: () => call("clear_recovery"),
+
+  log: (level, category, message) => {
+    invoke("log_event", { level, category, message }).catch(() => {});
+  },
+  exportLogs: () => call("export_logs"),
+};

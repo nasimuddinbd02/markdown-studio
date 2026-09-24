@@ -1,0 +1,212 @@
+import { useEffect, useRef } from "react";
+import { EditorState, Compartment, type Extension } from "@codemirror/state";
+import {
+  EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLineGutter,
+  drawSelection, dropCursor, rectangularSelection, crosshairCursor, placeholder, highlightSpecialChars,
+} from "@codemirror/view";
+import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
+import { searchKeymap, highlightSelectionMatches, search, gotoLine } from "@codemirror/search";
+import {
+  syntaxHighlighting, HighlightStyle, indentOnInput, bracketMatching, foldGutter, foldKeymap, indentUnit,
+} from "@codemirror/language";
+import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
+import { languages } from "@codemirror/language-data";
+import { tags as t } from "@lezer/highlight";
+import { useDocuments } from "../stores/documentsStore";
+import { useSettings } from "../stores/settingsStore";
+import { useUi } from "../stores/uiStore";
+import type { Settings } from "../types";
+import { openReplacePanel, registerEditorView } from "../features/editorBridge";
+import { scrollSync } from "../features/scrollSync";
+
+/**
+ * Markdown-aware syntax colours (FR-020). Colours come from CSS variables so
+ * the same style follows the light/dark theme.
+ */
+const markdownHighlight = HighlightStyle.define([
+  { tag: t.heading1, fontWeight: "700", fontSize: "1.3em", color: "var(--hl-heading)" },
+  { tag: t.heading2, fontWeight: "700", fontSize: "1.18em", color: "var(--hl-heading)" },
+  { tag: [t.heading3, t.heading4, t.heading5, t.heading6], fontWeight: "700", color: "var(--hl-heading)" },
+  { tag: t.strong, fontWeight: "700" },
+  { tag: t.emphasis, fontStyle: "italic" },
+  { tag: t.strikethrough, textDecoration: "line-through" },
+  { tag: [t.link, t.url], color: "var(--hl-link)" },
+  { tag: t.monospace, color: "var(--hl-code)", fontFamily: "var(--font-mono)" },
+  { tag: t.quote, color: "var(--hl-quote)", fontStyle: "italic" },
+  { tag: [t.processingInstruction, t.contentSeparator, t.list], color: "var(--hl-meta)" },
+  { tag: t.meta, color: "var(--hl-meta)" },
+  { tag: t.keyword, color: "var(--hl-keyword)" },
+  { tag: [t.string, t.special(t.string)], color: "var(--hl-string)" },
+  { tag: [t.number, t.bool, t.null, t.atom], color: "var(--hl-number)" },
+  { tag: t.comment, color: "var(--hl-comment)", fontStyle: "italic" },
+  { tag: [t.function(t.variableName), t.function(t.propertyName)], color: "var(--hl-function)" },
+  { tag: [t.typeName, t.className, t.tagName], color: "var(--hl-type)" },
+  { tag: [t.propertyName, t.attributeName], color: "var(--hl-property)" },
+  { tag: t.invalid, color: "var(--danger)" },
+]);
+
+const appearance = new Compartment();
+const gutters = new Compartment();
+const wrapping = new Compartment();
+const tabs = new Compartment();
+
+function appearanceExt(s: Settings): Extension {
+  return EditorView.theme({
+    "&": { fontSize: `${s.fontSize}px` },
+    ".cm-content, .cm-gutters": {
+      fontFamily: s.fontFamily ? `${s.fontFamily}, var(--font-mono)` : "var(--font-mono)",
+    },
+  });
+}
+
+function reconfigure(s: Settings) {
+  return [
+    appearance.reconfigure(appearanceExt(s)),
+    gutters.reconfigure(s.lineNumbers ? [lineNumbers(), foldGutter(), highlightActiveLineGutter()] : []),
+    wrapping.reconfigure(s.lineWrapping ? EditorView.lineWrapping : []),
+    tabs.reconfigure([EditorState.tabSize.of(s.tabSize), indentUnit.of(" ".repeat(s.tabSize))]),
+  ];
+}
+
+/** Editor states per document, so each tab keeps its own undo history and selection. */
+const states = new Map<string, EditorState>();
+/** Last text synced from the editor into the store, per document. */
+const synced = new Map<string, string>();
+
+export function Editor() {
+  const host = useRef<HTMLDivElement>(null);
+  const viewRef = useRef<EditorView | null>(null);
+  const currentId = useRef<string | null>(null);
+  const activeId = useDocuments((s) => s.activeId);
+  const content = useDocuments((s) => s.docs.find((d) => d.id === s.activeId)?.content);
+  const settings = useSettings((s) => s.settings);
+
+  const createState = (docId: string, text: string) => {
+    const s = useSettings.getState().settings;
+    synced.set(docId, text);
+    return EditorState.create({
+      doc: text,
+      extensions: [
+        highlightSpecialChars(),
+        history(),
+        drawSelection(),
+        dropCursor(),
+        EditorState.allowMultipleSelections.of(true),
+        indentOnInput(),
+        bracketMatching(),
+        rectangularSelection(),
+        crosshairCursor(),
+        highlightActiveLine(),
+        highlightSelectionMatches(),
+        search({ top: true }),
+        markdown({ base: markdownLanguage, codeLanguages: languages }),
+        syntaxHighlighting(markdownHighlight),
+        placeholder("Start writing Markdown…"),
+        EditorView.contentAttributes.of({ "aria-label": "Markdown editor", spellcheck: "true" }),
+        keymap.of([
+          { key: "Mod-g", run: gotoLine, preventDefault: true },
+          { key: "Mod-h", run: openReplacePanel, preventDefault: true },
+          ...defaultKeymap,
+          ...searchKeymap,
+          ...historyKeymap,
+          ...foldKeymap,
+          indentWithTab,
+        ]),
+        appearance.of(appearanceExt(s)),
+        gutters.of(s.lineNumbers ? [lineNumbers(), foldGutter(), highlightActiveLineGutter()] : []),
+        wrapping.of(s.lineWrapping ? EditorView.lineWrapping : []),
+        tabs.of([EditorState.tabSize.of(s.tabSize), indentUnit.of(" ".repeat(s.tabSize))]),
+        EditorView.updateListener.of((u) => {
+          const id = currentId.current;
+          if (!id) return;
+          if (u.docChanged) {
+            const text = u.state.doc.toString();
+            synced.set(id, text);
+            useDocuments.getState().setContent(id, text);
+          }
+          if (u.docChanged || u.selectionSet) {
+            const sel = u.state.selection.main;
+            const line = u.state.doc.lineAt(sel.head);
+            useUi.getState().setCursor({
+              line: line.number,
+              col: sel.head - line.from + 1,
+              selected: u.state.selection.ranges.reduce((n, r) => n + (r.to - r.from), 0),
+            });
+          }
+        }),
+      ],
+    });
+  };
+
+  // Mount a single EditorView.
+  useEffect(() => {
+    const view = new EditorView({ parent: host.current! });
+    viewRef.current = view;
+    registerEditorView(view);
+    const onScroll = () => {
+      const el = view.scrollDOM;
+      const max = el.scrollHeight - el.clientHeight;
+      scrollSync.emit("editor", max > 0 ? el.scrollTop / max : 0);
+    };
+    view.scrollDOM.addEventListener("scroll", onScroll, { passive: true });
+    const off = scrollSync.on("preview", (ratio) => {
+      const el = view.scrollDOM;
+      el.scrollTop = ratio * (el.scrollHeight - el.clientHeight);
+    });
+    // Forget editor state for closed tabs.
+    const unsub = useDocuments.subscribe((s) => {
+      for (const id of states.keys()) {
+        if (!s.docs.some((d) => d.id === id)) {
+          states.delete(id);
+          synced.delete(id);
+        }
+      }
+    });
+    return () => {
+      // Keep the current document's state (undo history) across remounts.
+      if (currentId.current) states.set(currentId.current, view.state);
+      currentId.current = null;
+      unsub();
+      off();
+      registerEditorView(null);
+      view.destroy();
+      viewRef.current = null;
+    };
+  }, []);
+
+  // Switch documents when the active tab changes.
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+    if (currentId.current) states.set(currentId.current, view.state);
+    currentId.current = activeId;
+    if (!activeId) return;
+    const doc = useDocuments.getState().docs.find((d) => d.id === activeId);
+    if (!doc) return;
+    const cached = states.get(activeId);
+    const state = cached && cached.doc.toString() === doc.content ? cached : createState(activeId, doc.content);
+    view.setState(state);
+    view.dispatch({ effects: reconfigure(useSettings.getState().settings) });
+    const sel = state.selection.main;
+    const line = state.doc.lineAt(sel.head);
+    useUi.getState().setCursor({ line: line.number, col: sel.head - line.from + 1, selected: 0 });
+    requestAnimationFrame(() => view.focus());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId]);
+
+  // Apply content changed outside the editor (reload from disk, recovery).
+  useEffect(() => {
+    const view = viewRef.current;
+    const id = currentId.current;
+    if (!view || !id || content === undefined || content === synced.get(id)) return;
+    synced.set(id, content);
+    view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: content } });
+  }, [content]);
+
+  // Apply settings changes (FR-025).
+  useEffect(() => {
+    viewRef.current?.dispatch({ effects: reconfigure(settings) });
+  }, [settings]);
+
+  return <div className="editor-host" ref={host} />;
+}

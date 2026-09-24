@@ -1,0 +1,379 @@
+//! Tauri commands exposed to the frontend. Every command that touches the
+//! filesystem validates its path against [`Scope`] first.
+
+use crate::error::{AppError, AppResult};
+use crate::fs_ops::{self, DirEntry, FileContent};
+use crate::scope::{self, Scope};
+use crate::storage::{self, Logger};
+use crate::text::LineEnding;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use std::path::{Path, PathBuf};
+use std::sync::Mutex;
+use tauri::{AppHandle, State};
+use tauri_plugin_dialog::DialogExt;
+use tauri_plugin_opener::OpenerExt;
+
+const MAX_RECENT: usize = 15;
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum RecentKind {
+    File,
+    Folder,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RecentEntry {
+    pub path: String,
+    pub kind: RecentKind,
+}
+
+pub struct AppState {
+    pub scope: Scope,
+    pub logger: Logger,
+    pub config_dir: PathBuf,
+    pub data_dir: PathBuf,
+    /// Recent files/folders are owned by the backend (not the UI) so a path can
+    /// only be re-opened without a dialog if the user opened it before (FR-044).
+    pub recents: Mutex<Vec<RecentEntry>>,
+}
+
+impl AppState {
+    fn settings_path(&self) -> PathBuf {
+        self.config_dir.join("settings.json")
+    }
+    fn recents_path(&self) -> PathBuf {
+        self.config_dir.join("recent.json")
+    }
+    fn recovery_path(&self) -> PathBuf {
+        self.data_dir.join("recovery").join("session.json")
+    }
+
+    pub fn load_recents(&self) {
+        if let Ok(list) = serde_json::from_value::<Vec<RecentEntry>>(storage::read_json(&self.recents_path())) {
+            *self.recents.lock().unwrap() = list;
+        }
+    }
+
+    fn remember(&self, path: &Path, kind: RecentKind) {
+        let path = fs_ops::path_string(path);
+        let snapshot = {
+            let mut list = self.recents.lock().unwrap();
+            list.retain(|r| r.path != path);
+            list.insert(0, RecentEntry { path, kind });
+            list.truncate(MAX_RECENT);
+            list.clone()
+        };
+        if let Err(e) = storage::write_json(&self.recents_path(), &serde_json::to_value(snapshot).unwrap_or(Value::Null)) {
+            self.logger.log("warn", "recent.save", &e.to_string());
+        }
+    }
+
+    /// Logs the operation name and error category only — never document content.
+    fn track<T>(&self, op: &str, result: AppResult<T>) -> AppResult<T> {
+        if let Err(e) = &result {
+            self.logger.log("error", op, &e.to_string());
+        }
+        result
+    }
+}
+
+fn md_filter_name() -> &'static str {
+    "Markdown"
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AppInfo {
+    version: String,
+    os: String,
+    arch: String,
+    log_path: String,
+}
+
+#[tauri::command]
+pub fn app_info(state: State<'_, AppState>) -> AppInfo {
+    AppInfo {
+        version: env!("CARGO_PKG_VERSION").to_string(),
+        os: std::env::consts::OS.to_string(),
+        arch: std::env::consts::ARCH.to_string(),
+        log_path: state.logger.redact(&state.logger.path().to_string_lossy()),
+    }
+}
+
+// ---------------------------------------------------------------- dialogs
+
+#[tauri::command]
+pub async fn pick_open_file(app: AppHandle, state: State<'_, AppState>) -> AppResult<Option<String>> {
+    let picked = app
+        .dialog()
+        .file()
+        .set_title("Open Markdown File")
+        .add_filter(md_filter_name(), fs_ops::MARKDOWN_EXTENSIONS)
+        .add_filter("All files", &["*"])
+        .blocking_pick_file();
+    let Some(path) = picked.and_then(|p| p.into_path().ok()) else {
+        return Ok(None);
+    };
+    let resolved = state.track("dialog.open", state.scope.allow_file(&path))?;
+    state.remember(&resolved, RecentKind::File);
+    Ok(Some(fs_ops::path_string(&resolved)))
+}
+
+#[tauri::command]
+pub async fn pick_open_folder(app: AppHandle, state: State<'_, AppState>) -> AppResult<Option<String>> {
+    let picked = app.dialog().file().set_title("Open Folder").blocking_pick_folder();
+    let Some(path) = picked.and_then(|p| p.into_path().ok()) else {
+        return Ok(None);
+    };
+    let resolved = state.track("dialog.openFolder", state.scope.allow_dir(&path))?;
+    state.remember(&resolved, RecentKind::Folder);
+    Ok(Some(fs_ops::path_string(&resolved)))
+}
+
+#[tauri::command]
+pub async fn pick_save_path(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    suggested_name: Option<String>,
+    directory: Option<String>,
+) -> AppResult<Option<String>> {
+    let mut dialog = app
+        .dialog()
+        .file()
+        .set_title("Save Markdown File")
+        .add_filter(md_filter_name(), fs_ops::MARKDOWN_EXTENSIONS)
+        .set_file_name(suggested_name.unwrap_or_else(|| "Untitled.md".into()));
+    if let Some(dir) = directory {
+        dialog = dialog.set_directory(dir);
+    }
+    let Some(mut path) = dialog.blocking_save_file().and_then(|p| p.into_path().ok()) else {
+        return Ok(None);
+    };
+    if path.extension().is_none() {
+        path.set_extension("md");
+    }
+    let resolved = state.track("dialog.save", state.scope.allow_file(&path))?;
+    state.remember(&resolved, RecentKind::File);
+    Ok(Some(fs_ops::path_string(&resolved)))
+}
+
+// ---------------------------------------------------------------- recents
+
+#[tauri::command]
+pub fn list_recent(state: State<'_, AppState>) -> Vec<RecentEntry> {
+    state.recents.lock().unwrap().clone()
+}
+
+/// Re-grants access to a path the user opened in an earlier session.
+#[tauri::command]
+pub fn open_recent(state: State<'_, AppState>, path: String) -> AppResult<RecentEntry> {
+    let entry = state
+        .recents
+        .lock()
+        .unwrap()
+        .iter()
+        .find(|r| r.path == path)
+        .cloned()
+        .ok_or_else(|| AppError::OutOfScope("This item is not in the recent list.".into()))?;
+    let p = Path::new(&entry.path);
+    if !p.exists() {
+        return Err(AppError::NotFound("The file or folder no longer exists.".into()));
+    }
+    match entry.kind {
+        RecentKind::File => state.scope.allow_file(p)?,
+        RecentKind::Folder => state.scope.allow_dir(p)?,
+    };
+    state.remember(p, entry.kind.clone());
+    Ok(entry)
+}
+
+#[tauri::command]
+pub fn remove_recent(state: State<'_, AppState>, path: String) -> AppResult<()> {
+    let snapshot = {
+        let mut list = state.recents.lock().unwrap();
+        list.retain(|r| r.path != path);
+        list.clone()
+    };
+    storage::write_json(&state.recents_path(), &serde_json::to_value(snapshot).unwrap_or(Value::Null))
+}
+
+// ---------------------------------------------------------------- files
+
+#[tauri::command]
+pub async fn list_dir(state: State<'_, AppState>, path: String) -> AppResult<Vec<DirEntry>> {
+    let dir = state.track("fs.listDir", state.scope.check(Path::new(&path)))?;
+    state.track("fs.listDir", fs_ops::list_dir(&dir))
+}
+
+#[tauri::command]
+pub async fn read_text_file(state: State<'_, AppState>, path: String) -> AppResult<FileContent> {
+    let file = state.track("fs.read", state.scope.check(Path::new(&path)))?;
+    let mut content = state.track("fs.read", fs_ops::read_text(&file))?;
+    content.path = path;
+    Ok(content)
+}
+
+#[tauri::command]
+pub async fn write_text_file(
+    state: State<'_, AppState>,
+    path: String,
+    content: String,
+    line_ending: LineEnding,
+    bom: bool,
+    expected_mtime: Option<u64>,
+    force: bool,
+) -> AppResult<u64> {
+    let file = state.track("fs.write", state.scope.check(Path::new(&path)))?;
+    let result = fs_ops::write_text_atomic(&file, &content, line_ending, bom, expected_mtime, force);
+    if result.is_ok() {
+        state.logger.log("info", "fs.write", "saved document");
+    }
+    state.track("fs.write", result)
+}
+
+/// Returns the modification time, or `None` if the file no longer exists.
+#[tauri::command]
+pub async fn file_mtime(state: State<'_, AppState>, path: String) -> AppResult<Option<u64>> {
+    let file = state.scope.check(Path::new(&path))?;
+    if !file.exists() {
+        return Ok(None);
+    }
+    Ok(Some(fs_ops::mtime(&file)?))
+}
+
+#[tauri::command]
+pub async fn create_file(state: State<'_, AppState>, directory: String, name: String) -> AppResult<String> {
+    scope::validate_file_name(&name)?;
+    let dir = state.scope.check(Path::new(&directory))?;
+    let mut target = fs_ops::join_child(&dir, &name);
+    if !fs_ops::is_markdown(&target) {
+        target.set_extension("md");
+    }
+    let target = state.scope.check(&target)?;
+    state.track("fs.create", fs_ops::create_file(&target))?;
+    Ok(fs_ops::path_string(&target))
+}
+
+#[tauri::command]
+pub async fn create_folder(state: State<'_, AppState>, directory: String, name: String) -> AppResult<String> {
+    scope::validate_file_name(&name)?;
+    let dir = state.scope.check(Path::new(&directory))?;
+    let target = state.scope.check(&fs_ops::join_child(&dir, &name))?;
+    state.track("fs.createFolder", fs_ops::create_dir(&target))?;
+    Ok(fs_ops::path_string(&target))
+}
+
+#[tauri::command]
+pub async fn rename_path(state: State<'_, AppState>, path: String, new_name: String) -> AppResult<String> {
+    scope::validate_file_name(&new_name)?;
+    let from = state.scope.check(Path::new(&path))?;
+    let parent = from
+        .parent()
+        .ok_or_else(|| AppError::InvalidPath("Cannot rename a root folder".into()))?;
+    let to = state.scope.check(&fs_ops::join_child(parent, &new_name))?;
+    state.track("fs.rename", fs_ops::rename(&from, &to))?;
+    state.scope.rename_file(&from, &to);
+    Ok(fs_ops::path_string(&to))
+}
+
+#[tauri::command]
+pub async fn delete_path(state: State<'_, AppState>, path: String) -> AppResult<()> {
+    let target = state.scope.check(Path::new(&path))?;
+    state.track("fs.delete", fs_ops::delete_to_trash(&target))
+}
+
+#[tauri::command]
+pub async fn read_image(state: State<'_, AppState>, path: String) -> AppResult<String> {
+    let file = state.scope.check_asset(Path::new(&path))?;
+    fs_ops::read_image_data_url(&file)
+}
+
+/// Opens a link in the user's default browser (SEC-005). Only web and mail
+/// links are allowed; `file:`, `javascript:` and custom schemes are refused.
+#[tauri::command]
+pub fn open_external(app: AppHandle, state: State<'_, AppState>, url: String) -> AppResult<()> {
+    let lower = url.trim().to_ascii_lowercase();
+    if !(lower.starts_with("https://") || lower.starts_with("http://") || lower.starts_with("mailto:")) {
+        return Err(AppError::InvalidPath("Only http, https and mailto links can be opened.".into()));
+    }
+    let result = app
+        .opener()
+        .open_url(url.trim(), None::<&str>)
+        .map_err(|e| AppError::Io(e.to_string()));
+    state.track("shell.openUrl", result)
+}
+
+// ---------------------------------------------------------------- settings & recovery
+
+#[tauri::command]
+pub fn load_settings(state: State<'_, AppState>) -> Value {
+    storage::read_json(&state.settings_path())
+}
+
+#[tauri::command]
+pub fn save_settings(state: State<'_, AppState>, settings: Value) -> AppResult<()> {
+    state.track("settings.save", storage::write_json(&state.settings_path(), &settings))
+}
+
+#[tauri::command]
+pub fn load_recovery(state: State<'_, AppState>) -> Value {
+    storage::read_json(&state.recovery_path())
+}
+
+#[tauri::command]
+pub async fn save_recovery(state: State<'_, AppState>, snapshot: Value) -> AppResult<()> {
+    storage::write_json(&state.recovery_path(), &snapshot)
+}
+
+#[tauri::command]
+pub fn clear_recovery(state: State<'_, AppState>) -> AppResult<()> {
+    match std::fs::remove_file(state.recovery_path()) {
+        Err(e) if e.kind() != std::io::ErrorKind::NotFound => Err(e.into()),
+        _ => Ok(()),
+    }
+}
+
+// ---------------------------------------------------------------- diagnostics
+
+#[tauri::command]
+pub fn log_event(state: State<'_, AppState>, level: String, category: String, message: String) {
+    let level = match level.as_str() {
+        "error" | "warn" | "info" | "debug" => level,
+        _ => "info".into(),
+    };
+    if level == "debug" && !cfg!(debug_assertions) {
+        return;
+    }
+    state.logger.log(&level, &category, &message);
+}
+
+#[tauri::command]
+pub async fn export_logs(app: AppHandle, state: State<'_, AppState>) -> AppResult<Option<String>> {
+    let picked = app
+        .dialog()
+        .file()
+        .set_title("Export Diagnostic Logs")
+        .add_filter("Log file", &["log", "txt"])
+        .set_file_name("markdown-studio-diagnostics.log")
+        .blocking_save_file();
+    let Some(dest) = picked.and_then(|p| p.into_path().ok()) else {
+        return Ok(None);
+    };
+    let mut out = format!(
+        "Markdown Studio {} ({} {})\n\n",
+        env!("CARGO_PKG_VERSION"),
+        std::env::consts::OS,
+        std::env::consts::ARCH
+    );
+    let rotated = state.logger.path().with_extension("log.1");
+    for p in [rotated.as_path(), state.logger.path()] {
+        if let Ok(s) = std::fs::read_to_string(p) {
+            out.push_str(&s);
+        }
+    }
+    std::fs::write(&dest, out)?;
+    Ok(Some(fs_ops::path_string(&dest)))
+}

@@ -1,0 +1,155 @@
+import { memo, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import ReactMarkdown, { type Components } from "react-markdown";
+import { remarkPlugins, rehypePlugins, classifyLink } from "../services/markdown";
+import { backend } from "../services";
+import { describeError } from "../services/errors";
+import { isMarkdownPath, resolveRelative } from "../services/paths";
+import { notify } from "../stores/uiStore";
+import { useDocuments } from "../stores/documentsStore";
+import { useSettings } from "../stores/settingsStore";
+import { openPath } from "../features/documents";
+import { scrollSync } from "../features/scrollSync";
+
+function useDebounced<T>(value: T, ms: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    if (ms <= 0) {
+      setDebounced(value);
+      return;
+    }
+    const t = setTimeout(() => setDebounced(value), ms);
+    return () => clearTimeout(t);
+  }, [value, ms]);
+  return debounced;
+}
+
+const imageCache = new Map<string, string>();
+
+/** Loads images referenced with a relative/local path through the backend. */
+function LocalImage({ src, alt, title, docPath }: { src?: string; alt?: string; title?: string; docPath: string | null }) {
+  const remote = !src || /^(https?:|data:)/i.test(src);
+  const resolved = !remote && docPath ? resolveRelative(docPath, src!) : null;
+  const [url, setUrl] = useState<string | null>(() => (resolved ? imageCache.get(resolved) ?? null : null));
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    if (!resolved) return;
+    const cached = imageCache.get(resolved);
+    if (cached) {
+      setUrl(cached);
+      return;
+    }
+    let cancelled = false;
+    setFailed(false);
+    backend()
+      .readImage(resolved)
+      .then((data) => {
+        imageCache.set(resolved, data);
+        if (!cancelled) setUrl(data);
+      })
+      .catch(() => !cancelled && setFailed(true));
+    return () => {
+      cancelled = true;
+    };
+  }, [resolved]);
+
+  if (remote) return <img src={src} alt={alt ?? ""} title={title} loading="lazy" />;
+  if (!resolved || failed) {
+    return (
+      <span className="preview-missing-image" title={src}>
+        🖼 {alt || src} {docPath ? "(image not found)" : "(save the document to show local images)"}
+      </span>
+    );
+  }
+  return url ? <img src={url} alt={alt ?? ""} title={title} /> : <span className="preview-missing-image">Loading image…</span>;
+}
+
+const MarkdownView = memo(function MarkdownView({ text, docPath }: { text: string; docPath: string | null }) {
+  const components = useMemo<Components>(
+    () => ({
+      img: ({ src, alt, title }) => (
+        <LocalImage src={typeof src === "string" ? src : undefined} alt={alt} title={title} docPath={docPath} />
+      ),
+      a: ({ href, children, title }) => (
+        <a href={href} title={title ?? href} data-href={href}>
+          {children}
+        </a>
+      ),
+    }),
+    [docPath],
+  );
+  return (
+    <ReactMarkdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins} components={components}>
+      {text}
+    </ReactMarkdown>
+  );
+});
+
+/** Debounces preview updates (FR-031); keyed per document so tab switches render immediately. */
+function DebouncedMarkdown({ text, docPath }: { text: string; docPath: string | null }) {
+  const debounceMs = useSettings((s) => s.settings.previewDebounceMs);
+  const debounced = useDebounced(text, debounceMs);
+  return <MarkdownView text={debounced} docPath={docPath} />;
+}
+
+export function Preview() {
+  const doc = useDocuments((s) => s.docs.find((d) => d.id === s.activeId));
+  const docPath = doc?.path ?? null;
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const onScroll = () => {
+      const max = el.scrollHeight - el.clientHeight;
+      scrollSync.emit("preview", max > 0 ? el.scrollTop / max : 0);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    const off = scrollSync.on("editor", (ratio) => {
+      el.scrollTop = ratio * (el.scrollHeight - el.clientHeight);
+    });
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      off();
+    };
+  }, []);
+
+  /** Links never navigate the app window (SEC-005). */
+  const onClick = async (e: MouseEvent<HTMLDivElement>) => {
+    const anchor = (e.target as HTMLElement).closest("a");
+    if (!anchor) return;
+    e.preventDefault();
+    const target = classifyLink(anchor.getAttribute("data-href") ?? anchor.getAttribute("href"));
+    switch (target.type) {
+      case "anchor": {
+        const el = ref.current?.querySelector(`[id="${CSS.escape(target.id)}"], [id="user-content-${CSS.escape(target.id)}"]`);
+        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+        break;
+      }
+      case "external":
+        try {
+          await backend().openExternal(target.url);
+        } catch (err) {
+          notify("error", describeError(err, "open the link"));
+        }
+        break;
+      case "document": {
+        const resolved = docPath ? resolveRelative(docPath, target.href) : null;
+        if (resolved && isMarkdownPath(resolved)) await openPath(resolved);
+        else notify("info", "Only links to Markdown documents and web pages can be opened from the preview.");
+        break;
+      }
+      case "blocked":
+        notify("warning", "This link type is blocked for your safety.");
+        break;
+    }
+  };
+
+  return (
+    <div className="preview" ref={ref} onClick={onClick} role="document" aria-label="Markdown preview" tabIndex={0}>
+      <article className="markdown-body">
+        {doc ? <DebouncedMarkdown key={doc.id} text={doc.content} docPath={docPath} /> : null}
+      </article>
+    </div>
+  );
+}

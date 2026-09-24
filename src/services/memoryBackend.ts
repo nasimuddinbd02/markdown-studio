@@ -1,0 +1,366 @@
+import type { Backend, WriteRequest } from "./backend";
+import { AppError } from "./errors";
+import { basename, dirname, isMarkdownPath, join } from "./paths";
+import type { DirEntry, RecentEntry, RecoverySnapshot } from "../types";
+import { DEMO_FILES } from "./demoContent";
+
+interface MemFile {
+  content: string;
+  mtime: number;
+}
+
+export interface MemoryBackendOptions {
+  /** Initial files keyed by absolute POSIX path. Folders are implied. */
+  files?: Record<string, string>;
+  /** Persist the virtual filesystem to localStorage under this key. */
+  storageKey?: string | null;
+  /** Answers native-dialog requests (defaults to `window.prompt`). */
+  prompt?: (message: string, defaultValue: string) => string | null;
+  /** Folders that are pre-approved (as if opened via a dialog). */
+  approved?: string[];
+}
+
+const STORAGE_PREFIX = "markdown-studio:";
+
+function safeStorage(): Storage | null {
+  try {
+    return typeof localStorage === "undefined" ? null : localStorage;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Browser/in-memory implementation of {@link Backend}. It mirrors the native
+ * backend's rules (approved scope, no `..` traversal, conflict detection) so
+ * UI behaviour can be developed and tested without the Tauri shell.
+ */
+export class MemoryBackend implements Backend {
+  readonly isNative = false;
+  private files = new Map<string, MemFile>();
+  private dirs = new Set<string>(["/"]);
+  private roots = new Set<string>();
+  private allowedFiles = new Set<string>();
+  private recents: RecentEntry[] = [];
+  private settings: unknown = null;
+  private recovery: RecoverySnapshot | null = null;
+  private clock = Date.now();
+  private readonly storageKey: string | null;
+  private readonly promptFn: (message: string, defaultValue: string) => string | null;
+  readonly logs: string[] = [];
+
+  constructor(opts: MemoryBackendOptions = {}) {
+    this.storageKey = opts.storageKey ?? null;
+    this.promptFn = opts.prompt ?? ((m, d) => window.prompt(m, d));
+    if (!this.restore()) {
+      for (const [path, content] of Object.entries(opts.files ?? {})) this.put(path, content);
+    }
+    for (const dir of opts.approved ?? []) {
+      this.roots.add(dir);
+      this.dirs.add(dir);
+    }
+  }
+
+  // ------------------------------------------------------------ internals
+
+  private tick() {
+    this.clock = Math.max(this.clock + 1, Date.now());
+    return this.clock;
+  }
+
+  private put(path: string, content: string) {
+    this.files.set(path, { content, mtime: this.tick() });
+    let dir = dirname(path);
+    while (dir && !this.dirs.has(dir)) {
+      this.dirs.add(dir);
+      dir = dirname(dir);
+    }
+  }
+
+  private persist() {
+    const store = safeStorage();
+    if (!store || !this.storageKey) return;
+    try {
+      store.setItem(
+        STORAGE_PREFIX + this.storageKey,
+        JSON.stringify({
+          files: Object.fromEntries(this.files),
+          dirs: [...this.dirs],
+          recents: this.recents,
+          settings: this.settings,
+          recovery: this.recovery,
+        }),
+      );
+    } catch {
+      /* quota exceeded or storage blocked: keep working in memory */
+    }
+  }
+
+  private restore(): boolean {
+    const store = safeStorage();
+    if (!store || !this.storageKey) return false;
+    try {
+      const raw = store.getItem(STORAGE_PREFIX + this.storageKey);
+      if (!raw) return false;
+      const data = JSON.parse(raw);
+      this.files = new Map(Object.entries(data.files ?? {}));
+      this.dirs = new Set(data.dirs ?? ["/"]);
+      this.recents = data.recents ?? [];
+      this.settings = data.settings ?? null;
+      this.recovery = data.recovery ?? null;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private validate(path: string): string {
+    if (!path.startsWith("/")) throw new AppError("invalidPath", "Path must be absolute");
+    if (path.split("/").includes("..")) {
+      throw new AppError("invalidPath", 'Path traversal ("..") is not allowed');
+    }
+    return path.length > 1 ? path.replace(/\/+$/, "") : path;
+  }
+
+  private check(path: string): string {
+    const p = this.validate(path);
+    const inRoot = [...this.roots].some((r) => p === r || p.startsWith(r + "/"));
+    if (!inRoot && !this.allowedFiles.has(p)) {
+      throw new AppError("outOfScope", "This location has not been opened in Markdown Studio.");
+    }
+    return p;
+  }
+
+  private remember(path: string, kind: RecentEntry["kind"]) {
+    this.recents = [{ path, kind }, ...this.recents.filter((r) => r.path !== path)].slice(0, 15);
+    this.persist();
+  }
+
+  private validateName(name: string) {
+    const n = name.trim();
+    if (!n || n === "." || n === ".." || /[\\/:*?"<>|\0]/.test(n)) {
+      throw new AppError("invalidPath", "Name contains characters that are not allowed in file names");
+    }
+    return n;
+  }
+
+  // ------------------------------------------------------------ Backend
+
+  async appInfo() {
+    return { version: "0.1.0", os: "browser", arch: "web", logPath: "(in memory)" };
+  }
+
+  async pickOpenFile() {
+    const answer = this.promptFn("Open file (path in the demo workspace):", "/demo/README.md");
+    if (!answer) return null;
+    const p = this.validate(answer.trim());
+    if (!this.files.has(p)) throw new AppError("notFound", "File not found");
+    this.allowedFiles.add(p);
+    this.remember(p, "file");
+    return p;
+  }
+
+  async pickOpenFolder() {
+    const answer = this.promptFn("Open folder:", "/demo");
+    if (!answer) return null;
+    const p = this.validate(answer.trim());
+    if (!this.dirs.has(p)) throw new AppError("notFound", "Folder not found");
+    this.roots.add(p);
+    this.remember(p, "folder");
+    return p;
+  }
+
+  async pickSavePath(suggestedName: string, directory: string | null) {
+    const answer = this.promptFn("Save as:", join(directory ?? "/demo", suggestedName));
+    if (!answer) return null;
+    let p = this.validate(answer.trim());
+    if (!/\.[^/]+$/.test(basename(p))) p += ".md";
+    if (!this.dirs.has(dirname(p))) throw new AppError("notFound", "Folder not found");
+    this.allowedFiles.add(p);
+    this.remember(p, "file");
+    return p;
+  }
+
+  async listRecent() {
+    return [...this.recents];
+  }
+
+  async openRecent(path: string) {
+    const entry = this.recents.find((r) => r.path === path);
+    if (!entry) throw new AppError("outOfScope", "This item is not in the recent list.");
+    const exists = entry.kind === "file" ? this.files.has(path) : this.dirs.has(path);
+    if (!exists) throw new AppError("notFound", "The file or folder no longer exists.");
+    if (entry.kind === "file") this.allowedFiles.add(path);
+    else this.roots.add(path);
+    this.remember(path, entry.kind);
+    return entry;
+  }
+
+  async removeRecent(path: string) {
+    this.recents = this.recents.filter((r) => r.path !== path);
+    this.persist();
+  }
+
+  async listDir(path: string): Promise<DirEntry[]> {
+    const dir = this.check(path);
+    if (!this.dirs.has(dir)) throw new AppError("notFound", "Folder not found");
+    const entries: DirEntry[] = [];
+    for (const d of this.dirs) {
+      if (d !== dir && dirname(d) === dir && !basename(d).startsWith(".")) {
+        entries.push({ name: basename(d), path: d, isDir: true });
+      }
+    }
+    for (const f of this.files.keys()) {
+      if (dirname(f) === dir && isMarkdownPath(f) && !basename(f).startsWith(".")) {
+        entries.push({ name: basename(f), path: f, isDir: false });
+      }
+    }
+    return entries.sort((a, b) =>
+      a.isDir !== b.isDir ? (a.isDir ? -1 : 1) : a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+    );
+  }
+
+  async readTextFile(path: string) {
+    const p = this.check(path);
+    const f = this.files.get(p);
+    if (!f) throw new AppError("notFound", "File not found");
+    const crlf = f.content.includes("\r\n");
+    return {
+      path: p,
+      content: f.content.replace(/\r\n/g, "\n"),
+      mtime: f.mtime,
+      lineEnding: crlf ? ("crlf" as const) : ("lf" as const),
+      bom: false,
+    };
+  }
+
+  async writeTextFile(req: WriteRequest) {
+    const p = this.check(req.path);
+    const existing = this.files.get(p);
+    if (!req.force && existing && req.expectedMtime !== null && existing.mtime !== req.expectedMtime) {
+      throw new AppError("conflict", "The file was changed by another program after it was opened.");
+    }
+    if (!this.dirs.has(dirname(p))) throw new AppError("notFound", "Folder not found");
+    const content = req.lineEnding === "crlf" ? req.content.replace(/\n/g, "\r\n") : req.content;
+    this.put(p, content);
+    this.persist();
+    return this.files.get(p)!.mtime;
+  }
+
+  async fileMtime(path: string) {
+    const p = this.check(path);
+    return this.files.get(p)?.mtime ?? null;
+  }
+
+  async createFile(directory: string, name: string) {
+    let n = this.validateName(name);
+    if (!isMarkdownPath(n)) n += ".md";
+    const p = this.check(join(this.check(directory), n));
+    if (this.files.has(p) || this.dirs.has(p)) throw new AppError("alreadyExists", "Already exists");
+    this.put(p, "");
+    this.persist();
+    return p;
+  }
+
+  async createFolder(directory: string, name: string) {
+    const p = this.check(join(this.check(directory), this.validateName(name)));
+    if (this.files.has(p) || this.dirs.has(p)) throw new AppError("alreadyExists", "Already exists");
+    this.dirs.add(p);
+    this.persist();
+    return p;
+  }
+
+  async renamePath(path: string, newName: string) {
+    const from = this.check(path);
+    const to = this.check(join(dirname(from), this.validateName(newName)));
+    if (to !== from && (this.files.has(to) || this.dirs.has(to))) {
+      throw new AppError("alreadyExists", "A file or folder with that name already exists.");
+    }
+    if (this.files.has(from)) {
+      const f = this.files.get(from)!;
+      this.files.delete(from);
+      this.files.set(to, f);
+      if (this.allowedFiles.delete(from)) this.allowedFiles.add(to);
+    } else if (this.dirs.has(from)) {
+      const move = (p: string) => to + p.slice(from.length);
+      this.dirs = new Set([...this.dirs].map((d) => (d === from || d.startsWith(from + "/") ? move(d) : d)));
+      this.files = new Map(
+        [...this.files].map(([k, v]) => [k.startsWith(from + "/") ? move(k) : k, v] as [string, MemFile]),
+      );
+    } else throw new AppError("notFound", "Not found");
+    this.persist();
+    return to;
+  }
+
+  async deletePath(path: string) {
+    const p = this.check(path);
+    if (this.files.delete(p)) {
+      this.persist();
+      return;
+    }
+    if (!this.dirs.has(p)) throw new AppError("notFound", "The file no longer exists.");
+    this.dirs = new Set([...this.dirs].filter((d) => d !== p && !d.startsWith(p + "/")));
+    this.files = new Map([...this.files].filter(([k]) => !k.startsWith(p + "/")));
+    this.persist();
+  }
+
+  async readImage(path: string) {
+    const p = this.validate(path);
+    const f = this.files.get(p);
+    if (!f) throw new AppError("notFound", "Image not found");
+    if (!p.endsWith(".svg")) throw new AppError("invalidPath", "Only SVG images are available in the demo");
+    return "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(f.content)));
+  }
+
+  async openExternal(url: string) {
+    if (!/^(https?:|mailto:)/i.test(url.trim())) {
+      throw new AppError("invalidPath", "Only http, https and mailto links can be opened.");
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  async loadSettings() {
+    return this.settings;
+  }
+  async saveSettings(settings: unknown) {
+    this.settings = settings;
+    this.persist();
+  }
+  async loadRecovery() {
+    return this.recovery;
+  }
+  async saveRecovery(snapshot: RecoverySnapshot) {
+    this.recovery = snapshot;
+    this.persist();
+  }
+  async clearRecovery() {
+    this.recovery = null;
+    this.persist();
+  }
+
+  log(level: string, category: string, message: string) {
+    this.logs.push(`[${level}] ${category}: ${message}`);
+  }
+  async exportLogs() {
+    const blob = new Blob([this.logs.join("\n")], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "markdown-studio-diagnostics.log";
+    a.click();
+    URL.revokeObjectURL(a.href);
+    return "markdown-studio-diagnostics.log";
+  }
+
+  /** Test helper: simulates another program editing a file. */
+  externalWrite(path: string, content: string) {
+    this.put(path, content);
+  }
+  /** Test helper: simulates another program deleting a file. */
+  externalDelete(path: string) {
+    this.files.delete(path);
+  }
+}
+
+export function createDemoBackend() {
+  return new MemoryBackend({ files: DEMO_FILES, storageKey: "demo-fs" });
+}

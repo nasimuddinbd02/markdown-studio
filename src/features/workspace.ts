@@ -1,0 +1,147 @@
+import { backend } from "../services";
+import { describeError } from "../services/errors";
+import { basename, dirname, isInside } from "../services/paths";
+import { useWorkspace } from "../stores/workspaceStore";
+import { useDocuments } from "../stores/documentsStore";
+import { ask, notify, promptText } from "../stores/uiStore";
+import type { DirEntry } from "../types";
+import { onPathDeleted, onPathRenamed, openPath } from "./documents";
+
+const ws = () => useWorkspace.getState();
+
+export async function refreshDir(dir: string) {
+  try {
+    ws().setChildren(dir, await backend().listDir(dir));
+  } catch (e) {
+    backend().log("warn", "workspace.list", String((e as Error).message ?? e));
+    ws().setChildren(dir, []);
+  }
+}
+
+/** Opens a folder as the workspace (FR-011). */
+export async function setWorkspace(root: string) {
+  ws().setRoot(root);
+  await refreshDir(root);
+}
+
+export async function openFolderDialog() {
+  try {
+    const path = await backend().pickOpenFolder();
+    if (path) await setWorkspace(path);
+  } catch (e) {
+    notify("error", describeError(e, "open the folder"));
+  }
+}
+
+export async function openRecentFolder(path: string) {
+  try {
+    await backend().openRecent(path);
+    await setWorkspace(path);
+  } catch (e) {
+    notify("error", describeError(e, `open “${basename(path)}”`));
+    await backend().removeRecent(path).catch(() => {});
+  }
+}
+
+export function closeWorkspace() {
+  ws().setRoot(null);
+}
+
+export async function toggleDir(dir: string) {
+  const expanded = !ws().expanded[dir];
+  ws().setExpanded(dir, expanded);
+  if (expanded && !ws().children[dir]) await refreshDir(dir);
+}
+
+/** Re-lists every loaded folder, e.g. after the window regains focus. */
+export async function refreshWorkspace() {
+  const loaded = Object.keys(ws().children);
+  await Promise.all(loaded.map(refreshDir));
+}
+
+export async function createFileIn(dir: string) {
+  const name = await promptText({
+    title: "New File",
+    message: `Create a Markdown file in “${basename(dir)}”`,
+    value: "untitled.md",
+    okLabel: "Create",
+    selectUntil: "untitled".length,
+  });
+  if (!name) return;
+  try {
+    const path = await backend().createFile(dir, name);
+    ws().setExpanded(dir, true);
+    await refreshDir(dir);
+    ws().select(path);
+    await openPath(path);
+  } catch (e) {
+    notify("error", describeError(e, `create “${name}”`));
+  }
+}
+
+export async function createFolderIn(dir: string) {
+  const name = await promptText({ title: "New Folder", message: `Create a folder in “${basename(dir)}”`, value: "", okLabel: "Create" });
+  if (!name) return;
+  try {
+    await backend().createFolder(dir, name);
+    ws().setExpanded(dir, true);
+    await refreshDir(dir);
+  } catch (e) {
+    notify("error", describeError(e, `create “${name}”`));
+  }
+}
+
+/** FR-016 */
+export async function renameEntry(entry: DirEntry) {
+  const dot = entry.isDir ? -1 : entry.name.lastIndexOf(".");
+  const name = await promptText({
+    title: "Rename",
+    message: `New name for “${entry.name}”`,
+    value: entry.name,
+    okLabel: "Rename",
+    selectUntil: dot > 0 ? dot : entry.name.length,
+  });
+  if (!name || name === entry.name) return;
+  try {
+    const to = await backend().renamePath(entry.path, name);
+    onPathRenamed(entry.path, to);
+    const parent = dirname(entry.path);
+    // Move cached expansion/children for renamed folders.
+    if (entry.isDir) {
+      const { children, expanded } = ws();
+      for (const key of Object.keys(children)) if (isInside(key, entry.path)) delete children[key];
+      if (expanded[entry.path]) ws().setExpanded(to, true);
+    }
+    await refreshDir(parent);
+    ws().select(to);
+  } catch (e) {
+    notify("error", describeError(e, `rename “${entry.name}”`));
+  }
+}
+
+/** FR-017: deletes after confirmation; the item goes to the OS trash. */
+export async function deleteEntry(entry: DirEntry) {
+  const openDirty = useDocuments
+    .getState()
+    .docs.some((d) => d.path && isInside(d.path, entry.path) && d.content !== d.savedContent);
+  const choice = await ask({
+    title: entry.isDir ? "Delete folder" : "Delete file",
+    message: `Are you sure you want to delete “${entry.name}”${entry.isDir ? " and everything in it" : ""}?`,
+    detail:
+      (backend().isNative ? "It will be moved to the Trash / Recycle Bin." : "This cannot be undone in the browser demo.") +
+      (openDirty ? " It has unsaved changes in an open tab." : ""),
+    buttons: [
+      { id: "cancel", label: "Cancel" },
+      { id: "delete", label: "Delete", variant: "danger" },
+    ],
+    cancelId: "cancel",
+  });
+  if (choice !== "delete") return;
+  try {
+    await backend().deletePath(entry.path);
+    onPathDeleted(entry.path);
+    await refreshDir(dirname(entry.path));
+  } catch (e) {
+    notify("error", describeError(e, `delete “${entry.name}”`));
+  }
+}

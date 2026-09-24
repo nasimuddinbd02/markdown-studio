@@ -1,0 +1,114 @@
+import { useEffect, useState } from "react";
+import { useUi } from "../stores/uiStore";
+import { DEFAULT_SETTINGS, useSettings } from "../stores/settingsStore";
+import { Modal } from "./Dialogs";
+import { backend } from "../services";
+import type { AppInfo, Settings } from "../types";
+
+/** Settings screen (FR-025, FR-060, FR-061). Changes apply and persist immediately. */
+export function SettingsDialog() {
+  const open = useUi((s) => s.settingsOpen);
+  const setOpen = useUi((s) => s.setSettingsOpen);
+  const settings = useSettings((s) => s.settings);
+  const update = useSettings((s) => s.update);
+  if (!open) return null;
+
+  const field = <K extends keyof Settings>(key: K) => ({
+    id: `setting-${key}`,
+    value: settings[key] as unknown as string,
+  });
+
+  return (
+    <Modal title="Settings" onClose={() => setOpen(false)} className="settings-modal">
+      <div className="settings-grid">
+        <section>
+          <h3>Appearance</h3>
+          <label htmlFor="setting-theme">Theme</label>
+          <select {...field("theme")} onChange={(e) => update({ theme: e.target.value as Settings["theme"] })}>
+            <option value="system">Match system</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+
+          <label htmlFor="setting-fontSize">Editor font size</label>
+          <div className="inline-field">
+            <input
+              type="range" min={10} max={28} {...field("fontSize")}
+              onChange={(e) => update({ fontSize: Number(e.target.value) })}
+            />
+            <output htmlFor="setting-fontSize">{settings.fontSize}px</output>
+          </div>
+
+          <label htmlFor="setting-fontFamily">Editor font family</label>
+          <input
+            className="text-input" type="text" placeholder="Default monospace" {...field("fontFamily")}
+            onChange={(e) => update({ fontFamily: e.target.value })}
+          />
+        </section>
+
+        <section>
+          <h3>Editor</h3>
+          <label className="check"><input type="checkbox" checked={settings.lineNumbers} onChange={(e) => update({ lineNumbers: e.target.checked })} /> Show line numbers</label>
+          <label className="check"><input type="checkbox" checked={settings.lineWrapping} onChange={(e) => update({ lineWrapping: e.target.checked })} /> Wrap long lines</label>
+          <label htmlFor="setting-tabSize">Tab size</label>
+          <select {...field("tabSize")} onChange={(e) => update({ tabSize: Number(e.target.value) })}>
+            {[2, 4, 8].map((n) => <option key={n} value={n}>{n} spaces</option>)}
+          </select>
+        </section>
+
+        <section>
+          <h3>Preview</h3>
+          <label htmlFor="setting-previewDebounceMs">Update delay after typing</label>
+          <select {...field("previewDebounceMs")} onChange={(e) => update({ previewDebounceMs: Number(e.target.value) })}>
+            <option value={0}>Instant</option>
+            <option value={150}>150 ms (default)</option>
+            <option value={300}>300 ms</option>
+            <option value={600}>600 ms</option>
+            <option value={1000}>1 second</option>
+          </select>
+          <label className="check"><input type="checkbox" checked={settings.syncScroll} onChange={(e) => update({ syncScroll: e.target.checked })} /> Sync editor and preview scrolling</label>
+        </section>
+
+        <section>
+          <h3>Startup</h3>
+          <label className="check"><input type="checkbox" checked={settings.restoreSession} onChange={(e) => update({ restoreSession: e.target.checked })} /> Reopen last folder and files</label>
+        </section>
+      </div>
+      <div className="modal-buttons">
+        <button
+          className="button"
+          onClick={() => update({ ...DEFAULT_SETTINGS, session: settings.session })}
+        >
+          Reset to Defaults
+        </button>
+        <button className="button primary" onClick={() => setOpen(false)}>Done</button>
+      </div>
+    </Modal>
+  );
+}
+
+export function AboutDialog() {
+  const open = useUi((s) => s.aboutOpen);
+  const setOpen = useUi((s) => s.setAboutOpen);
+  const [info, setInfo] = useState<AppInfo | null>(null);
+  useEffect(() => {
+    if (open) backend().appInfo().then(setInfo).catch(() => {});
+  }, [open]);
+  if (!open) return null;
+  return (
+    <Modal title="About Markdown Studio" onClose={() => setOpen(false)}>
+      <div className="about">
+        <img src="/icon.svg" alt="" width={56} height={56} />
+        <div>
+          <p><strong>Markdown Studio</strong> {info ? `version ${info.version}` : ""}</p>
+          <p className="muted">A fast, local-first Markdown editor. Your documents stay on your computer.</p>
+          {info && <p className="muted">Platform: {info.os} ({info.arch})</p>}
+          {info && <p className="muted">Logs: {info.logPath}</p>}
+        </div>
+      </div>
+      <div className="modal-buttons">
+        <button className="button primary" onClick={() => setOpen(false)}>Close</button>
+      </div>
+    </Modal>
+  );
+}
