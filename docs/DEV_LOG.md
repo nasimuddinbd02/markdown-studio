@@ -77,3 +77,25 @@ The user approved a continuous loop: build a feature, test it, run it, then comm
 - Please complete the GitHub sign-in so pushes can go through. Running `git push` once in a terminal will cache the credentials.
 - Auto-update needs an update-signing key and an update URL (for example GitHub Releases `latest.json`). Should I generate the keypair?
 - License, final app identifier (currently `com.markdownstudio.app`), and minimum OS versions (SRS §21).
+
+### Iterations 10–13 (same evening)
+
+| # | Feature | Commit |
+| --- | --- | --- |
+| 10 | Paste or drop images into a document: saved to `assets/` next to the file via a scoped Rust command, linked on their own line | e27b918 |
+| 11 | Code-split the preview and export pipelines: startup bundle 1.4 MB → 612 KB (693 KB after 12–13) | 7cba49a |
+| 12 | Markdown lint (broken links and images, anchors, duplicate headings, heading levels, alt text) with a Problems panel | 6a5fe3d |
+| 13 | Format Table (CJK-aware alignment) and link autocompletion (files, images, `#anchors`) | 3108380 |
+
+**Final check:** `tsc` is clean. Vitest: 120 tests passing across 17 files. Rust: 22 passing. `vite build` succeeds, and `npm audit` reports 0 vulnerabilities.
+
+**Push status:** still waiting for the GitHub sign-in. 14+ commits are queued on local `main`.
+
+**Next up:**
+
+1. Localization (i18n) scaffolding: extract UI strings; English plus one more locale.
+2. Playwright end-to-end tests against the browser demo (open, edit, save, find, export).
+3. Auto-update (UPD-*), once the user provides or approves a signing key and update URL.
+4. A native macOS menu bar, and "Reveal in File Explorer" / "Copy Path" in the explorer context menu.
+5. Performance: trim the highlight.js language set and benchmark 10 MB documents.
+6. Spell-check language setting, and word/character count for the selection.
