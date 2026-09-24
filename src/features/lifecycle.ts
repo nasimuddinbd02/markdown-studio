@@ -9,6 +9,7 @@ import { checkExternalChanges, closeAllDocuments, openPath } from "./documents";
 import { refreshWorkspace, setWorkspace } from "./workspace";
 import { installOsOpenHandlers } from "./osOpen";
 import { installAutoSave } from "./autosave";
+import { installWorkspaceWatcher } from "./watch";
 
 const RECOVERY_INTERVAL_MS = 5000;
 const EXTERNAL_CHECK_INTERVAL_MS = 3000;
@@ -205,6 +206,7 @@ export async function startApp() {
   await offerRecovery();
   await installOsOpenHandlers();
   installAutoSave();
+  await installWorkspaceWatcher();
 
   useDocuments.subscribe((s, prev) => {
     if (s.docs !== prev.docs) scheduleRecoverySave();

@@ -433,6 +433,19 @@ export class MemoryBackend implements Backend {
     this.persist();
   }
 
+  private fsListeners = new Set<(paths: string[]) => void>();
+  private watchedRoot: string | null = null;
+  async watchWorkspace(root: string | null) {
+    this.watchedRoot = root ? this.check(root) : null;
+  }
+  async onFsChanged(handler: (paths: string[]) => void) {
+    this.fsListeners.add(handler);
+    return () => void this.fsListeners.delete(handler);
+  }
+  private notifyFs(path: string) {
+    if (this.watchedRoot && path.startsWith(this.watchedRoot + "/")) this.fsListeners.forEach((h) => h([path]));
+  }
+
   async takePendingOpens() {
     return { files: [], folders: [] };
   }
@@ -464,10 +477,12 @@ export class MemoryBackend implements Backend {
   /** Test helper: simulates another program editing a file. */
   externalWrite(path: string, content: string) {
     this.put(path, content);
+    this.notifyFs(path);
   }
   /** Test helper: simulates another program deleting a file. */
   externalDelete(path: string) {
     this.files.delete(path);
+    this.notifyFs(path);
   }
 }
 

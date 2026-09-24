@@ -72,6 +72,10 @@ export interface Backend {
   saveRecovery(snapshot: RecoverySnapshot): Promise<void>;
   clearRecovery(): Promise<void>;
 
+  /** Watches a folder for changes (desktop only); `null` root stops watching. */
+  watchWorkspace(root: string | null): Promise<void>;
+  /** Subscribes to file-system changes under the watched folder. */
+  onFsChanged(handler: (paths: string[]) => void): Promise<() => void>;
   /** Paths the app was launched with (consumed once). */
   takePendingOpens(): Promise<OpenPaths>;
   /** Subscribes to paths opened later (drop, second launch). Returns an unsubscribe function. */

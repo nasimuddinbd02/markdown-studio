@@ -423,6 +423,26 @@ pub async fn search_workspace(
     state.track("search", result)
 }
 
+/// Starts watching an approved folder; changes are reported as `fs-changed` events.
+#[tauri::command]
+pub fn watch_workspace(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    watcher: State<'_, crate::watcher::WorkspaceWatcher>,
+    root: String,
+) -> AppResult<()> {
+    let dir = state.scope.check(Path::new(&root))?;
+    if !dir.is_dir() {
+        return Err(AppError::InvalidPath("Not a folder".into()));
+    }
+    state.track("watch", watcher.watch(app, dir))
+}
+
+#[tauri::command]
+pub fn unwatch_workspace(watcher: State<'_, crate::watcher::WorkspaceWatcher>) {
+    watcher.stop();
+}
+
 /// Earlier versions of a document kept by local history, newest first.
 #[tauri::command]
 pub async fn list_history(state: State<'_, AppState>, path: String) -> AppResult<Vec<crate::history::HistoryEntry>> {

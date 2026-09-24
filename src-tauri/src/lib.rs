@@ -7,6 +7,7 @@ mod scope;
 mod search;
 mod storage;
 mod text;
+mod watcher;
 
 use commands::AppState;
 use std::sync::Mutex;
@@ -54,6 +55,7 @@ pub fn run() {
             let launch = open_paths::paths_from_args(std::env::args().skip(1), &cwd);
             *state.pending_open.lock().unwrap() = open_paths::accept(&state, launch);
             app.manage(state);
+            app.manage(watcher::WorkspaceWatcher::default());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -81,6 +83,8 @@ pub fn run() {
             commands::search_workspace,
             commands::list_workspace_files,
             commands::list_history,
+            commands::watch_workspace,
+            commands::unwatch_workspace,
             commands::read_history,
             commands::load_settings,
             commands::save_settings,

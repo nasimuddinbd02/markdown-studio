@@ -45,6 +45,7 @@ macOS and Linux builds are produced by the release workflow (see [Packaging and 
 - Large-document mode: live preview pauses above 1 MB of text, with render-on-demand
 - Local file history: the previous version is kept on every save (30 per file, in app data); browse with a line diff and restore (undoable)
 - Safe saves: atomic temp-file writes, conflict detection when a file changed on disk, and actionable errors (permission denied → Save As, disk full, and so on)
+- Live folder watching: the explorer and open files update immediately when other programs change files on disk
 - External change detection: clean tabs reload automatically; dirty tabs get Reload / Compare / Keep Mine
 - Crash recovery for unsaved documents, and session restore for the last folder and open files
 - UTF-8 (with or without BOM), with LF/CRLF line endings preserved per file

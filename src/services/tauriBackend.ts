@@ -47,6 +47,11 @@ export const tauriBackend: Backend = {
   saveRecovery: (snapshot) => call("save_recovery", { snapshot }),
   clearRecovery: () => call("clear_recovery"),
 
+  watchWorkspace: (root) => (root ? call("watch_workspace", { root }) : call("unwatch_workspace")),
+  onFsChanged: async (handler) => {
+    const { listen } = await import("@tauri-apps/api/event");
+    return listen<{ paths: string[] }>("fs-changed", (e) => handler(e.payload.paths));
+  },
   takePendingOpens: () => call("take_pending_opens"),
   onOpenPaths: async (handler) => {
     const { listen } = await import("@tauri-apps/api/event");
