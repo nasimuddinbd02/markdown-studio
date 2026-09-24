@@ -112,6 +112,9 @@ export async function openRecentFile(path: string) {
   }
 }
 
+/** Documents that were saved again while a save was in flight. */
+const resaveRequested = new Set<string>();
+
 type SaveOptions = {
   saveAs?: boolean;
   force?: boolean;
@@ -125,7 +128,13 @@ type SaveOptions = {
  */
 export async function saveDocument(id: string, opts: SaveOptions = {}): Promise<boolean> {
   const doc = findDoc(id);
-  if (!doc || doc.saving) return false;
+  if (!doc) return false;
+  if (doc.saving) {
+    // Don't drop the request: save again once the current write finishes,
+    // so edits typed during a slow save are not left unsaved.
+    if (!opts.saveAs) resaveRequested.add(id);
+    return false;
+  }
   // Auto-save never picks a location or overwrites around a conflict/deletion.
   if (opts.auto && (!doc.path || doc.externalChange)) return false;
 
@@ -172,9 +181,14 @@ export async function saveDocument(id: string, opts: SaveOptions = {}): Promise<
     });
     const root = useWorkspace.getState().root;
     if (isNewPath && root && isInside(path!, root)) void refreshDir(dirname(path!));
+    if (resaveRequested.delete(id)) {
+      const latest = findDoc(id);
+      if (latest && isDirty(latest)) void saveDocument(id, { auto: opts.auto });
+    }
     return true;
   } catch (e) {
     docs().update(id, { saving: false });
+    resaveRequested.delete(id);
     return handleSaveError(id, path!, e, !!opts.auto);
   }
 }

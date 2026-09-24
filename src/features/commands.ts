@@ -98,6 +98,15 @@ export const commands: Record<string, Command> = {
     enabled: hasActive,
   },
   saveAll: { id: "saveAll", label: "Save All", shortcut: "Mod+Alt+S", run: async () => void (await saveAll()) },
+  fileHistory: {
+    id: "fileHistory",
+    label: "File History…",
+    run: () => {
+      const d = activeDoc();
+      if (d?.path) useUi.getState().setHistoryDocId(d.id);
+    },
+    enabled: () => !!activeDoc()?.path,
+  },
   exportHtml: { id: "exportHtml", label: "Export as HTML…", run: async () => (await exporting()).exportActiveAsHtml(), enabled: hasActive },
   copyHtml: { id: "copyHtml", label: "Copy as HTML", run: async () => (await exporting()).copyActiveAsHtml(), enabled: hasActive },
   print: { id: "print", label: "Print / Save as PDF…", shortcut: "Mod+P", run: async () => (await exporting()).printActive(), enabled: hasActive },

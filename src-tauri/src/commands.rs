@@ -49,6 +49,9 @@ impl AppState {
     fn recents_path(&self) -> PathBuf {
         self.config_dir.join("recent.json")
     }
+    fn history_root(&self) -> PathBuf {
+        self.data_dir.join("history")
+    }
     fn recovery_path(&self) -> PathBuf {
         self.data_dir.join("recovery").join("session.json")
     }
@@ -235,6 +238,10 @@ pub async fn write_text_file(
     force: bool,
 ) -> AppResult<u64> {
     let file = state.track("fs.write", state.scope.check(Path::new(&path)))?;
+    // Keep the version being replaced in local history (never blocks the save).
+    if let Err(e) = crate::history::snapshot(&state.history_root(), &file) {
+        state.logger.log("warn", "history.snapshot", &e.to_string());
+    }
     let result = fs_ops::write_text_atomic(&file, &content, line_ending, bom, expected_mtime, force);
     if result.is_ok() {
         state.logger.log("info", "fs.write", "saved document");
@@ -414,6 +421,21 @@ pub async fn search_workspace(
         .await
         .map_err(|e| AppError::Io(e.to_string()))?;
     state.track("search", result)
+}
+
+/// Earlier versions of a document kept by local history, newest first.
+#[tauri::command]
+pub async fn list_history(state: State<'_, AppState>, path: String) -> AppResult<Vec<crate::history::HistoryEntry>> {
+    let file = state.scope.check(Path::new(&path))?;
+    crate::history::list(&state.history_root(), &file)
+}
+
+/// Text of one history version (decoded like a document: UTF-8, LF).
+#[tauri::command]
+pub async fn read_history(state: State<'_, AppState>, path: String, id: u64) -> AppResult<String> {
+    let file = state.scope.check(Path::new(&path))?;
+    let bytes = crate::history::read(&state.history_root(), &file, id)?;
+    Ok(crate::text::decode(&bytes)?.content)
 }
 
 // ---------------------------------------------------------------- settings & recovery

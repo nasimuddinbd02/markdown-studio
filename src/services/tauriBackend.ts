@@ -39,6 +39,8 @@ export const tauriBackend: Backend = {
   revealInFolder: (path) => call("reveal_in_folder", { path }),
   exportFile: (suggestedName, content, kind) => call("export_file", { suggestedName, content, kind }),
 
+  listHistory: (path) => call("list_history", { path }),
+  readHistory: (path, id) => call("read_history", { path, id }),
   loadSettings: () => call("load_settings"),
   saveSettings: (settings) => call("save_settings", { settings }),
   loadRecovery: async () => (await call<RecoverySnapshot | null>("load_recovery")) ?? null,

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   checkExternalChanges, closeDocument, newDocument, openPath, saveDocument,
 } from "../src/features/documents";
@@ -127,6 +127,29 @@ describe("safe save (SRS §10.2, NFR-004)", () => {
     expect(await saveDocument(id)).toBe(true);
     overwrite.stop();
     expect((await backend.readTextFile("/ws/a.md")).content).toBe("mine");
+  });
+});
+
+describe("saving while a save is in flight", () => {
+  it("saves again afterwards so later edits are not left unsaved", async () => {
+    const backend = setupBackend({ "/ws/a.md": "a" });
+    const id = (await openPath("/ws/a.md"))!;
+    const original = backend.writeTextFile.bind(backend);
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    let calls = 0;
+    backend.writeTextFile = async (req) => {
+      if (calls++ === 0) await gate; // first write is slow
+      return original(req);
+    };
+    useDocuments.getState().setContent(id, "one");
+    const first = saveDocument(id);
+    useDocuments.getState().setContent(id, "one two");
+    expect(await saveDocument(id)).toBe(false); // queued, not dropped
+    release();
+    await first;
+    await vi.waitFor(async () => expect((await backend.readTextFile("/ws/a.md")).content).toBe("one two"));
+    expect(isDirty(docs()[0])).toBe(false);
   });
 });
 

@@ -119,3 +119,9 @@ export interface SearchResult {
   filesSearched: number;
   truncated: boolean;
 }
+
+export interface HistoryEntry {
+  /** Time (ms since epoch) this version was replaced by a save. */
+  id: number;
+  size: number;
+}

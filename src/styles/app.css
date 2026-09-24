@@ -1387,3 +1387,99 @@ select {
   color: var(--text);
   box-shadow: var(--shadow);
 }
+
+/* ------------------------------------------------------------ file history */
+
+.history-modal {
+  width: min(960px, 100%);
+}
+.history-body {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 12px;
+  height: min(60vh, 520px);
+}
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+}
+.history-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 7px 10px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.history-item:hover {
+  background: var(--bg-hover);
+}
+.history-item.active {
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.history-diff {
+  min-width: 0;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 0;
+}
+.history-diff > p {
+  margin: 4px 12px 8px;
+}
+.history-legend {
+  font-size: 12px;
+}
+.diff-add-chip,
+.diff-del-chip {
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+.diff-add-chip {
+  background: rgba(31, 138, 76, 0.18);
+}
+.diff-del-chip {
+  background: rgba(198, 47, 58, 0.16);
+}
+.diff {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+}
+.diff-line {
+  padding: 0 12px 0 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.diff-sign {
+  display: inline-block;
+  width: 16px;
+  color: var(--text-muted);
+}
+.diff-add {
+  background: rgba(31, 138, 76, 0.16);
+}
+.diff-del {
+  background: rgba(198, 47, 58, 0.14);
+}
+.diff-gap {
+  padding: 2px 12px;
+  color: var(--text-muted);
+  background: var(--bg-code);
+  font-family: var(--font-ui);
+}
+@media (max-width: 700px) {
+  .history-body {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}

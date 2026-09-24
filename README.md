@@ -25,6 +25,7 @@ The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status pe
 - Optional auto save (after a delay, or on tab/window focus change) that never overwrites external changes
 - Save options: trim trailing whitespace (keeps Markdown hard breaks and code blocks), final newline, default line ending for new files
 - Large-document mode: live preview pauses above 1 MB of text, with render-on-demand
+- Local file history: the previous version is kept on every save (30 per file, in app data); browse with a line diff and restore (undoable)
 - Safe saves: atomic temp-file writes, conflict detection when a file changed on disk, and actionable errors (permission denied → Save As, disk full, and so on)
 - External change detection: clean tabs reload automatically; dirty tabs get Reload / Compare / Keep Mine
 - Crash recovery for unsaved documents, and session restore for the last folder and open files

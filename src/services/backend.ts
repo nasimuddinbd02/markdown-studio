@@ -1,5 +1,5 @@
 import type {
-  AppInfo, OpenPaths, SearchOptions, SearchResult, DirEntry, FileContent, LineEnding, RecentEntry, RecoverySnapshot,
+  AppInfo, HistoryEntry, OpenPaths, SearchOptions, SearchResult, DirEntry, FileContent, LineEnding, RecentEntry, RecoverySnapshot,
 } from "../types";
 
 export type ExportKind = "html";
@@ -61,6 +61,10 @@ export interface Backend {
    * writes it there. Returns the chosen path, or `null` if cancelled.
    */
   exportFile(suggestedName: string, content: string, kind: ExportKind): Promise<string | null>;
+
+  /** Earlier versions of a document kept by local history, newest first. */
+  listHistory(path: string): Promise<HistoryEntry[]>;
+  readHistory(path: string, id: number): Promise<string>;
 
   loadSettings(): Promise<unknown>;
   saveSettings(settings: unknown): Promise<void>;

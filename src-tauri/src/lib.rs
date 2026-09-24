@@ -1,6 +1,7 @@
 mod commands;
 mod error;
 mod fs_ops;
+mod history;
 mod open_paths;
 mod scope;
 mod search;
@@ -79,6 +80,8 @@ pub fn run() {
             commands::take_pending_opens,
             commands::search_workspace,
             commands::list_workspace_files,
+            commands::list_history,
+            commands::read_history,
             commands::load_settings,
             commands::save_settings,
             commands::load_recovery,

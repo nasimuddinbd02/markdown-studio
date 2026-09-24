@@ -33,6 +33,9 @@ interface UiState {
   paletteOpen: boolean;
   sidebarView: "explorer" | "search";
   problems: { errors: number; warnings: number; infos: number } | null;
+  /** Document whose File History dialog is open. */
+  historyDocId: string | null;
+  setHistoryDocId(id: string | null): void;
   setProblems(p: UiState["problems"]): void;
   /** Incremented to move focus into the search box. */
   searchFocusToken: number;
@@ -58,6 +61,8 @@ export const useUi = create<UiState>((set, get) => ({
   paletteOpen: false,
   sidebarView: "explorer",
   problems: null,
+  historyDocId: null,
+  setHistoryDocId: (historyDocId) => set({ historyDocId }),
   setProblems: (problems) => set({ problems }),
   searchFocusToken: 0,
   cursor: { line: 1, col: 1, selected: 0 },

@@ -24,6 +24,7 @@ import { DialogHost, Toasts } from "./components/Dialogs";
 import { AboutDialog, SettingsDialog } from "./components/SettingsDialog";
 import { Welcome } from "./components/Welcome";
 import { CommandPalette } from "./components/CommandPalette";
+import { HistoryDialog } from "./components/HistoryDialog";
 import { useSettings } from "./stores/settingsStore";
 import { useDocuments } from "./stores/documentsStore";
 
@@ -142,6 +143,7 @@ export default function App() {
       <SettingsDialog />
       <AboutDialog />
       <CommandPalette />
+      <HistoryDialog />
       <DialogHost />
       <Toasts />
     </div>

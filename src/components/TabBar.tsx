@@ -6,6 +6,7 @@ import { Icon } from "./Icon";
 import { ContextMenu } from "./ContextMenu";
 import { closeOthers, closeSaved, closeToTheRight, copyPath, revealInFolder, revealLabel } from "../features/pathActions";
 import { backend } from "../services";
+import { useUi } from "../stores/uiStore";
 
 /** Document tabs (FR-040, FR-041). Dirty tabs show a dot *and* a text label (§15). */
 export function TabBar() {
@@ -129,6 +130,7 @@ export function TabBar() {
             { label: "Close to the Right", run: () => closeToTheRight(menuDoc.id), disabled: docs[docs.length - 1]?.id === menuDoc.id },
             { label: "Close Saved", run: () => closeSaved() },
             "separator",
+            { label: "File History…", run: () => useUi.getState().setHistoryDocId(menuDoc.id), disabled: !menuDoc.path },
             { label: "Copy Path", run: () => copyPath(menuDoc.path!), disabled: !menuDoc.path },
             { label: revealLabel, run: () => revealInFolder(menuDoc.path!), disabled: !menuDoc.path || !backend().isNative },
           ]}

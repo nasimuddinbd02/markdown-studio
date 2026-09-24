@@ -235,6 +235,20 @@ export class MemoryBackend implements Backend {
     };
   }
 
+  private history = new Map<string, Array<{ id: number; content: string }>>();
+
+  async listHistory(path: string) {
+    const p = this.check(path);
+    return (this.history.get(p) ?? []).map((v) => ({ id: v.id, size: v.content.length })).sort((a, b) => b.id - a.id);
+  }
+
+  async readHistory(path: string, id: number) {
+    const p = this.check(path);
+    const v = (this.history.get(p) ?? []).find((x) => x.id === id);
+    if (!v) throw new AppError("notFound", "That version is no longer available.");
+    return v.content.replace(/\r\n/g, "\n");
+  }
+
   async writeTextFile(req: WriteRequest) {
     const p = this.check(req.path);
     const existing = this.files.get(p);
@@ -243,6 +257,13 @@ export class MemoryBackend implements Backend {
     }
     if (!this.dirs.has(dirname(p))) throw new AppError("notFound", "Folder not found");
     const content = req.lineEnding === "crlf" ? req.content.replace(/\n/g, "\r\n") : req.content;
+    if (existing) {
+      const versions = this.history.get(p) ?? [];
+      if (versions[versions.length - 1]?.content !== existing.content) {
+        versions.push({ id: this.tick(), content: existing.content });
+        this.history.set(p, versions.slice(-30));
+      }
+    }
     this.put(p, content);
     this.persist();
     return this.files.get(p)!.mtime;
