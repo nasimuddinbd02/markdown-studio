@@ -1,0 +1,62 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [6 0 R 8 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Length 656 >>
+stream
+BT /F1 8 Tf 72 770 Td (ACME Corp - Confidential) Tj ET
+BT /F1 8 Tf 72 30 Td (Page 1) Tj ET
+BT /F2 24 Tf 72 700 Td (Annual Report) Tj ET
+BT /F2 16 Tf 72 660 Td (Overview) Tj ET
+BT /F1 11 Tf 72 635 Td (This year the company grew in every) Tj ET
+BT /F1 11 Tf 72 621 Td (region and opened two new offices in) Tj ET
+BT /F1 11 Tf 72 607 Td (Europe, with strong per-) Tj ET
+BT /F1 11 Tf 72 593 Td (formance overall.) Tj ET
+BT /F2 11 Tf 72 560 Td (Key results) Tj ET
+BT /F1 11 Tf 72 540 Td (• Revenue up 20%) Tj ET
+BT /F1 11 Tf 72 526 Td (• Costs down 5%) Tj ET
+BT /F1 11 Tf 72 500 Td (1. Hire more engineers) Tj ET
+BT /F1 11 Tf 72 486 Td (2. Expand to Asia) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 184 >>
+stream
+BT /F1 8 Tf 72 770 Td (ACME Corp - Confidential) Tj ET
+BT /F1 8 Tf 72 30 Td (Page 2) Tj ET
+BT /F2 16 Tf 72 700 Td (Outlook) Tj ET
+BT /F1 11 Tf 72 675 Td (Next year looks bright.) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 7 0 R >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000121 00000 n 
+0000000218 00000 n 
+0000000320 00000 n 
+0000001027 00000 n 
+0000001163 00000 n 
+0000001398 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+1534
+%%EOF

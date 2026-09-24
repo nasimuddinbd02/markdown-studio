@@ -38,6 +38,24 @@ test("imports a Word document as Markdown with its images", async ({ page }) => 
   await expect(page.locator(".toast")).toContainText(/Imported “report\.docx” \(1 image saved to assets\//);
 });
 
+test("imports a PDF as Markdown with headings and lists", async ({ page }) => {
+  await start(page);
+  await page.getByRole("button", { name: "File", exact: true }).click();
+  const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("menuitem", { name: /Import PDF/ }).click();
+  await (await chooser).setFiles(fixture("report.pdf"));
+
+  await expect(page.getByRole("tab", { name: /report\.md/ })).toHaveAttribute("aria-selected", "true", { timeout: 15_000 });
+  const preview = page.locator(".markdown-body");
+  await expect(preview.locator("h1")).toHaveText("Annual Report");
+  await expect(preview.locator("h2")).toHaveText(["Overview", "Outlook"]);
+  await expect(preview.locator("h3")).toHaveText("Key results");
+  await expect(preview.locator("ul li")).toHaveText(["Revenue up 20%", "Costs down 5%"]);
+  await expect(preview.locator("ol li")).toHaveText(["Hire more engineers", "Expand to Asia"]);
+  await expect(preview).toContainText("with strong performance overall.");
+  await expect(preview).not.toContainText("Confidential");
+});
+
 test("pastes rich text from the clipboard as Markdown", async ({ page, context }) => {
   await start(page);
   await context.grantPermissions(["clipboard-read", "clipboard-write"]).catch(() => {});

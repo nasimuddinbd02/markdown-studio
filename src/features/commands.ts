@@ -109,6 +109,7 @@ export const commands: Record<string, Command> = {
     enabled: () => !!activeDoc()?.path,
   },
   importDocx: { id: "importDocx", label: "Import Word Document (.docx)…", run: async () => (await importing()).importDocument("docx") },
+  importPdf: { id: "importPdf", label: "Import PDF (.pdf)…", run: async () => (await importing()).importDocument("pdf") },
   importHtml: { id: "importHtml", label: "Import Web Page (.html)…", run: async () => (await importing()).importDocument("html") },
   exportHtml: { id: "exportHtml", label: "Export as HTML…", run: async () => (await exporting()).exportActiveAsHtml(), enabled: hasActive },
   exportDocx: { id: "exportDocx", label: "Export as Word (.docx)…", run: async () => (await exporting()).exportActiveAsDocx(), enabled: hasActive },

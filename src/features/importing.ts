@@ -102,6 +102,11 @@ export async function importDocument(kind: ImportKind) {
     return;
   }
 
+  if (!result.markdown.trim()) {
+    notify("error", result.warnings[0] ?? `“${source.name}” doesn't contain any text to import.`);
+    return;
+  }
+
   const b = backend();
   const suggested = source.name.replace(/\.[^.]+$/, "") + ".md";
   let dest: string | null = null;
