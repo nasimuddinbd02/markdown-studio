@@ -334,6 +334,7 @@ fn import_filter(kind: &str) -> AppResult<(&'static str, &'static [&'static str]
         "docx" => Ok(("Word document", &["docx"])),
         "html" => Ok(("Web page", &["html", "htm"])),
         "pdf" => Ok(("PDF document", &["pdf"])),
+        "csv" => Ok(("Spreadsheet data (CSV/TSV)", &["csv", "tsv"])),
         _ => Err(AppError::InvalidPath("Unsupported import type".into())),
     }
 }

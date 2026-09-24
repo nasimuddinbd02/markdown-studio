@@ -19,7 +19,7 @@ const MENUS: { label: string; items: (recent: RecentEntry[]) => Item[] }[] = [
     items: (recent) => [
       c("newFile"), c("newFileInWorkspace"), sep, c("openFile"), c("openFolder"),
       ...(recent.length ? [sep, ...recent.slice(0, 10).map((entry): Item => ({ type: "recent", entry }))] : []),
-      sep, c("save"), c("saveAs"), c("saveAll"), c("fileHistory"), sep, c("importDocx"), c("importPdf"), c("importHtml"), sep, c("exportPdf"), c("exportDocx"), c("exportHtml"), c("copyHtml"), c("print"), sep, c("closeTab"), c("closeFolder"), sep, c("settings"),
+      sep, c("save"), c("saveAs"), c("saveAll"), c("fileHistory"), sep, c("importDocx"), c("importPdf"), c("importHtml"), c("importCsv"), sep, c("exportPdf"), c("exportDocx"), c("exportHtml"), c("copyHtml"), c("print"), sep, c("closeTab"), c("closeFolder"), sep, c("settings"),
     ],
   },
   {
@@ -32,7 +32,7 @@ const MENUS: { label: string; items: (recent: RecentEntry[]) => Item[] }[] = [
       c("bold"), c("italic"), c("strikethrough"), c("inlineCode"), c("link"), sep,
       c("heading1"), c("heading2"), c("heading3"), c("paragraph"), sep,
       c("bulletList"), c("orderedList"), c("taskList"), c("quote"), sep,
-      c("codeBlock"), c("table"), c("formatTable"), c("horizontalRule"),
+      c("codeBlock"), c("table"), c("formatTable"), c("copyTableCsv"), c("horizontalRule"), sep, c("toc"),
     ],
   },
   {

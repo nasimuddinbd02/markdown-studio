@@ -29,7 +29,7 @@ export interface Backend {
   pickSavePath(suggestedName: string, directory: string | null): Promise<string | null>;
 
   /** Native Open dialog for a document to import (desktop only). */
-  pickImportFile(kind: "docx" | "html" | "pdf"): Promise<string | null>;
+  pickImportFile(kind: "docx" | "html" | "pdf" | "csv"): Promise<string | null>;
   /** Reads an approved file as base64 (desktop only; used by import). */
   readBinaryFile(path: string): Promise<string>;
 

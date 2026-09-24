@@ -1,4 +1,5 @@
 import type { LineEnding, Settings } from "../types";
+import { updateToc } from "./toc";
 
 const FENCE = /^ {0,3}(`{3,}|~{3,})/;
 
@@ -34,8 +35,12 @@ export function ensureFinalNewline(text: string): string {
 }
 
 /** Applies the user's on-save cleanups (Settings → Files). */
-export function applySaveTransforms(text: string, s: Pick<Settings, "trimTrailingWhitespace" | "insertFinalNewline">): string {
+export function applySaveTransforms(
+  text: string,
+  s: Pick<Settings, "trimTrailingWhitespace" | "insertFinalNewline"> & Partial<Pick<Settings, "updateTocOnSave">>,
+): string {
   let out = text;
+  if (s.updateTocOnSave) out = updateToc(out);
   if (s.trimTrailingWhitespace) out = trimTrailingWhitespace(out);
   if (s.insertFinalNewline) out = ensureFinalNewline(out);
   return out;

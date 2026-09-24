@@ -17,6 +17,7 @@ import type { StateCommand } from "@codemirror/state";
 import type { KeyBinding } from "@codemirror/view";
 import * as fmt from "./formatting";
 import { formatTableAtCursor } from "./tables";
+import { insertOrUpdateToc } from "./toc";
 
 export const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
@@ -55,6 +56,7 @@ export const formatCommands: Record<string, Command> = {
   codeBlock: formatCommand("codeBlock", "Code Block", fmt.insertCodeBlock, "Mod+Alt+C"),
   table: formatCommand("table", "Insert Table", fmt.insertTable),
   formatTable: formatCommand("formatTable", "Format Table", formatTableAtCursor, "Mod+Alt+T"),
+  toc: formatCommand("toc", "Insert / Update Table of Contents", insertOrUpdateToc),
   horizontalRule: formatCommand("horizontalRule", "Horizontal Rule", fmt.insertHorizontalRule),
 };
 const VIEW_ORDER: ViewMode[] = ["split", "editor", "preview"];
@@ -110,6 +112,13 @@ export const commands: Record<string, Command> = {
   },
   importDocx: { id: "importDocx", label: "Import Word Document (.docx)…", run: async () => (await importing()).importDocument("docx") },
   importPdf: { id: "importPdf", label: "Import PDF (.pdf)…", run: async () => (await importing()).importDocument("pdf") },
+  importCsv: { id: "importCsv", label: "Import CSV as Table…", run: async () => (await importing()).importDocument("csv") },
+  copyTableCsv: {
+    id: "copyTableCsv",
+    label: "Copy Table as CSV",
+    run: async () => (await import("./tableCsv")).copyTableAsCsv(),
+    enabled: hasActive,
+  },
   importHtml: { id: "importHtml", label: "Import Web Page (.html)…", run: async () => (await importing()).importDocument("html") },
   exportHtml: { id: "exportHtml", label: "Export as HTML…", run: async () => (await exporting()).exportActiveAsHtml(), enabled: hasActive },
   exportPdf: { id: "exportPdf", label: "Export as PDF…", run: async () => (await exporting()).exportActiveAsPdf(), enabled: hasActive },

@@ -60,6 +60,7 @@ export interface Settings {
   lintMarkdown: boolean;
   spellCheck: boolean;
   pasteRichTextAsMarkdown: boolean;
+  updateTocOnSave: boolean;
   restoreSession: boolean;
   autoSave: AutoSaveMode;
   autoSaveDelayMs: number;

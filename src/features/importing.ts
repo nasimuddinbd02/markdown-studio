@@ -10,14 +10,15 @@ import { newDocument, openPath } from "./documents";
 import { defaultLineEnding } from "./saveTransforms";
 import { refreshDir } from "./workspace";
 
-export type ImportKind = "docx" | "html" | "pdf";
+export type ImportKind = "docx" | "html" | "pdf" | "csv";
 
 const ACCEPT: Record<ImportKind, string> = {
   docx: ".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   html: ".html,.htm,text/html",
   pdf: ".pdf,application/pdf",
+  csv: ".csv,.tsv,text/csv,text/tab-separated-values",
 };
-const LABEL: Record<ImportKind, string> = { docx: "Word document", html: "web page", pdf: "PDF" };
+const LABEL: Record<ImportKind, string> = { docx: "Word document", html: "web page", pdf: "PDF", csv: "CSV file" };
 
 interface Source {
   name: string;
@@ -66,6 +67,11 @@ export async function convertSource(kind: ImportKind, data: ArrayBuffer, name: s
       return (await import("../services/convert/docx")).htmlFileToMarkdown(new TextDecoder().decode(data), stem);
     case "pdf":
       return (await import("../services/convert/pdf")).pdfToMarkdown(data);
+    case "csv": {
+      const { csvToMarkdownTable } = await import("../services/convert/csv");
+      const table = csvToMarkdownTable(new TextDecoder().decode(data));
+      return { markdown: table ? `# ${stem}\n\n${table}\n` : "", images: [], warnings: [] };
+    }
   }
 }
 
