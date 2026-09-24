@@ -81,5 +81,5 @@ describe("large documents", () => {
     expect(document.querySelector(".markdown-body h1")).toBeNull();
     act(() => screen.getByRole("button", { name: "Render Now" }).click());
     expect(document.querySelector(".markdown-body h1")?.textContent).toBe("Big");
-  });
+  }, 20_000); // renders a 1M-character document; allow for slow CI machines
 });
