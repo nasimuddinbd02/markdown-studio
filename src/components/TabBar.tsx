@@ -46,6 +46,14 @@ export function TabBar() {
       }
       return;
     }
+    if (e.key === "Delete") {
+      const tab = (document.activeElement as HTMLElement | null)?.closest<HTMLElement>("[data-tab-id]");
+      if (tab) {
+        e.preventDefault();
+        void closeDocument(tab.dataset.tabId!);
+      }
+      return;
+    }
     if (e.key !== "ArrowRight" && e.key !== "ArrowLeft" && e.key !== "Home" && e.key !== "End") return;
     const tabs = [...(list.current?.querySelectorAll<HTMLElement>("[role=tab]") ?? [])];
     const idx = tabs.indexOf(document.activeElement as HTMLElement);
@@ -68,9 +76,7 @@ export function TabBar() {
           return (
             <div
               key={d.id}
-              role="tab"
-              aria-selected={active}
-              tabIndex={active ? 0 : -1}
+              role="presentation"
               className={`tab${active ? " active" : ""}${dirty ? " dirty" : ""}${d.externalChange ? " warn" : ""}`}
               title={(d.path ?? "Not saved yet") + (dirty ? " — unsaved changes" : "")}
               onClick={() => setActive(d.id)}
@@ -89,22 +95,24 @@ export function TabBar() {
                 window.addEventListener("pointerup", endDrag);
               }}
             >
-              <Icon name="file" size={14} className="tab-icon" />
-              <span className="tab-label">{d.name}</span>
-              {dirty && <span className="sr-only"> (unsaved)</span>}
-              <button
+              <div role="tab" aria-selected={active} tabIndex={active ? 0 : -1} className="tab-main">
+                <Icon name="file" size={14} className="tab-icon" />
+                <span className="tab-label">{d.name}</span>
+                {dirty && <span className="sr-only"> (unsaved)</span>}
+              </div>
+              {/* Mouse affordance only: keyboard users close with Ctrl/Cmd+W, Delete or the context menu. */}
+              <span
                 className="tab-close"
-                tabIndex={-1}
-                aria-label={`Close ${d.name}`}
+                aria-hidden="true"
                 title={`Close (${formatShortcut(commands.closeTab.shortcut)})`}
                 onClick={(e) => {
                   e.stopPropagation();
                   void closeDocument(d.id);
                 }}
               >
-                <span className="tab-dirty-dot" aria-hidden="true" />
+                <span className="tab-dirty-dot" />
                 <Icon name="close" size={13} className="tab-close-icon" />
-              </button>
+              </span>
             </div>
           );
         })}

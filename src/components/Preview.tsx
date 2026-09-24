@@ -87,6 +87,12 @@ const MarkdownView = memo(function MarkdownView({ text, docPath }: { text: strin
       img: ({ src, alt, title }) => (
         <LocalImage src={typeof src === "string" ? src : undefined} alt={alt} title={title} docPath={docPath} />
       ),
+      input: ({ node: _node, ...props }) =>
+        props.type === "checkbox" ? (
+          <input {...props} aria-label={props.checked ? "Completed task" : "Open task"} />
+        ) : (
+          <input {...props} />
+        ),
       a: ({ href, children, title }) => (
         <a href={href} title={title ?? href} data-href={href}>
           {children}

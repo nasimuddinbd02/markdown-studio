@@ -128,12 +128,12 @@ export function SearchPanel() {
               : ""}
       </div>
       {result && (
-        <ul className="search-results" role="tree" aria-label="Search results">
+        <ul className="search-results" aria-label="Search results">
           {result.files.map((f) => {
             const isCollapsed = !!collapsed[f.path];
             return (
-              <li key={f.path} role="treeitem" aria-expanded={!isCollapsed}>
-                <button className="search-file" title={f.path} onClick={() => setCollapsed((c) => ({ ...c, [f.path]: !isCollapsed }))}>
+              <li key={f.path}>
+                <button className="search-file" title={f.path} aria-expanded={!isCollapsed} onClick={() => setCollapsed((c) => ({ ...c, [f.path]: !isCollapsed }))}>
                   <Icon name={isCollapsed ? "chevronRight" : "chevronDown"} size={14} />
                   <Icon name="file" size={14} className="tree-file-icon" />
                   <span className="search-file-name">{basename(f.path)}</span>
@@ -141,7 +141,7 @@ export function SearchPanel() {
                   <span className="badge">{f.matches.length}</span>
                 </button>
                 {!isCollapsed && (
-                  <ul role="group">
+                  <ul>
                     {f.matches.map((m, i) => (
                       <li key={i}>
                         <button className="search-match" title={`Line ${m.line}`} onClick={() => void open(f.path, m)}>

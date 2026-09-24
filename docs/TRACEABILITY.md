@@ -58,7 +58,7 @@ Status of each [SRS](SRS.md) requirement. **Done** means implemented and tested 
 | NFR-007 | Done | Scope enforced in Rust ([scope.rs](../src-tauri/src/scope.rs)) |
 | NFR-008 | Done | No telemetry; content never leaves the machine |
 | NFR-009 | Done | Modular services and stores; Vitest and Rust tests |
-| NFR-010 | Done | Keyboard menus, tree, tabs and dialogs; focus rings |
+| NFR-010 | Done | Keyboard menus, tree, tabs and dialogs; focus rings; automated axe-core WCAG 2.1 AA audit (light and dark) in e2e |
 | NFR-011 | Partial | Minimum OS versions still need to be documented (open question in SRS §21) |
 | SEC-001 | Done | Capability grants only `core:default`, set-title and destroy |
 | SEC-002/003 | Done | Absolute paths only, `..` rejected, canonicalised scope check |

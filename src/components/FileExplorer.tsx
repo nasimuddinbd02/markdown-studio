@@ -76,9 +76,9 @@ function TreeNode({ entry, depth, onContext }: { entry: DirEntry; depth: number;
       {entry.isDir && expanded && (
         <ul role="group">
           {children === undefined ? (
-            <li className="tree-empty" style={{ paddingLeft: 22 + (depth + 1) * 14 }}>Loading…</li>
+            <li role="none" className="tree-empty" style={{ paddingLeft: 22 + (depth + 1) * 14 }}>Loading…</li>
           ) : children.length === 0 ? (
-            <li className="tree-empty" style={{ paddingLeft: 22 + (depth + 1) * 14 }}>No Markdown files</li>
+            <li role="none" className="tree-empty" style={{ paddingLeft: 22 + (depth + 1) * 14 }}>No Markdown files</li>
           ) : (
             children.map((c) => <TreeNode key={c.path} entry={c} depth={depth + 1} onContext={onContext} />)
           )}
@@ -155,9 +155,9 @@ export function FileExplorer() {
         }}
       >
         {rootChildren === undefined ? (
-          <li className="tree-empty">Loading…</li>
+          <li role="none" className="tree-empty">Loading…</li>
         ) : rootChildren.length === 0 ? (
-          <li className="tree-empty">This folder has no Markdown files.</li>
+          <li role="none" className="tree-empty">This folder has no Markdown files.</li>
         ) : (
           rootChildren.map((c) => <TreeNode key={c.path} entry={c} depth={0} onContext={onContext} />)
         )}
