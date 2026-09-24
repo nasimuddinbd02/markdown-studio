@@ -32,7 +32,7 @@ const MENUS: { label: string; items: (recent: RecentEntry[]) => Item[] }[] = [
       c("bold"), c("italic"), c("strikethrough"), c("inlineCode"), c("link"), sep,
       c("heading1"), c("heading2"), c("heading3"), c("paragraph"), sep,
       c("bulletList"), c("orderedList"), c("taskList"), c("quote"), sep,
-      c("codeBlock"), c("table"), c("horizontalRule"),
+      c("codeBlock"), c("table"), c("formatTable"), c("horizontalRule"),
     ],
   },
   {

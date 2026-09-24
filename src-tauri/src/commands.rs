@@ -378,6 +378,15 @@ pub async fn export_file(
     Ok(Some(fs_ops::path_string(&path)))
 }
 
+/// Lists Markdown and image files under an approved folder (link completion).
+#[tauri::command]
+pub async fn list_workspace_files(state: State<'_, AppState>, root: String) -> AppResult<Vec<String>> {
+    let dir = state.scope.check(Path::new(&root))?;
+    tauri::async_runtime::spawn_blocking(move || crate::search::workspace_files(&dir))
+        .await
+        .map_err(|e| AppError::Io(e.to_string()))
+}
+
 /// Searches Markdown files under an approved folder ("Find in Files").
 #[tauri::command]
 pub async fn search_workspace(

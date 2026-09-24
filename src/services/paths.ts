@@ -78,6 +78,23 @@ export function resolveRelative(docPath: string, target: string): string | null 
   return drive + lead + stack.join(sep);
 }
 
+/**
+ * Relative path from folder `fromDir` to `to`, using "/" separators (as
+ * Markdown links do). Returns `null` if they are on different drives.
+ */
+export function relativePath(fromDir: string, to: string): string | null {
+  const split = (p: string) => p.split(SEP).filter(Boolean);
+  const a = split(fromDir);
+  const b = split(to);
+  const win = /^[a-zA-Z]:/.test(fromDir) || fromDir.startsWith("\\\\");
+  const eq = (x: string, y: string) => (win ? x.toLowerCase() === y.toLowerCase() : x === y);
+  if (a.length && b.length && /:$/.test(a[0]) && !eq(a[0], b[0])) return null;
+  let i = 0;
+  while (i < a.length && i < b.length && eq(a[i], b[i])) i++;
+  const up = a.slice(i).map(() => "..");
+  return [...up, ...b.slice(i)].join("/");
+}
+
 /** Shortens a path for display, e.g. in the status bar or recent list. */
 export function displayPath(path: string, max = 60): string {
   if (path.length <= max) return path;

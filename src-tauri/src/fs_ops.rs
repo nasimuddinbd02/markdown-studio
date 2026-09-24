@@ -39,6 +39,13 @@ pub fn is_markdown(path: &Path) -> bool {
         .unwrap_or(false)
 }
 
+pub fn is_image(path: &Path) -> bool {
+    path.extension()
+        .and_then(|e| e.to_str())
+        .map(|e| IMAGE_EXTENSIONS.contains(&e.to_ascii_lowercase().as_str()))
+        .unwrap_or(false)
+}
+
 pub fn path_string(path: &Path) -> String {
     path.to_string_lossy().into_owned()
 }

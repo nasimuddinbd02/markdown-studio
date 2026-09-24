@@ -77,6 +77,7 @@ pub fn run() {
             commands::export_file,
             commands::take_pending_opens,
             commands::search_workspace,
+            commands::list_workspace_files,
             commands::load_settings,
             commands::save_settings,
             commands::load_recovery,

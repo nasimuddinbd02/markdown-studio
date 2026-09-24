@@ -11,6 +11,7 @@ The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status pe
 - Paste or drop images into a document: they are saved to an `assets/` folder next to it and linked automatically
 - Workspace folders with a file explorer: new file/folder, rename (F2), delete to the Trash/Recycle Bin
 - Tabs with dirty indicators, and Save / Don't Save / Cancel prompts on close and on quit
+- Link autocompletion (workspace files after `](`, images after `![](`, headings after `](#`) and Format Table (Ctrl/Cmd+Alt+T) that aligns GFM tables, CJK-aware
 - Format menu and shortcuts: bold (Ctrl/Cmd+B), italic (I), link (K), inline code (E), strikethrough, headings (Ctrl/Cmd+Alt+1–3), lists, task lists, quotes, code blocks and tables
 - CodeMirror 6 editor with Markdown syntax highlighting, code-block languages, undo/redo, multi-cursor, find & replace (case-sensitive, regex, whole word) and go to line
 - Export to standalone HTML (styled, images inlined, sanitized), Copy as HTML, and Print / Save as PDF (Ctrl/Cmd+P)

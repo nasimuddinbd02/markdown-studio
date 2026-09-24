@@ -306,6 +306,14 @@ export class MemoryBackend implements Backend {
     this.persist();
   }
 
+  async listWorkspaceFiles(root: string) {
+    const dir = this.check(root);
+    return [...this.files.keys()]
+      .filter((p) => p.startsWith(dir + "/") && /\.(md|markdown|png|jpe?g|gif|webp|svg|bmp|avif)$/i.test(p))
+      .filter((p) => !p.slice(dir.length).split("/").some((s) => s.startsWith(".")))
+      .sort();
+  }
+
   async searchWorkspace(root: string, options: SearchOptions): Promise<SearchResult> {
     const dir = this.check(root);
     const re = buildSearchRegex(options);

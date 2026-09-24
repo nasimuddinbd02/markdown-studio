@@ -15,6 +15,7 @@ const exporting = () => import("./exporting");
 import type { StateCommand } from "@codemirror/state";
 import type { KeyBinding } from "@codemirror/view";
 import * as fmt from "./formatting";
+import { formatTableAtCursor } from "./tables";
 
 export const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
@@ -52,6 +53,7 @@ export const formatCommands: Record<string, Command> = {
   quote: formatCommand("quote", "Quote", fmt.toggleQuote, "Mod+Shift+."),
   codeBlock: formatCommand("codeBlock", "Code Block", fmt.insertCodeBlock, "Mod+Alt+C"),
   table: formatCommand("table", "Insert Table", fmt.insertTable),
+  formatTable: formatCommand("formatTable", "Format Table", formatTableAtCursor, "Mod+Alt+T"),
   horizontalRule: formatCommand("horizontalRule", "Horizontal Rule", fmt.insertHorizontalRule),
 };
 const VIEW_ORDER: ViewMode[] = ["split", "editor", "preview"];

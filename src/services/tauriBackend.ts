@@ -34,6 +34,7 @@ export const tauriBackend: Backend = {
   readImage: (path) => call("read_image", { path }),
   saveImageAsset: (docPath, fileName, dataBase64) => call("save_image_asset", { docPath, fileName, dataBase64 }),
   searchWorkspace: (root, options) => call("search_workspace", { root, options }),
+  listWorkspaceFiles: (root) => call("list_workspace_files", { root }),
   openExternal: (url) => call("open_external", { url }),
   exportFile: (suggestedName, content, kind) => call("export_file", { suggestedName, content, kind }),
 

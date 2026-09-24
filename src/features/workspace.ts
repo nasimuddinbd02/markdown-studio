@@ -6,10 +6,12 @@ import { useDocuments } from "../stores/documentsStore";
 import { ask, notify, promptText } from "../stores/uiStore";
 import type { DirEntry } from "../types";
 import { onPathDeleted, onPathRenamed, openPath } from "./documents";
+import { invalidateWorkspaceFiles } from "./completion";
 
 const ws = () => useWorkspace.getState();
 
 export async function refreshDir(dir: string) {
+  invalidateWorkspaceFiles();
   try {
     ws().setChildren(dir, await backend().listDir(dir));
   } catch (e) {

@@ -42,6 +42,8 @@ export interface Backend {
   createFolder(directory: string, name: string): Promise<string>;
   renamePath(path: string, newName: string): Promise<string>;
   deletePath(path: string): Promise<void>;
+  /** Markdown and image files under an approved folder (for link completion). */
+  listWorkspaceFiles(root: string): Promise<string[]>;
   /** Searches Markdown files under an approved folder. */
   searchWorkspace(root: string, options: SearchOptions): Promise<SearchResult>;
   /**

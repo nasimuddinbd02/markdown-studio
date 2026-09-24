@@ -130,7 +130,16 @@ pub fn search_text(text: &str, re: &Regex, limit: usize) -> Vec<SearchMatch> {
     out
 }
 
+/// Markdown and image files under `root`, for link completion.
+pub fn workspace_files(root: &Path) -> Vec<String> {
+    walk(root, &|p| is_markdown(p) || fs_ops::is_image(p)).iter().map(|p| fs_ops::path_string(p)).collect()
+}
+
 fn collect_files(root: &Path) -> Vec<PathBuf> {
+    walk(root, &is_markdown)
+}
+
+fn walk(root: &Path, keep: &dyn Fn(&Path) -> bool) -> Vec<PathBuf> {
     let mut files = Vec::new();
     let mut stack = vec![root.to_path_buf()];
     while let Some(dir) = stack.pop() {
@@ -148,7 +157,7 @@ fn collect_files(root: &Path) -> Vec<PathBuf> {
                 if !SKIPPED_DIRS.contains(&name.as_str()) {
                     stack.push(entry.path());
                 }
-            } else if file_type.is_file() && is_markdown(&entry.path()) {
+            } else if file_type.is_file() && keep(&entry.path()) {
                 files.push(entry.path());
                 if files.len() >= MAX_FILES {
                     return files;
@@ -231,6 +240,17 @@ mod tests {
         assert_eq!(m[0].column, 4);
         assert_eq!(&m[0].preview, "🚀é x");
         assert_eq!(m[0].preview_start, 4);
+    }
+
+    #[test]
+    fn lists_markdown_and_images() {
+        let tmp = tempfile::tempdir().unwrap();
+        fs::create_dir_all(tmp.path().join("img")).unwrap();
+        fs::write(tmp.path().join("a.md"), "").unwrap();
+        fs::write(tmp.path().join("img").join("x.PNG"), "").unwrap();
+        fs::write(tmp.path().join("notes.txt"), "").unwrap();
+        let files = workspace_files(tmp.path());
+        assert_eq!(files.len(), 2);
     }
 
     #[test]

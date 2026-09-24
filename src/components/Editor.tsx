@@ -22,6 +22,7 @@ import { editorKeymap } from "../features/commands";
 import { minimalChange } from "../features/saveTransforms";
 import { insertImageFiles, isImageFile } from "../features/images";
 import { markdownLinter } from "../features/lintExtension";
+import { linkCompletion } from "../features/completion";
 
 /**
  * Markdown-aware syntax colours (FR-020). Colours come from CSS variables so
@@ -105,6 +106,7 @@ export function Editor() {
         highlightActiveLine(),
         highlightSelectionMatches(),
         search({ top: true }),
+        linkCompletion(),
         markdown({ base: markdownLanguage, codeLanguages: languages }),
         syntaxHighlighting(markdownHighlight),
         placeholder("Start writing Markdown…"),
