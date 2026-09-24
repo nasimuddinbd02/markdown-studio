@@ -6,3 +6,5 @@ coverage/
 src-tauri/target/
 src-tauri/gen/schemas/
 .vite/
+playwright-report/
+test-results/

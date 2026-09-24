@@ -57,6 +57,7 @@ That runs the desktop app with hot reload. Other scripts:
 | --- | --- |
 | `npm run dev` | UI only, in a browser, using an in-memory demo workspace (no Rust needed) |
 | `npm test` | Frontend unit/component tests (Vitest + Testing Library) |
+| `npm run test:e2e` | End-to-end tests (Playwright) against the browser demo; uses the installed Microsoft Edge on Windows |
 | `npm run typecheck` | TypeScript type check |
 | `cargo test --manifest-path src-tauri/Cargo.toml` | Rust tests (scope, safe save, encoding, settings) |
 | `npm run tauri:build` | Builds installers for the current OS |

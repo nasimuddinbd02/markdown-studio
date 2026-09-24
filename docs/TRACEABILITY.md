@@ -85,5 +85,5 @@ Status of each [SRS](SRS.md) requirement. **Done** means implemented and tested 
 - Startup bundle is 612 KB; the preview pipeline, export and Mermaid are lazy-loaded. Further trimming (highlight.js language subset) is possible.
 - A native OS menu bar on macOS (the in-app menu is used on all platforms today).
 - Large-file benchmark (10 MB+) and incremental preview rendering.
-- Playwright end-to-end tests against the Tauri build.
+- Playwright e2e covers the browser demo (6 workflows); a Tauri-driver e2e run against the native build is still to do.
 - i18n (localization), Playwright end-to-end tests.
