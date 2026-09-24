@@ -37,6 +37,7 @@ The app appears in **Settings → Apps → Installed apps** and in **Control Pan
 - Link autocompletion (workspace files after `](`, images after `![](`, headings after `](#`) and Format Table (Ctrl/Cmd+Alt+T) that aligns GFM tables, CJK-aware
 - Format menu and shortcuts: bold (Ctrl/Cmd+B), italic (I), link (K), inline code (E), strikethrough, headings (Ctrl/Cmd+Alt+1–3), lists, task lists, quotes, code blocks and tables
 - CodeMirror 6 editor with Markdown syntax highlighting, code-block languages, undo/redo, multi-cursor, find & replace (case-sensitive, regex, whole word) and go to line
+- Import Word (.docx) and web pages (.html) as Markdown (headings, lists, tables, links, images saved to assets/), and paste rich text from browsers or Word as Markdown
 - Export to standalone HTML (styled, images inlined, sanitized), Copy as HTML, and Print / Save as PDF (Ctrl/Cmd+P)
 - Markdown lint in the editor: broken links, missing images, broken anchors, duplicate headings, skipped heading levels and missing alt text, with a Problems panel
 - Focus Mode (Ctrl/Cmd+Shift+Enter), Full Screen (F11) and a searchable Keyboard Shortcuts reference (Help menu)

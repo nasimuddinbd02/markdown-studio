@@ -28,6 +28,11 @@ export interface Backend {
   pickOpenFolder(): Promise<string | null>;
   pickSavePath(suggestedName: string, directory: string | null): Promise<string | null>;
 
+  /** Native Open dialog for a document to import (desktop only). */
+  pickImportFile(kind: "docx" | "html" | "pdf"): Promise<string | null>;
+  /** Reads an approved file as base64 (desktop only; used by import). */
+  readBinaryFile(path: string): Promise<string>;
+
   listRecent(): Promise<RecentEntry[]>;
   openRecent(path: string): Promise<RecentEntry>;
   removeRecent(path: string): Promise<void>;

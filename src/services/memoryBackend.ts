@@ -182,6 +182,17 @@ export class MemoryBackend implements Backend {
     return p;
   }
 
+  // The browser demo imports through a file input instead of these.
+  async pickImportFile(): Promise<string | null> {
+    throw new AppError("io", "Use the browser file picker in the demo.");
+  }
+  async readBinaryFile(path: string) {
+    const p = this.check(path);
+    const f = this.files.get(p);
+    if (!f) throw new AppError("notFound", "File not found");
+    return btoa(unescape(encodeURIComponent(f.content)));
+  }
+
   async listRecent() {
     return [...this.recents];
   }

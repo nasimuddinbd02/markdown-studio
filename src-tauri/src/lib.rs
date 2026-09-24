@@ -76,6 +76,8 @@ pub fn run() {
             commands::delete_path,
             commands::read_image,
             commands::save_image_asset,
+            commands::pick_import_file,
+            commands::read_binary_file,
             commands::open_external,
             commands::reveal_in_folder,
             commands::export_file,

@@ -21,6 +21,7 @@ import { scrollSync } from "../features/scrollSync";
 import { editorKeymap } from "../features/commands";
 import { minimalChange } from "../features/saveTransforms";
 import { insertImageFiles, isImageFile } from "../features/images";
+import { pasteHtmlAsMarkdown } from "../features/richPaste";
 import { markdownLinter } from "../features/lintExtension";
 import { linkCompletion } from "../features/completion";
 
@@ -117,11 +118,18 @@ export function Editor() {
         spelling.of(spellAttr(s.spellCheck)),
         // Pasted or dropped images are saved to assets/ and linked.
         EditorView.domEventHandlers({
-          paste: (e) => {
+          paste: (e, view) => {
             const files = [...(e.clipboardData?.files ?? [])];
-            if (!files.some(isImageFile)) return false;
+            if (files.some(isImageFile)) {
+              e.preventDefault();
+              void insertImageFiles(files);
+              return true;
+            }
+            // Rich text from browsers/Word becomes Markdown (Ctrl+Shift+V still pastes plain text).
+            const html = e.clipboardData?.getData("text/html");
+            if (!html || !useSettings.getState().settings.pasteRichTextAsMarkdown) return false;
             e.preventDefault();
-            void insertImageFiles(files);
+            void pasteHtmlAsMarkdown(view, html, e.clipboardData?.getData("text/plain") ?? "");
             return true;
           },
           drop: (e, view) => {

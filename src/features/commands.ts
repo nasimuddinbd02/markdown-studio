@@ -12,6 +12,7 @@ import { closeWorkspace, createFileIn, openFolderDialog } from "./workspace";
 import { editorCommand, runOnEditor } from "./editorBridge";
 // Export/print pull in the unified pipeline; load them on first use.
 const exporting = () => import("./exporting");
+const importing = () => import("./importing");
 import type { StateCommand } from "@codemirror/state";
 import type { KeyBinding } from "@codemirror/view";
 import * as fmt from "./formatting";
@@ -107,6 +108,8 @@ export const commands: Record<string, Command> = {
     },
     enabled: () => !!activeDoc()?.path,
   },
+  importDocx: { id: "importDocx", label: "Import Word Document (.docx)…", run: async () => (await importing()).importDocument("docx") },
+  importHtml: { id: "importHtml", label: "Import Web Page (.html)…", run: async () => (await importing()).importDocument("html") },
   exportHtml: { id: "exportHtml", label: "Export as HTML…", run: async () => (await exporting()).exportActiveAsHtml(), enabled: hasActive },
   copyHtml: { id: "copyHtml", label: "Copy as HTML", run: async () => (await exporting()).copyActiveAsHtml(), enabled: hasActive },
   print: { id: "print", label: "Print / Save as PDF…", shortcut: "Mod+P", run: async () => (await exporting()).printActive(), enabled: hasActive },

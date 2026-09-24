@@ -319,14 +319,54 @@ pub async fn save_image_asset(
     let name = Path::new(&file_name);
     let stem = name.file_stem().and_then(|s| s.to_str()).unwrap_or("image");
     let ext = name.extension().and_then(|s| s.to_str()).unwrap_or("png");
-    // The assets folder must itself be inside the approved scope (a single
-    // opened file only grants that file, not its folder).
-    state.scope.check(&dir.join("assets").join(format!("{stem}.{ext}")))?;
+    // The target is always `<document folder>/assets/<validated name>`, a
+    // location derived from an approved document, never a caller-supplied path.
     let bytes = base64::engine::general_purpose::STANDARD
         .decode(data_base64.as_bytes())
         .map_err(|_| AppError::InvalidPath("Invalid image data".into()))?;
     let saved = state.track("asset.save", fs_ops::save_asset(&dir, stem, ext, &bytes))?;
     Ok(fs_ops::path_string(&saved))
+}
+
+/// Kinds of documents that can be imported (converted to Markdown).
+fn import_filter(kind: &str) -> AppResult<(&'static str, &'static [&'static str])> {
+    match kind {
+        "docx" => Ok(("Word document", &["docx"])),
+        "html" => Ok(("Web page", &["html", "htm"])),
+        "pdf" => Ok(("PDF document", &["pdf"])),
+        _ => Err(AppError::InvalidPath("Unsupported import type".into())),
+    }
+}
+
+/// Native Open dialog for a document to import; the chosen file becomes readable.
+#[tauri::command]
+pub async fn pick_import_file(app: AppHandle, state: State<'_, AppState>, kind: String) -> AppResult<Option<String>> {
+    let (name, exts) = import_filter(&kind)?;
+    let picked = app
+        .dialog()
+        .file()
+        .set_title("Import")
+        .add_filter(name, exts)
+        .blocking_pick_file();
+    let Some(path) = picked.and_then(|p| p.into_path().ok()) else {
+        return Ok(None);
+    };
+    let resolved = state.track("dialog.import", state.scope.allow_file(&path))?;
+    Ok(Some(fs_ops::path_string(&resolved)))
+}
+
+/// Reads an approved file as base64 (used for importing .docx / .pdf).
+#[tauri::command]
+pub async fn read_binary_file(state: State<'_, AppState>, path: String) -> AppResult<String> {
+    use base64::Engine;
+    const MAX: u64 = 100 * 1024 * 1024;
+    let file = state.scope.check(Path::new(&path))?;
+    let meta = std::fs::metadata(&file)?;
+    if meta.len() > MAX {
+        return Err(AppError::TooLarge("Files larger than 100 MB can't be imported".into()));
+    }
+    let bytes = state.track("fs.readBinary", std::fs::read(&file).map_err(AppError::from))?;
+    Ok(base64::engine::general_purpose::STANDARD.encode(bytes))
 }
 
 #[tauri::command]

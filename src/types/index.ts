@@ -59,6 +59,7 @@ export interface Settings {
   renderDiagrams: boolean;
   lintMarkdown: boolean;
   spellCheck: boolean;
+  pasteRichTextAsMarkdown: boolean;
   restoreSession: boolean;
   autoSave: AutoSaveMode;
   autoSaveDelayMs: number;

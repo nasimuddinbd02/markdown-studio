@@ -19,6 +19,8 @@ export const tauriBackend: Backend = {
   pickOpenFolder: () => call("pick_open_folder"),
   pickSavePath: (suggestedName, directory) => call("pick_save_path", { suggestedName, directory }),
 
+  pickImportFile: (kind) => call("pick_import_file", { kind }),
+  readBinaryFile: (path) => call("read_binary_file", { path }),
   listRecent: () => call("list_recent"),
   openRecent: (path) => call("open_recent", { path }),
   removeRecent: (path) => call("remove_recent", { path }),
