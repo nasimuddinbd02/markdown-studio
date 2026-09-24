@@ -119,3 +119,28 @@ The user approved a continuous loop: build a feature, test it, run it, then comm
 
 - Which UI languages should localization cover (besides English)?
 - Auto-update signing key and update URL (UPD-*).
+
+## 2026-09-24: Conversion tools, released as 0.4.0
+
+The user asked for conversion tools (DOCX/PDF to Markdown and the reverse) and continued development.
+
+| # | Feature | Commit |
+| --- | --- | --- |
+| 21 | Import Word (.docx) and HTML as Markdown (mammoth, turndown + GFM); images saved to `assets/`; paste rich text as Markdown | 08e8fed |
+| 22 | Export to Word (.docx) from the Markdown syntax tree; verified by opening the file in Microsoft Word through COM | db8d0b9 |
+| 23 | Import PDF as Markdown (pdf.js plus layout heuristics); CMaps and standard fonts bundled for offline use | e70950e |
+| 24 | Export to PDF (pdfmake, vector, bookmarks, links, vector checkboxes); non-Latin scripts are offered Print instead | 1c4d0fc |
+| — | Native end-to-end check: drove the installed app with Windows UI Automation and the real file dialogs. Found and fixed list marker spacing and missing image alt text | 073225a |
+| — | Also shipped: Windows shell integration (0.3.1), offline installer, GitHub Releases through `npm run release:github` | — |
+
+**Release 0.4.0:** the standard installer is 6.3 MB (in `downloads/`) and the offline installer is 212 MB (GitHub Release). Both download URLs return 200, and the checksum is verified.
+
+**Tests:** Vitest 160, Playwright 17, Rust 26. All passing. `npm audit`: 0 vulnerabilities.
+
+**Next up:**
+
+1. Insert or update a Table of Contents from headings.
+2. CSV/TSV → Markdown table (paste and import), and export a table to CSV.
+3. Batch conversion: convert every .docx/.pdf in a folder to Markdown.
+4. Localization: still waiting on the user's language choices.
+5. Auto-update (UPD-*), using GitHub Releases as the update source.
