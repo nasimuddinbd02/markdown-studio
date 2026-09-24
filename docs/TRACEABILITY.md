@@ -68,11 +68,22 @@ Status of each [SRS](SRS.md) requirement. **Done** means implemented and tested 
 | SEC-008 | Partial | Signing hooks exist in the release workflow; certificates are needed |
 | UPD-001..006 | Planned (v1.0) | Add `tauri-plugin-updater` with a signing key and update endpoint |
 
+## Beyond the MVP (delivered early)
+
+| Feature | SRS reference |
+| --- | --- |
+| Document outline | §19 Future: document outline and navigation |
+| Mermaid diagrams and LaTeX math | §18 v0.3 |
+| Export to HTML, Print / Save as PDF | §19 Future: export to HTML and PDF |
+| Find in Files, command palette, formatting commands | §5 Power user needs |
+| Open from OS (file association, single instance, drag and drop) | §13 packaging and desktop integration |
+| Auto save, save options, large-document mode | §10.2, NFR-002 |
+
 ## Known gaps and next improvements
 
 - Auto-update (UPD-*), planned for v1.0.
-- Main JavaScript bundle is about 1 MB. Lazy-load highlight.js languages and CodeMirror language data.
+- Main JavaScript bundle is about 1.4 MB. Lazy-load the preview/export pipeline and highlight.js languages (Mermaid is already lazy).
 - A native OS menu bar on macOS (the in-app menu is used on all platforms today).
 - Large-file benchmark (10 MB+) and incremental preview rendering.
 - Playwright end-to-end tests against the Tauri build.
-- Mermaid and math (v0.3), document outline, export to HTML/PDF (future).
+- Image paste into documents, Markdown lint / Problems panel, table formatter, i18n.

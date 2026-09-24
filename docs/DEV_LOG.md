@@ -41,3 +41,39 @@ Daily development sessions (4–6 PM). Newest entries at the bottom.
 
 - Should scheduled sessions commit their work to git? No commits are made until you approve.
 - Several SRS §21 questions are still open: license, application identifier (currently `com.markdownstudio.app`), and minimum OS versions.
+
+## 2026-09-23 (evening): Enterprise feature loop, iterations 1–9
+
+The user approved a continuous loop: build a feature, test it, run it, then commit and push. The Rust toolchain is now installed and all Rust code compiles, with `cargo test` passing 20 tests.
+
+| # | Feature | Commit |
+| --- | --- | --- |
+| 1 | Format menu and shortcuts (bold/italic/link/headings/lists/quote/code/table); explorer toggle moved to Ctrl+Shift+E | dccadea |
+| 2 | Command palette (Ctrl+Shift+P / F1) with fuzzy search | 5c658c5 |
+| 3 | Document outline panel (current-section highlight, jump to heading) | 03f29b1 |
+| 4 | Export to HTML (self-contained, sanitized, images inlined), Copy as HTML, Print / Save as PDF | e54128b |
+| 5 | Open files from the OS: launch args / file association, single instance, drag and drop onto the window | 8d6d794 |
+| 6 | Auto save (after delay / on focus change), quiet on conflicts | 5f8ae2a |
+| 7 | Find in Files: native Rust search with case, word and regex options; Search sidebar view | a092caf |
+| 8 | Mermaid diagrams (lazy, strict) and LaTeX math (MathML); lodash-es pinned via overrides (`npm audit`: 0 vulnerabilities) | c6da031 |
+| 9 | Save options (trim whitespace, final newline, new-file EOL), minimal-diff editor sync, large-document preview pause | c5f1bc7 |
+
+**Tests:** 96 Vitest and 20 Rust, all passing. Each feature was also checked in the browser demo. The native behaviour of iteration 5 was checked with the debug build: the second instance forwarded its file and the log recorded `os.open`.
+
+**Push status:** the push to `origin/main` is waiting for an interactive GitHub sign-in (Git Credential Manager), so these commits exist locally only until the user signs in once.
+
+**Next up:**
+
+1. Paste or drop an image into a document, saving it to an `assets/` folder next to the file.
+2. Performance: code-split the main bundle (~1.4 MB) by lazy-loading the preview and export pipeline and the highlight.js languages.
+3. Auto-update (UPD-001..006) with `tauri-plugin-updater`. This needs a signing keypair and an update endpoint from the user.
+4. Markdown lint / Problems panel (broken relative links, duplicate headings, missing image files).
+5. Table formatter (align columns) and link autocompletion for workspace files.
+6. Localization (i18n) scaffolding.
+7. Playwright end-to-end tests against the browser demo.
+
+**Questions for the user:**
+
+- Please complete the GitHub sign-in so pushes can go through. Running `git push` once in a terminal will cache the credentials.
+- Auto-update needs an update-signing key and an update URL (for example GitHub Releases `latest.json`). Should I generate the keypair?
+- License, final app identifier (currently `com.markdownstudio.app`), and minimum OS versions (SRS §21).
