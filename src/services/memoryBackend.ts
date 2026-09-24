@@ -346,6 +346,14 @@ export class MemoryBackend implements Backend {
       .sort();
   }
 
+  async listConvertibleFiles(root: string) {
+    const dir = this.check(root);
+    return [...this.files.keys()]
+      .filter((p) => p.startsWith(dir + "/") && /\.(docx|pdf|html?|csv|tsv)$/i.test(p))
+      .filter((p) => !p.slice(dir.length).split("/").some((s) => s.startsWith(".")))
+      .sort();
+  }
+
   async searchWorkspace(root: string, options: SearchOptions): Promise<SearchResult> {
     const dir = this.check(root);
     const re = buildSearchRegex(options);

@@ -119,6 +119,12 @@ export const commands: Record<string, Command> = {
     run: async () => (await import("./tableCsv")).copyTableAsCsv(),
     enabled: hasActive,
   },
+  convertFolder: {
+    id: "convertFolder",
+    label: "Convert Folder to Markdown…",
+    run: async () => void (await (await import("./batchConvert")).convertWorkspaceDocuments()),
+    enabled: () => !!useWorkspace.getState().root,
+  },
   importHtml: { id: "importHtml", label: "Import Web Page (.html)…", run: async () => (await importing()).importDocument("html") },
   exportHtml: { id: "exportHtml", label: "Export as HTML…", run: async () => (await exporting()).exportActiveAsHtml(), enabled: hasActive },
   exportPdf: { id: "exportPdf", label: "Export as PDF…", run: async () => (await exporting()).exportActiveAsPdf(), enabled: hasActive },

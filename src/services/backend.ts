@@ -49,6 +49,8 @@ export interface Backend {
   deletePath(path: string): Promise<void>;
   /** Markdown and image files under an approved folder (for link completion). */
   listWorkspaceFiles(root: string): Promise<string[]>;
+  /** Word, PDF, HTML and CSV/TSV files under the workspace (batch conversion). */
+  listConvertibleFiles(root: string): Promise<string[]>;
   /** Searches Markdown files under an approved folder. */
   searchWorkspace(root: string, options: SearchOptions): Promise<SearchResult>;
   /**

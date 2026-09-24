@@ -135,6 +135,19 @@ pub fn workspace_files(root: &Path) -> Vec<String> {
     walk(root, &|p| is_markdown(p) || fs_ops::is_image(p)).iter().map(|p| fs_ops::path_string(p)).collect()
 }
 
+/// Documents under `root` that can be converted to Markdown (batch conversion).
+pub fn convertible_files(root: &Path) -> Vec<String> {
+    const EXTS: &[&str] = &["docx", "pdf", "html", "htm", "csv", "tsv"];
+    walk(root, &|p| {
+        p.extension()
+            .and_then(|e| e.to_str())
+            .is_some_and(|e| EXTS.contains(&e.to_ascii_lowercase().as_str()))
+    })
+    .iter()
+    .map(|p| fs_ops::path_string(p))
+    .collect()
+}
+
 fn collect_files(root: &Path) -> Vec<PathBuf> {
     walk(root, &is_markdown)
 }
@@ -251,6 +264,22 @@ mod tests {
         fs::write(tmp.path().join("notes.txt"), "").unwrap();
         let files = workspace_files(tmp.path());
         assert_eq!(files.len(), 2);
+    }
+
+    #[test]
+    fn lists_convertible_documents() {
+        let tmp = tempfile::tempdir().unwrap();
+        fs::create_dir_all(tmp.path().join("sub")).unwrap();
+        fs::create_dir_all(tmp.path().join("node_modules")).unwrap();
+        for name in ["a.DOCX", "b.pdf", "sub/c.htm", "sub/d.tsv", "e.md", "f.doc", "node_modules/g.pdf"] {
+            fs::write(tmp.path().join(name), "").unwrap();
+        }
+        let mut names: Vec<String> = convertible_files(tmp.path())
+            .iter()
+            .map(|p| Path::new(p).file_name().unwrap().to_string_lossy().into_owned())
+            .collect();
+        names.sort();
+        assert_eq!(names, ["a.DOCX", "b.pdf", "c.htm", "d.tsv"]);
     }
 
     #[test]

@@ -39,6 +39,7 @@ The app appears in **Settings → Apps → Installed apps** and in **Control Pan
 - CodeMirror 6 editor with Markdown syntax highlighting, code-block languages, undo/redo, multi-cursor, find & replace (case-sensitive, regex, whole word) and go to line
 - Import Word (.docx), PDF and web pages (.html) as Markdown (headings, lists, tables, links, images saved to assets/), and paste rich text from browsers or Word as Markdown
 - CSV/TSV tools: import a .csv or .tsv file as an aligned Markdown table, paste cells copied from Excel or Google Sheets as a table, and Copy Table as CSV for spreadsheets
+- Convert Folder to Markdown (File menu): converts every Word, PDF, HTML and CSV/TSV file in the open folder to a .md file beside it in one step; files that already have a Markdown version are skipped
 - Table of contents: Format → Insert / Update Table of Contents builds a linked, nested TOC that stays up to date on save (Settings → Files)
 - Export to PDF (selectable text, clickable links, heading bookmarks, tables, task checkboxes, images) and to Word (.docx) with real Word headings, numbered/bulleted/task lists, tables, code, links and embedded images
 - Export to standalone HTML (styled, images inlined, sanitized), Copy as HTML, and Print / Save as PDF (Ctrl/Cmd+P)

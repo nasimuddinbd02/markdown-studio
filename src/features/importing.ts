@@ -75,6 +75,38 @@ export async function convertSource(kind: ImportKind, data: ArrayBuffer, name: s
   }
 }
 
+/** Import kind for a file name, by extension. */
+export function kindForPath(path: string): ImportKind | null {
+  const ext = /\.([^./\\]+)$/.exec(path)?.[1]?.toLowerCase();
+  if (ext === "docx" || ext === "pdf" || ext === "csv") return ext;
+  if (ext === "tsv") return "csv";
+  if (ext === "html" || ext === "htm") return "html";
+  return null;
+}
+
+/** Writes a conversion result to `dest`, saving its images to assets/ beside it. */
+export async function writeConverted(dest: string, result: ConversionResult) {
+  const b = backend();
+  let markdown = result.markdown;
+  for (const img of result.images) {
+    const saved = await b.saveImageAsset(dest, img.name, img.base64);
+    const savedName = basename(saved);
+    if (savedName !== img.name) markdown = markdown.split(`assets/${img.name}`).join(`assets/${encodeURI(savedName)}`);
+  }
+  await b.writeTextFile({
+    path: dest,
+    content: markdown,
+    lineEnding: defaultLineEnding(useSettings.getState().settings.newFileLineEnding),
+    bom: false,
+    expectedMtime: null,
+    force: true,
+  });
+}
+
+export function base64ToArrayBuffer(b64: string) {
+  return base64ToBuffer(b64);
+}
+
 /** Inlines extracted images as data: URIs (for an import that wasn't saved yet). */
 function inlineImages(result: ConversionResult) {
   let md = result.markdown;
@@ -130,20 +162,7 @@ export async function importDocument(kind: ImportKind) {
   }
 
   try {
-    let markdown = result.markdown;
-    for (const img of result.images) {
-      const saved = await b.saveImageAsset(dest, img.name, img.base64);
-      const savedName = basename(saved);
-      if (savedName !== img.name) markdown = markdown.split(`assets/${img.name}`).join(`assets/${encodeURI(savedName)}`);
-    }
-    await b.writeTextFile({
-      path: dest,
-      content: markdown,
-      lineEnding: defaultLineEnding(useSettings.getState().settings.newFileLineEnding),
-      bom: false,
-      expectedMtime: null,
-      force: true, // the Save dialog already confirmed any overwrite
-    });
+    await writeConverted(dest, result); // the Save dialog already confirmed any overwrite
   } catch (e) {
     notify("error", describeError(e, `save “${basename(dest)}”`));
     return;

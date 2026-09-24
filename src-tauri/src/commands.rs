@@ -446,6 +446,15 @@ pub async fn list_workspace_files(state: State<'_, AppState>, root: String) -> A
         .map_err(|e| AppError::Io(e.to_string()))
 }
 
+/// Lists Word, PDF, HTML and CSV files under an approved folder ("Convert Folder to Markdown").
+#[tauri::command]
+pub async fn list_convertible_files(state: State<'_, AppState>, root: String) -> AppResult<Vec<String>> {
+    let dir = state.scope.check(Path::new(&root))?;
+    tauri::async_runtime::spawn_blocking(move || crate::search::convertible_files(&dir))
+        .await
+        .map_err(|e| AppError::Io(e.to_string()))
+}
+
 /// Searches Markdown files under an approved folder ("Find in Files").
 #[tauri::command]
 pub async fn search_workspace(

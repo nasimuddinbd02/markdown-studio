@@ -85,6 +85,7 @@ pub fn run() {
             commands::take_pending_opens,
             commands::search_workspace,
             commands::list_workspace_files,
+            commands::list_convertible_files,
             commands::list_history,
             commands::watch_workspace,
             commands::unwatch_workspace,
