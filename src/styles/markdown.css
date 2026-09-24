@@ -280,3 +280,18 @@
   overflow-y: hidden;
   font-size: 1.1em;
 }
+
+.preview-paused {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 1.2em;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.preview-paused span {
+  flex: 1;
+}

@@ -60,6 +60,9 @@ export interface Settings {
   restoreSession: boolean;
   autoSave: AutoSaveMode;
   autoSaveDelayMs: number;
+  trimTrailingWhitespace: boolean;
+  insertFinalNewline: boolean;
+  newFileLineEnding: "auto" | LineEnding;
   /** Last session's workspace and open files, restored on launch (FR-003). */
   session: { workspace: string | null; files: string[] };
 }

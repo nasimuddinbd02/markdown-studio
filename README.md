@@ -19,6 +19,8 @@ The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status pe
 - Editor-only, split and preview-only views, resizable panels and synced scrolling
 - Light, dark and system themes; configurable font, font size, line numbers, wrapping and tab size
 - Optional auto save (after a delay, or on tab/window focus change) that never overwrites external changes
+- Save options: trim trailing whitespace (keeps Markdown hard breaks and code blocks), final newline, default line ending for new files
+- Large-document mode: live preview pauses above 1 MB of text, with render-on-demand
 - Safe saves: atomic temp-file writes, conflict detection when a file changed on disk, and actionable errors (permission denied → Save As, disk full, and so on)
 - External change detection: clean tabs reload automatically; dirty tabs get Reload / Compare / Keep Mine
 - Crash recovery for unsaved documents, and session restore for the last folder and open files

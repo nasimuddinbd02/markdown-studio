@@ -77,6 +77,15 @@ export function SettingsDialog() {
             </>
           )}
           <p className="muted small">Untitled documents are never auto-saved. Recovery snapshots are kept either way.</p>
+          <label className="check"><input type="checkbox" checked={settings.trimTrailingWhitespace} onChange={(e) => update({ trimTrailingWhitespace: e.target.checked })} /> Trim trailing whitespace on save (keeps Markdown line breaks)</label>
+          <label className="check"><input type="checkbox" checked={settings.insertFinalNewline} onChange={(e) => update({ insertFinalNewline: e.target.checked })} /> Insert a final newline on save</label>
+          <label htmlFor="setting-newFileLineEnding">Line endings for new files</label>
+          <select {...field("newFileLineEnding")} onChange={(e) => update({ newFileLineEnding: e.target.value as Settings["newFileLineEnding"] })}>
+            <option value="lf">LF (Unix, macOS)</option>
+            <option value="crlf">CRLF (Windows)</option>
+            <option value="auto">Match operating system</option>
+          </select>
+          <p className="muted small">Existing files always keep their own line endings.</p>
         </section>
 
         <section>

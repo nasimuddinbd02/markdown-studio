@@ -6,6 +6,8 @@ import { useWorkspace } from "../stores/workspaceStore";
 import { ask, notify } from "../stores/uiStore";
 import type { Doc, FileContent } from "../types";
 import { refreshDir } from "./workspace";
+import { useSettings } from "../stores/settingsStore";
+import { applySaveTransforms, defaultLineEnding } from "./saveTransforms";
 
 const docs = () => useDocuments.getState();
 const findDoc = (id: string) => docs().docs.find((d) => d.id === id);
@@ -42,7 +44,7 @@ export function newDocument(content = ""): string {
     name: untitledName(),
     content,
     savedContent: "",
-    lineEnding: "lf",
+    lineEnding: defaultLineEnding(useSettings.getState().settings.newFileLineEnding),
     bom: false,
     mtime: null,
     externalChange: null,
@@ -145,8 +147,10 @@ export async function saveDocument(id: string, opts: SaveOptions = {}): Promise<
     }
   }
 
-  const content = doc.content;
-  docs().update(id, { saving: true });
+  // On-save cleanups (trim whitespace, final newline) are applied to the
+  // editor too, so what is shown is exactly what was written.
+  const content = applySaveTransforms(doc.content, useSettings.getState().settings);
+  docs().update(id, content === doc.content ? { saving: true } : { saving: true, content });
   try {
     const mtime = await backend().writeTextFile({
       path: path!,

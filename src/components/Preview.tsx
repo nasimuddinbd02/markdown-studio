@@ -102,10 +102,30 @@ const MarkdownView = memo(function MarkdownView({ text, docPath }: { text: strin
   );
 });
 
+/** Above this size the live preview pauses until the user asks for a render (NFR-002). */
+export const LARGE_DOCUMENT_CHARS = 1_000_000;
+
 /** Debounces preview updates (FR-031); keyed per document so tab switches render immediately. */
 function DebouncedMarkdown({ text, docPath }: { text: string; docPath: string | null }) {
   const debounceMs = useSettings((s) => s.settings.previewDebounceMs);
-  const debounced = useDebounced(text, debounceMs);
+  const large = text.length > LARGE_DOCUMENT_CHARS;
+  // Large documents render on demand: re-rendering on every keystroke would lag typing.
+  const [snapshot, setSnapshot] = useState<string | null>(null);
+  const debounced = useDebounced(large ? "" : text, debounceMs);
+  if (large) {
+    const mb = (text.length / 1_000_000).toFixed(1);
+    return (
+      <>
+        <div className="preview-paused" role="status">
+          <span>Live preview is paused for large documents ({mb} MB of text) to keep typing fast.</span>
+          <button className="button" onClick={() => setSnapshot(text)}>
+            {snapshot === null ? "Render Now" : "Refresh Preview"}
+          </button>
+        </div>
+        {snapshot !== null && <MarkdownView text={snapshot} docPath={docPath} />}
+      </>
+    );
+  }
   return <MarkdownView text={debounced} docPath={docPath} />;
 }
 

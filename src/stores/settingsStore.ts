@@ -19,6 +19,9 @@ export const DEFAULT_SETTINGS: Settings = {
   restoreSession: true,
   autoSave: "off",
   autoSaveDelayMs: 1000,
+  trimTrailingWhitespace: false,
+  insertFinalNewline: false,
+  newFileLineEnding: "lf",
   session: { workspace: null, files: [] },
 };
 
@@ -51,6 +54,12 @@ export function sanitizeSettings(raw: unknown): Settings {
     restoreSession: bool(s.restoreSession, d.restoreSession),
     autoSave: s.autoSave === "afterDelay" || s.autoSave === "onFocusChange" || s.autoSave === "off" ? s.autoSave : d.autoSave,
     autoSaveDelayMs: clamp(s.autoSaveDelayMs, 200, 60000, d.autoSaveDelayMs),
+    trimTrailingWhitespace: bool(s.trimTrailingWhitespace, d.trimTrailingWhitespace),
+    insertFinalNewline: bool(s.insertFinalNewline, d.insertFinalNewline),
+    newFileLineEnding:
+      s.newFileLineEnding === "auto" || s.newFileLineEnding === "lf" || s.newFileLineEnding === "crlf"
+        ? s.newFileLineEnding
+        : d.newFileLineEnding,
     session: {
       workspace: typeof session.workspace === "string" ? session.workspace : null,
       files: Array.isArray(session.files) ? session.files.filter((f): f is string => typeof f === "string").slice(0, 50) : [],

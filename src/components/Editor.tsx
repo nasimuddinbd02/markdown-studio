@@ -19,6 +19,7 @@ import type { Settings } from "../types";
 import { editorShowing, openReplacePanel, registerEditorView } from "../features/editorBridge";
 import { scrollSync } from "../features/scrollSync";
 import { editorKeymap } from "../features/commands";
+import { minimalChange } from "../features/saveTransforms";
 
 /**
  * Markdown-aware syntax colours (FR-020). Colours come from CSS variables so
@@ -204,7 +205,8 @@ export function Editor() {
     const id = currentId.current;
     if (!view || !id || content === undefined || content === synced.get(id)) return;
     synced.set(id, content);
-    view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: content } });
+    const change = minimalChange(view.state.doc.toString(), content);
+    if (change) view.dispatch({ changes: change });
   }, [content]);
 
   // Apply settings changes (FR-025).
