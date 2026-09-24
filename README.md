@@ -11,14 +11,15 @@ The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status pe
 
 | Version | Platform | Size | Released | SHA-256 |
 | --- | --- | --- | --- | --- |
-| 0.3.0 | Windows 10/11 x64 | 3.6 MB | 2026-09-23 | `2143d8d077dc401b463dd84cf64fdc1055a9ba11a5cf90b4b1f7411a4f169257` |
+| 0.3.0 | Windows 10 (1803+) / 11, x64 | 3.6 MB | 2026-09-23 | `2143d8d077dc401b463dd84cf64fdc1055a9ba11a5cf90b4b1f7411a4f169257` |
 
-1. Download the installer and run it. No administrator rights are needed; it installs for the current user.
-2. Windows SmartScreen may warn because the installer isn't code-signed yet. Choose **More info → Run anyway**.
-3. Start **Markdown Studio** from the Start menu. `.md` files can be opened by double-clicking them.
+**Install in 3 steps:**
 
-Installing a newer version upgrades in place and keeps your settings. Uninstall from **Settings → Apps → Installed apps**.
-macOS and Linux builds are produced by the release workflow (see [Packaging and releases](#packaging-and-releases)).
+1. **Download** the installer with the link above. On GitHub you can also open [`downloads/`](downloads/), click the `.exe`, then **Download raw file**.
+2. **Run** it. No administrator rights are needed; it installs for your user account. The installer isn't code-signed yet, so if Windows SmartScreen says *"Windows protected your PC"*, choose **More info → Run anyway**.
+3. **Start** Markdown Studio from the Start menu, or double-click any `.md` file.
+
+Newer versions install over older ones and keep your settings. For requirements, checksum verification, silent install, uninstalling and troubleshooting, see the **[installation guide](docs/INSTALL.md)**.
 <!-- download:end -->
 
 ## Features
