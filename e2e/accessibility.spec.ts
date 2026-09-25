@@ -26,6 +26,9 @@ async function audit(page: Page, label: string) {
   expect(summary, `${label}\n${summary.join("\n")}`).toEqual([]);
 }
 
+// Each test runs one or more full-page axe audits; allow for a cold dev server under parallel load.
+test.slow();
+
 for (const theme of ["light", "dark"] as const) {
   test.describe(`${theme} theme`, () => {
     test("welcome screen", async ({ page }) => {
