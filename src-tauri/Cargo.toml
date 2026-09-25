@@ -1,6 +1,6 @@
 [package]
 name = "markdown-studio"
-version = "0.8.0"
+version = "0.9.0"
 description = "Cross-platform, local-first desktop Markdown editor"
 authors = ["Markdown Studio contributors"]
 edition = "2021"

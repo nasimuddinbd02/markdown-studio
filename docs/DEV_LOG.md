@@ -218,3 +218,18 @@ The user asked for automatic updates: check at startup, ask, then replace the ol
 3. Served the real signed 0.8.0. Update Now from the startup prompt installed 0.8.0 in place (registry and exe both 0.8.0), and the app relaunched in about 3 seconds.
 
 **Tests:** Vitest 191, Playwright 17, Rust 27. All passing.
+
+## 2026-09-25: Writing features, released as 0.9.0
+
+The user asked for a continuous loop: suggest a feature, build it, test it, push it.
+
+| # | Feature | Commit |
+| --- | --- | --- |
+| 31 | YAML front matter is shown as a metadata table in the preview (not a rule plus a stray heading), left out of exports, and its `title` names exported documents | a95a571 |
+| 32 | GitHub alerts (`> [!NOTE]`, TIP, IMPORTANT, WARNING, CAUTION): coloured callouts with icons in the preview and HTML export, and labelled callouts in PDF and Word. Styled after sanitizing | e06dfe6 |
+| 33 | New from Template: 7 built-in templates plus the workspace `templates/` folder; `{{date}}`, `{{week}}` and `{{cursor}}` placeholders | 392c308 |
+| 34 | Paste a URL over selected text to make `[text](url)` | ef472f7 |
+
+**Release 0.9.0:** the first release delivered through the in-app updater. Installed 0.8.0 apps offer it at startup.
+
+**Tests:** Vitest 207, Playwright 18, Rust 27. All passing.
