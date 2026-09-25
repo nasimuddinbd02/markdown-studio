@@ -1,3 +1,4 @@
+import { stripFrontMatter } from "../frontMatter";
 import {
   AlignmentType, BorderStyle, Document, ExternalHyperlink, HeadingLevel, ImageRun, LevelFormat, Packer,
   Paragraph, ShadingType, Table, TableCell, TableRow, TextRun, WidthType,
@@ -235,7 +236,7 @@ class DocxBuilder {
 
 /** Markdown → Word document (.docx) bytes. */
 export async function markdownToDocx(markdown: string, opts: { title?: string; loadImage?: DocxImageLoader } = {}): Promise<Uint8Array> {
-  const tree = unified().use(remarkParse).use(remarkGfm).parse(markdown) as Root;
+  const tree = unified().use(remarkParse).use(remarkGfm).parse(stripFrontMatter(markdown)) as Root;
   const builder = new DocxBuilder(opts.loadImage);
   const children: Array<Paragraph | Table> = [];
   for (const node of tree.children) children.push(...(await builder.block(node)));

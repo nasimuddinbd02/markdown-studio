@@ -1,3 +1,4 @@
+import { frontMatterTitle, stripFrontMatter } from "./frontMatter";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
@@ -83,7 +84,7 @@ export async function renderHtml(
     .use(rehypePlugins)
     .use(() => rehypeInlineImages(docPath, loadImage))
     .use(rehypeStringify)
-    .process(markdown);
+    .process(stripFrontMatter(markdown));
   const html = String(file);
   return features.diagrams && typeof document !== "undefined" ? inlineMermaidDiagrams(html) : html;
 }
@@ -93,7 +94,9 @@ function escapeHtml(s: string) {
 }
 
 export function documentTitle(markdown: string, fallbackName: string) {
-  const h1 = /^\s{0,3}#\s+(.+?)\s*#*\s*$/m.exec(markdown);
+  const fromMeta = frontMatterTitle(markdown);
+  if (fromMeta) return fromMeta;
+  const h1 = /^\s{0,3}#\s+(.+?)\s*#*\s*$/m.exec(stripFrontMatter(markdown));
   return (h1?.[1] ?? fallbackName.replace(/\.(md|markdown)$/i, "")).trim();
 }
 

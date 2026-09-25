@@ -1609,3 +1609,18 @@ select {
   margin: 8px 0 4px;
   accent-color: var(--accent);
 }
+
+/* YAML front matter shown above the preview */
+.markdown-body table.front-matter {
+  margin: 0 0 16px;
+  font-size: 0.9em;
+}
+.markdown-body table.front-matter th {
+  text-align: left;
+  white-space: nowrap;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.markdown-body table.front-matter td {
+  white-space: pre-wrap;
+}

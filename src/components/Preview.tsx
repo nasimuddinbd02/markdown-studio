@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import { classifyLink, markdownPlugins } from "../services/markdown";
+import { splitFrontMatter } from "../services/frontMatter";
 import { MermaidDiagram } from "./MermaidDiagram";
 import { backend } from "../services";
 import { describeError } from "../services/errors";
@@ -74,10 +75,27 @@ function mermaidSource(node: unknown): string | null {
   return (code.children ?? []).map((c) => c.value ?? "").join("");
 }
 
+/** Document metadata (YAML front matter), shown like GitHub does: a key/value table. */
+function FrontMatterTable({ entries }: { entries: Array<[string, string]> }) {
+  return (
+    <table className="front-matter" aria-label="Document metadata">
+      <tbody>
+        {entries.map(([key, value], i) => (
+          <tr key={i}>
+            <th scope="row">{key}</th>
+            <td>{value}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
 const MarkdownView = memo(function MarkdownView({ text, docPath }: { text: string; docPath: string | null }) {
   const renderMath = useSettings((s) => s.settings.renderMath);
   const renderDiagrams = useSettings((s) => s.settings.renderDiagrams);
   const plugins = useMemo(() => markdownPlugins({ math: renderMath }), [renderMath]);
+  const frontMatter = useMemo(() => splitFrontMatter(text), [text]);
   const components = useMemo<Components>(
     () => ({
       pre: ({ node, children, ...rest }) => {
@@ -102,9 +120,12 @@ const MarkdownView = memo(function MarkdownView({ text, docPath }: { text: strin
     [docPath, renderDiagrams],
   );
   return (
-    <ReactMarkdown remarkPlugins={plugins.remarkPlugins} rehypePlugins={plugins.rehypePlugins} components={components}>
-      {text}
-    </ReactMarkdown>
+    <>
+      {frontMatter && frontMatter.entries.length > 0 && <FrontMatterTable entries={frontMatter.entries} />}
+      <ReactMarkdown remarkPlugins={plugins.remarkPlugins} rehypePlugins={plugins.rehypePlugins} components={components}>
+        {frontMatter ? frontMatter.body : text}
+      </ReactMarkdown>
+    </>
   );
 });
 

@@ -1,3 +1,4 @@
+import { stripFrontMatter } from "../frontMatter";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
@@ -236,7 +237,7 @@ async function pdfmake() {
 
 /** Markdown → PDF bytes. */
 export async function markdownToPdf(markdown: string, opts: { title?: string; loadImage?: DocxImageLoader } = {}): Promise<Uint8Array> {
-  const tree = unified().use(remarkParse).use(remarkGfm).parse(markdown) as Root;
+  const tree = unified().use(remarkParse).use(remarkGfm).parse(stripFrontMatter(markdown)) as Root;
   const builder = new PdfBuilder(opts.loadImage);
   const content: Content[] = [];
   for (const node of tree.children) content.push(...(await builder.block(node)));
