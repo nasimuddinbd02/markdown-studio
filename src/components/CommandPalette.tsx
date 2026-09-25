@@ -3,6 +3,7 @@ import { useUi } from "../stores/uiStore";
 import { useDocuments } from "../stores/documentsStore";
 import { commands, formatShortcut } from "../features/commands";
 import { fuzzyFilter } from "../features/fuzzy";
+import { listTemplates, newFromTemplate, type Template } from "../features/templates";
 
 interface PaletteItem {
   id: string;
@@ -21,19 +22,27 @@ function highlight(text: string, indices: number[]): ReactNode {
 /** Searchable list of every command and open tab (Ctrl/Cmd+Shift+P). */
 export function CommandPalette() {
   const open = useUi((s) => s.paletteOpen);
+  const mode = useUi((s) => s.paletteMode);
   const setOpen = useUi((s) => s.setPaletteOpen);
   if (!open) return null;
-  return <PaletteBody onClose={() => setOpen(false)} />;
+  return <PaletteBody key={mode} mode={mode} onClose={() => setOpen(false)} />;
 }
 
-function PaletteBody({ onClose }: { onClose(): void }) {
+function PaletteBody({ mode, onClose }: { mode: "commands" | "templates"; onClose(): void }) {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const input = useRef<HTMLInputElement>(null);
   const list = useRef<HTMLUListElement>(null);
   const docs = useDocuments((s) => s.docs);
+  const [templates, setTemplates] = useState<Template[] | null>(null);
+  useEffect(() => {
+    if (mode === "templates") void listTemplates().then(setTemplates);
+  }, [mode]);
 
   const items = useMemo<PaletteItem[]>(() => {
+    if (mode === "templates") {
+      return (templates ?? []).map((t) => ({ id: `tpl:${t.id}`, label: t.name, hint: t.description, run: () => void newFromTemplate(t) }));
+    }
     const cmdItems = Object.values(commands)
       .filter((c) => c.id !== "commandPalette" && (!c.enabled || c.enabled()))
       .map((c) => ({ id: `cmd:${c.id}`, label: c.label.replace(/…$/, ""), shortcut: c.shortcut, run: c.run }));
@@ -44,7 +53,7 @@ function PaletteBody({ onClose }: { onClose(): void }) {
       run: () => useDocuments.getState().setActive(d.id),
     }));
     return [...cmdItems, ...tabItems];
-  }, [docs]);
+  }, [docs, mode, templates]);
 
   const results = useMemo(() => fuzzyFilter(items, query, (i) => i.label).slice(0, 50), [items, query]);
 
@@ -67,11 +76,11 @@ function PaletteBody({ onClose }: { onClose(): void }) {
 
   return (
     <div className="palette-backdrop" onPointerDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="palette" role="dialog" aria-modal="true" aria-label="Command palette">
+      <div className="palette" role="dialog" aria-modal="true" aria-label={mode === "templates" ? "New from template" : "Command palette"}>
         <input
           ref={input}
           className="palette-input"
-          placeholder="Type a command or tab name…"
+          placeholder={mode === "templates" ? "Choose a template…" : "Type a command or tab name…"}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           role="combobox"
@@ -91,8 +100,10 @@ function PaletteBody({ onClose }: { onClose(): void }) {
             e.stopPropagation();
           }}
         />
-        <ul className="palette-list" id="palette-list" role="listbox" ref={list} aria-label="Commands">
-          {results.length === 0 && <li className="palette-empty">No matching commands</li>}
+        <ul className="palette-list" id="palette-list" role="listbox" ref={list} aria-label={mode === "templates" ? "Templates" : "Commands"}>
+          {results.length === 0 && (templates !== null || mode === "commands") && (
+            <li className="palette-empty">{mode === "templates" ? "No matching templates" : "No matching commands"}</li>
+          )}
           {results.map(({ item, match }, i) => (
             <li
               key={item.id}

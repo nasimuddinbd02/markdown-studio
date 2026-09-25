@@ -34,6 +34,9 @@ interface UiState {
   settingsOpen: boolean;
   aboutOpen: boolean;
   paletteOpen: boolean;
+  /** What the palette lists: commands and tabs, or document templates. */
+  paletteMode: "commands" | "templates";
+  openTemplatePicker(): void;
   shortcutsOpen: boolean;
   setShortcutsOpen(open: boolean): void;
   /** Distraction-free writing: hides chrome and centres the editor. */
@@ -72,6 +75,8 @@ export const useUi = create<UiState>((set, get) => ({
   settingsOpen: false,
   aboutOpen: false,
   paletteOpen: false,
+  paletteMode: "commands",
+  openTemplatePicker: () => set({ paletteOpen: true, paletteMode: "templates" }),
   shortcutsOpen: false,
   setShortcutsOpen: (shortcutsOpen) => set({ shortcutsOpen }),
   focusMode: false,
@@ -87,7 +92,7 @@ export const useUi = create<UiState>((set, get) => ({
   setCursor: (cursor) => set({ cursor }),
   setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
   setAboutOpen: (aboutOpen) => set({ aboutOpen }),
-  setPaletteOpen: (paletteOpen) => set({ paletteOpen }),
+  setPaletteOpen: (paletteOpen) => set({ paletteOpen, paletteMode: "commands" }),
   setSidebarView: (sidebarView) => set({ sidebarView }),
   checkLinks: () => set((s) => ({ sidebarView: "links", linkCheckToken: s.linkCheckToken + 1 })),
   focusSearch: () => set((s) => ({ sidebarView: "search", searchFocusToken: s.searchFocusToken + 1 })),

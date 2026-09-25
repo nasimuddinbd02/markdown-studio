@@ -63,6 +63,7 @@ const VIEW_ORDER: ViewMode[] = ["split", "editor", "preview"];
 
 export const commands: Record<string, Command> = {
   newFile: { id: "newFile", label: "New File", shortcut: "Mod+N", run: () => void newDocument() },
+  newFromTemplate: { id: "newFromTemplate", label: "New from Template…", run: () => useUi.getState().openTemplatePicker() },
   newFileInWorkspace: {
     id: "newFileInWorkspace",
     label: "New File in Folder…",
