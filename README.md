@@ -7,18 +7,18 @@ The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status pe
 ## Download
 
 <!-- download:start -->
-### ⬇️ [Download Markdown Studio 0.6.0 for Windows (64-bit)](downloads/MarkdownStudio-0.6.0-windows-x64-setup.exe?raw=true)
+### ⬇️ [Download Markdown Studio 0.7.0 for Windows (64-bit)](downloads/MarkdownStudio-0.7.0-windows-x64-setup.exe?raw=true)
 
 Released 2026-09-24 for Windows 10 (1803+) and 11, x64. Nothing else needs to be installed: the app is self-contained.
 
 | Installer | When to use it | Size | SHA-256 |
 | --- | --- | --- | --- |
-| **Standard**: [MarkdownStudio-0.6.0-windows-x64-setup.exe](downloads/MarkdownStudio-0.6.0-windows-x64-setup.exe?raw=true) | Recommended. WebView2 is already part of Windows 11 and updated Windows 10; if it's missing, the installer adds it automatically (needs internet) | 6.3 MB | `c0fd254965950ae91eadbf7757d01920da1db2d078627f9fff38bd089e543a02` |
-| **Offline**: [MarkdownStudio-0.6.0-windows-x64-offline-setup.exe](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.6.0/MarkdownStudio-0.6.0-windows-x64-offline-setup.exe) | Includes WebView2; no internet needed | 212.1 MB | `d44251122de963d2c1e1a9e3ee91a31d9bfa5351d40739295bad2c9a026e0ae5` |
+| **Standard**: [MarkdownStudio-0.7.0-windows-x64-setup.exe](downloads/MarkdownStudio-0.7.0-windows-x64-setup.exe?raw=true) | Recommended. WebView2 is already part of Windows 11 and updated Windows 10; if it's missing, the installer adds it automatically (needs internet) | 6.3 MB | `22d3ae03de54dca549937849d86cf07dd7711f4db93147410bb63019b8bb4f80` |
+| **Offline**: [MarkdownStudio-0.7.0-windows-x64-offline-setup.exe](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.7.0/MarkdownStudio-0.7.0-windows-x64-offline-setup.exe) | Includes WebView2; no internet needed | 211.3 MB | `7cda0c7de15597acef86657b6bf32949402e18dd319ecd9f7b37f24d66c9669d` |
 
 **Install in 3 steps:**
 
-1. **Download** an installer above (all files are also on the [0.6.0 release page](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.6.0)).
+1. **Download** an installer above (all files are also on the [0.7.0 release page](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.7.0)).
 2. **Run** it and choose **Anyone who uses this computer**, which needs administrator approval, or **Only for me**, which doesn't. The installer isn't code-signed yet, so if Windows SmartScreen says *"Windows protected your PC"*, choose **More info → Run anyway**.
 3. **Start** Markdown Studio from the Start menu, or right-click any `.md` file and choose **Open with Markdown Studio**.
 
