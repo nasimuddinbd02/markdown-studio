@@ -9,3 +9,7 @@ src-tauri/gen/schemas/
 playwright-report/
 test-results/
 release-assets/
+# Never commit signing keys (the updater key lives in ~/.tauri/).
+*.key
+*.pem
+*.pfx

@@ -15,6 +15,8 @@ const files = [
   join("downloads", `MarkdownStudio-${version}-windows-x64-setup.exe`),
   join("release-assets", `MarkdownStudio-${version}-windows-x64-offline-setup.exe`),
   join("downloads", "SHA256SUMS.txt"),
+  // Update manifest read by the in-app updater (releases/latest/download/latest.json).
+  join("release-assets", "latest.json"),
 ].filter(existsSync);
 if (files.length < 2) {
   console.error("Installers not found. Run: npm run release:installer -- --offline");

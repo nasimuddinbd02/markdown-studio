@@ -20,6 +20,14 @@ export interface RecentEntry {
   kind: "file" | "folder";
 }
 
+/** A newer signed release found by the in-app updater. */
+export interface AppUpdate {
+  version: string;
+  currentVersion: string;
+  notes: string | null;
+  date: string | null;
+}
+
 export interface AppInfo {
   version: string;
   os: string;

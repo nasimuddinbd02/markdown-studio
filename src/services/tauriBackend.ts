@@ -62,6 +62,13 @@ export const tauriBackend: Backend = {
     return listen<OpenPaths>("open-paths", (e) => handler(e.payload));
   },
 
+  checkAppUpdate: () => call("check_app_update"),
+  installAppUpdate: () => call("install_app_update"),
+  onUpdateProgress: async (handler) => {
+    const { listen } = await import("@tauri-apps/api/event");
+    return listen<{ downloaded: number; total: number | null }>("update-progress", (e) => handler(e.payload.downloaded, e.payload.total ?? null));
+  },
+
   log: (level, category, message) => {
     invoke("log_event", { level, category, message }).catch(() => {});
   },

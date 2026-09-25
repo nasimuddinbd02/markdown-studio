@@ -7,6 +7,12 @@
 //     upload to a GitHub Release (npm run release:github).
 // It then updates the README download section and docs/INSTALL.md links.
 //
+// In-app updates: the standard installer is signed with the updater key
+// (minisign) and release-assets/latest.json is written for the updater. The
+// private key is read from TAURI_SIGNING_PRIVATE_KEY or, by default, from
+// ~/.tauri/markdown-studio.key. It must never be committed; keep a backup,
+// because updates can only be published with the same key.
+//
 //   npm run release:installer                   standard installer
 //   npm run release:installer -- --offline      standard + offline installers
 //   npm run release:installer -- --skip-build   republish existing builds
@@ -14,6 +20,7 @@ import { execSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { homedir } from "node:os";
 
 const args = process.argv.slice(2);
 const skipBuild = args.includes("--skip-build");
@@ -35,6 +42,18 @@ const bundlePath = join("src-tauri", "target", "release", "bundle", "nsis", `${c
 const sha256Of = (file) => createHash("sha256").update(readFileSync(file)).digest("hex");
 const mb = (file) => (statSync(file).size / 1024 / 1024).toFixed(1);
 
+// ---------------------------------------------------------------- updater signing key
+const keyFile = join(homedir(), ".tauri", "markdown-studio.key");
+if (!skipBuild && !process.env.TAURI_SIGNING_PRIVATE_KEY) {
+  if (!existsSync(keyFile)) {
+    console.error(`Updater signing key not found: ${keyFile}`);
+    console.error("Restore it from your backup, or set TAURI_SIGNING_PRIVATE_KEY.");
+    process.exit(1);
+  }
+  process.env.TAURI_SIGNING_PRIVATE_KEY = readFileSync(keyFile, "utf8").trim();
+  process.env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD ??= "";
+}
+
 // ---------------------------------------------------------------- standard installer
 const outDir = "downloads";
 const fileName = `MarkdownStudio-${version}-windows-x64-setup.exe`;
@@ -54,8 +73,31 @@ if (!skipBuild || !existsSync(target)) {
   copyFileSync(bundlePath, target);
 }
 
-// ---------------------------------------------------------------- offline installer
+// ---------------------------------------------------------------- updater manifest
+// Written before the offline build, which replaces the bundle and its signature.
 const assetsDir = "release-assets";
+const manifestPath = join(assetsDir, "latest.json");
+if (!skipBuild || !existsSync(manifestPath)) {
+  const sigPath = `${bundlePath}.sig`;
+  if (!existsSync(sigPath)) {
+    console.error(`Updater signature not found: ${sigPath} (is bundle.createUpdaterArtifacts enabled?)`);
+    process.exit(1);
+  }
+  const platform = {
+    signature: readFileSync(sigPath, "utf8").trim(),
+    url: `https://github.com/${repo}/releases/download/v${version}/${fileName}`,
+  };
+  mkdirSync(assetsDir, { recursive: true });
+  const manifest = {
+    version,
+    notes: `Markdown Studio ${version}. See https://github.com/${repo}/releases/tag/v${version} for what's new.`,
+    pub_date: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+    platforms: { "windows-x86_64-nsis": platform, "windows-x86_64": platform },
+  };
+  writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
+}
+
+// ---------------------------------------------------------------- offline installer
 const offlineName = `MarkdownStudio-${version}-windows-x64-offline-setup.exe`;
 const offlineTarget = join(assetsDir, offlineName);
 if (withOffline) {

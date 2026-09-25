@@ -37,7 +37,7 @@ describe("check for updates", () => {
     setupBackend();
     vi.stubGlobal("fetch", release("v99.0.0"));
     const open = vi.spyOn(window, "open").mockImplementation(() => null);
-    const answered = autoAnswer("download");
+    const answered = autoAnswer("install");
     expect(await checkForUpdates({ manual: false })).toBe("available");
     answered.stop();
     expect(answered.titles).toEqual(["Update available"]);
@@ -72,5 +72,64 @@ describe("check for updates", () => {
     expect(useUi.getState().toasts).toEqual([]);
     expect(await checkForUpdates({ manual: true })).toBe("error");
     expect(useUi.getState().toasts.at(-1)?.kind).toBe("error");
+  });
+});
+
+describe("in-app update (desktop)", () => {
+  const nativeBackend = (install: () => Promise<void>) => {
+    const b = setupBackend({ "/ws/a.md": "saved" });
+    Object.defineProperty(b, "isNative", { value: true });
+    b.checkAppUpdate = async () => ({ version: "9.0.0", currentVersion: "0.8.0", notes: "## 9.0.0\n\nBetter things", date: null });
+    const progress: Array<(d: number, t: number | null) => void> = [];
+    b.onUpdateProgress = async (h) => {
+      progress.push(h);
+      return () => {};
+    };
+    b.installAppUpdate = vi.fn(async () => {
+      progress.forEach((h) => h(5 * 1024 * 1024, 10 * 1024 * 1024));
+      expect(useUi.getState().progress?.message).toMatch(/5\.0 of 10\.0 MB/);
+      await install();
+    });
+    return b;
+  };
+
+  it("offers Update Now, shows progress and installs", async () => {
+    const b = nativeBackend(async () => {});
+    const answered = autoAnswer("install");
+    expect(await checkForUpdates({ manual: false })).toBe("available");
+    answered.stop();
+    expect(b.installAppUpdate).toHaveBeenCalledOnce();
+    expect(useUi.getState().progress).toBeNull();
+  });
+
+  it("saves open documents first and postpones if saving fails", async () => {
+    const b = nativeBackend(async () => {});
+    const { openPath } = await import("../src/features/documents");
+    const { useDocuments } = await import("../src/stores/documentsStore");
+    const id = (await openPath("/ws/a.md"))!;
+    useDocuments.getState().setContent(id, "edited");
+    const answered = autoAnswer("install");
+    await checkForUpdates({ manual: true });
+    answered.stop();
+    expect((await b.readTextFile("/ws/a.md")).content).toBe("edited");
+    expect(b.installAppUpdate).toHaveBeenCalledOnce();
+
+    useDocuments.getState().setContent(id, "edited again");
+    b.writeTextFile = async () => { throw new Error("disk full"); };
+    (b.installAppUpdate as ReturnType<typeof vi.fn>).mockClear();
+    const again = autoAnswer("install");
+    await checkForUpdates({ manual: true });
+    again.stop();
+    expect(b.installAppUpdate).not.toHaveBeenCalled();
+  });
+
+  it("keeps the current version running when installing fails", async () => {
+    nativeBackend(async () => { throw new Error("Update failed: signature mismatch"); });
+    const answered = autoAnswer("install");
+    await checkForUpdates({ manual: true });
+    answered.stop();
+    expect(useUi.getState().progress).toBeNull();
+    expect(useUi.getState().toasts.at(-1)).toMatchObject({ kind: "error" });
+    expect(useUi.getState().toasts.at(-1)?.message).toMatch(/current version is unchanged.*signature mismatch/);
   });
 });

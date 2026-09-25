@@ -1602,3 +1602,10 @@ select {
   text-decoration: underline;
   cursor: pointer;
 }
+
+.modal-progress {
+  width: 100%;
+  height: 8px;
+  margin: 8px 0 4px;
+  accent-color: var(--accent);
+}

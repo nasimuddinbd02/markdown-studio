@@ -1,5 +1,5 @@
 import type {
-  AppInfo, HistoryEntry, OpenPaths, SearchOptions, SearchResult, DirEntry, FileContent, LineEnding, RecentEntry, RecoverySnapshot,
+  AppInfo, AppUpdate, HistoryEntry, OpenPaths, SearchOptions, SearchResult, DirEntry, FileContent, LineEnding, RecentEntry, RecoverySnapshot,
 } from "../types";
 
 export type ExportKind = "html";
@@ -89,6 +89,12 @@ export interface Backend {
   takePendingOpens(): Promise<OpenPaths>;
   /** Subscribes to paths opened later (drop, second launch). Returns an unsubscribe function. */
   onOpenPaths(handler: (paths: OpenPaths) => void): Promise<() => void>;
+
+  /** In-app updates (desktop): the newer signed release on GitHub, or null. */
+  checkAppUpdate(): Promise<AppUpdate | null>;
+  /** Downloads, verifies and installs the update; the app restarts when it's done. */
+  installAppUpdate(): Promise<void>;
+  onUpdateProgress(handler: (downloaded: number, total: number | null) => void): Promise<() => void>;
 
   log(level: "error" | "warn" | "info" | "debug", category: string, message: string): void;
   exportLogs(): Promise<string | null>;

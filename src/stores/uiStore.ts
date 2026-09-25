@@ -27,6 +27,9 @@ export interface Toast {
 
 interface UiState {
   dialogs: DialogRequest[];
+  /** A blocking operation in progress (e.g. installing an update); fraction null = indeterminate. */
+  progress: { title: string; message: string; fraction: number | null } | null;
+  setProgress(p: UiState["progress"]): void;
   toasts: Toast[];
   settingsOpen: boolean;
   aboutOpen: boolean;
@@ -63,6 +66,8 @@ let nextId = 1;
 
 export const useUi = create<UiState>((set, get) => ({
   dialogs: [],
+  progress: null,
+  setProgress: (progress) => set({ progress }),
   toasts: [],
   settingsOpen: false,
   aboutOpen: false,

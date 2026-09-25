@@ -77,7 +77,7 @@ impl AppState {
     }
 
     /// Logs the operation name and error category only — never document content.
-    fn track<T>(&self, op: &str, result: AppResult<T>) -> AppResult<T> {
+    pub(crate) fn track<T>(&self, op: &str, result: AppResult<T>) -> AppResult<T> {
         if let Err(e) = &result {
             self.logger.log("error", op, &e.to_string());
         }

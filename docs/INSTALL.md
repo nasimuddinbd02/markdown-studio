@@ -18,8 +18,8 @@ Choose one installer:
 
 | Installer | Use it when | Size |
 | --- | --- | --- |
-| **Standard**: <!-- installer-link -->[**MarkdownStudio-0.7.0-windows-x64-setup.exe**](../downloads/MarkdownStudio-0.7.0-windows-x64-setup.exe?raw=true)<!-- /installer-link --> | Recommended for almost everyone. If WebView2 is missing, it's downloaded automatically during setup (needs internet only in that case). | ~4 MB |
-| **Offline**: <!-- offline-link -->[**MarkdownStudio-0.7.0-windows-x64-offline-setup.exe**](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.7.0/MarkdownStudio-0.7.0-windows-x64-offline-setup.exe)<!-- /offline-link --> | The PC has **no internet access**, is locked down, or you're deploying to many machines. It includes the WebView2 runtime, so nothing is downloaded. | ~210 MB |
+| **Standard**: <!-- installer-link -->[**MarkdownStudio-0.8.0-windows-x64-setup.exe**](../downloads/MarkdownStudio-0.8.0-windows-x64-setup.exe?raw=true)<!-- /installer-link --> | Recommended for almost everyone. If WebView2 is missing, it's downloaded automatically during setup (needs internet only in that case). | ~4 MB |
+| **Offline**: <!-- offline-link -->[**MarkdownStudio-0.8.0-windows-x64-offline-setup.exe**](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.8.0/MarkdownStudio-0.8.0-windows-x64-offline-setup.exe)<!-- /offline-link --> | The PC has **no internet access**, is locked down, or you're deploying to many machines. It includes the WebView2 runtime, so nothing is downloaded. | ~210 MB |
 
 On GitHub you can also open the [`downloads`](../downloads/) folder, click the `.exe` file, and then click **Download raw file** (the ⬇ button). The offline installer is too large for the repository, so it's published on the project's [Releases page](https://github.com/nasimuddinbd02/markdown-studio/releases/latest).
 
@@ -60,7 +60,15 @@ After installation Markdown Studio:
 
 ### Updating
 
-Download the newer installer and run it. It upgrades the existing installation in place. Your settings, recent files and file history are kept. You can see the installed version under **Help → About Markdown Studio**.
+**From version 0.8.0, Markdown Studio updates itself.** Each time it starts, it asks GitHub whether a newer version has been published. If there is one, it shows the new version and your current one, with three choices:
+
+- **Update Now** saves your open documents, then downloads the new installer. It checks the installer's digital signature against the key built into the app and refuses any file that doesn't match. The installer then replaces the current version in place, and Markdown Studio restarts on the new version. If Markdown Studio was installed for **Anyone who uses this computer**, Windows asks for administrator approval first.
+- **Later** asks again the next time Markdown Studio starts.
+- **Skip This Version** stops the automatic prompt for that version.
+
+You can also use **Help → Check for Updates…** at any time. To turn off the startup check, clear **Settings → Startup → Check for updates when Markdown Studio starts**. If a download or install fails, the current version keeps running unchanged.
+
+Versions before 0.8.0 can't install updates themselves. Download the newer installer and run it once; it upgrades the existing installation in place. Your settings, recent files and file history are always kept. You can see the installed version under **Help → About Markdown Studio**.
 
 ### Uninstalling
 
@@ -71,7 +79,7 @@ Open **Settings → Apps → Installed apps** (or **Control Panel → Programs a
 The installer supports unattended installation. Add `/AllUsers` (run elevated) or `/CurrentUser` to choose the scope:
 
 ```powershell
-.\MarkdownStudio-0.7.0-windows-x64-setup.exe /S /AllUsers
+.\MarkdownStudio-0.8.0-windows-x64-setup.exe /S /AllUsers
 ```
 
 To uninstall silently, run `uninstall.exe /S` from the installation folder.

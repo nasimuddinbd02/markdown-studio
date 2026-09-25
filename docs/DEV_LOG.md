@@ -201,3 +201,20 @@ The user asked for conversion tools (DOCX/PDF to Markdown and the reverse) and c
 
 - Which UI languages should localization cover?
 - Signing key and update endpoint for in-app updates.
+
+## 2026-09-25: Automatic in-app updates, released as 0.8.0
+
+The user asked for automatic updates: check at startup, ask, then replace the old version with the new one.
+
+| # | Feature |
+| --- | --- |
+| 30 | `tauri-plugin-updater` driven from Rust commands (`check_app_update`, `install_app_update`), so the frontend needs no updater permissions. Checks on every startup (can be turned off in Settings), with Update Now, Later and Skip This Version. Open documents are saved first, a progress dialog shows the download, and the verified NSIS installer replaces the current version in place and relaunches. |
+| — | Release pipeline: the standard installer is signed with the updater key (`~/.tauri/markdown-studio.key`, never committed), and `latest.json` is written and uploaded to the GitHub Release. The endpoint is `releases/latest/download/latest.json`. |
+
+**Native end-to-end test:**
+
+1. Built a test 0.7.9 whose update endpoint was a local server, and installed it.
+2. Served a manifest with the wrong signature. It was rejected ("signature verification failed"), and 0.7.9 kept running.
+3. Served the real signed 0.8.0. Update Now from the startup prompt installed 0.8.0 in place (registry and exe both 0.8.0), and the app relaunched in about 3 seconds.
+
+**Tests:** Vitest 191, Playwright 17, Rust 27. All passing.

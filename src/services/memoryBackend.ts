@@ -1,7 +1,7 @@
 import type { Backend, WriteRequest } from "./backend";
 import { AppError } from "./errors";
 import { basename, dirname, isMarkdownPath, join } from "./paths";
-import type { DirEntry, OpenPaths, RecentEntry, RecoverySnapshot, SearchOptions, SearchResult } from "../types";
+import type { AppUpdate, DirEntry, OpenPaths, RecentEntry, RecoverySnapshot, SearchOptions, SearchResult } from "../types";
 import { buildSearchRegex, searchText } from "./search";
 import { DEMO_FILES } from "./demoContent";
 
@@ -148,7 +148,7 @@ export class MemoryBackend implements Backend {
   // ------------------------------------------------------------ Backend
 
   async appInfo() {
-    return { version: "0.7.0", os: "browser", arch: "web", logPath: "(in memory)" };
+    return { version: "0.8.0", os: "browser", arch: "web", logPath: "(in memory)" };
   }
 
   async pickOpenFile() {
@@ -476,6 +476,17 @@ export class MemoryBackend implements Backend {
   }
   private notifyFs(path: string) {
     if (this.watchedRoot && path.startsWith(this.watchedRoot + "/")) this.fsListeners.forEach((h) => h([path]));
+  }
+
+  // The browser demo has no installer; updates.ts uses the GitHub API instead.
+  async checkAppUpdate(): Promise<AppUpdate | null> {
+    return null;
+  }
+  async installAppUpdate() {
+    throw new AppError("io", "Updates are installed by the desktop app.");
+  }
+  async onUpdateProgress(_handler: (downloaded: number, total: number | null) => void) {
+    return () => {};
   }
 
   async takePendingOpens() {

@@ -107,8 +107,27 @@ function RequestDialog({ req }: { req: DialogRequest }) {
 /** Renders the top-most pending dialog request. */
 export function DialogHost() {
   const dialogs = useUi((s) => s.dialogs);
+  const progress = useUi((s) => s.progress);
   const top = dialogs[0];
+  if (progress) return <ProgressDialog {...progress} />;
   return top ? <RequestDialog key={top.id} req={top} /> : null;
+}
+
+/** Non-dismissable progress for operations that must finish (e.g. installing an update). */
+function ProgressDialog({ title, message, fraction }: { title: string; message: string; fraction: number | null }) {
+  return (
+    <div className="modal-backdrop">
+      <div className="modal" role="alertdialog" aria-modal="true" aria-labelledby="progress-title" aria-busy="true">
+        <h2 id="progress-title" className="modal-title">{title}</h2>
+        <p className="modal-message" role="status" aria-live="polite">{message}</p>
+        {fraction === null ? (
+          <progress className="modal-progress" aria-label={title} />
+        ) : (
+          <progress className="modal-progress" aria-label={title} max={1} value={fraction} />
+        )}
+      </div>
+    </div>
+  );
 }
 
 export function Toasts() {

@@ -7,18 +7,18 @@ The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status pe
 ## Download
 
 <!-- download:start -->
-### ⬇️ [Download Markdown Studio 0.7.0 for Windows (64-bit)](downloads/MarkdownStudio-0.7.0-windows-x64-setup.exe?raw=true)
+### ⬇️ [Download Markdown Studio 0.8.0 for Windows (64-bit)](downloads/MarkdownStudio-0.8.0-windows-x64-setup.exe?raw=true)
 
-Released 2026-09-24 for Windows 10 (1803+) and 11, x64. Nothing else needs to be installed: the app is self-contained.
+Released 2026-09-25 for Windows 10 (1803+) and 11, x64. Nothing else needs to be installed: the app is self-contained.
 
 | Installer | When to use it | Size | SHA-256 |
 | --- | --- | --- | --- |
-| **Standard**: [MarkdownStudio-0.7.0-windows-x64-setup.exe](downloads/MarkdownStudio-0.7.0-windows-x64-setup.exe?raw=true) | Recommended. WebView2 is already part of Windows 11 and updated Windows 10; if it's missing, the installer adds it automatically (needs internet) | 6.3 MB | `22d3ae03de54dca549937849d86cf07dd7711f4db93147410bb63019b8bb4f80` |
-| **Offline**: [MarkdownStudio-0.7.0-windows-x64-offline-setup.exe](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.7.0/MarkdownStudio-0.7.0-windows-x64-offline-setup.exe) | Includes WebView2; no internet needed | 211.3 MB | `7cda0c7de15597acef86657b6bf32949402e18dd319ecd9f7b37f24d66c9669d` |
+| **Standard**: [MarkdownStudio-0.8.0-windows-x64-setup.exe](downloads/MarkdownStudio-0.8.0-windows-x64-setup.exe?raw=true) | Recommended. WebView2 is already part of Windows 11 and updated Windows 10; if it's missing, the installer adds it automatically (needs internet) | 6.9 MB | `695c0b2e815e3565f83a96f309ac29f39761e132bde577bc3c35cfa88fa6ebb4` |
+| **Offline**: [MarkdownStudio-0.8.0-windows-x64-offline-setup.exe](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.8.0/MarkdownStudio-0.8.0-windows-x64-offline-setup.exe) | Includes WebView2; no internet needed | 211.9 MB | `d556d1ce5aae473229c0b2183834badeb876506cb0b5a9f2298604257e6a4809` |
 
 **Install in 3 steps:**
 
-1. **Download** an installer above (all files are also on the [0.7.0 release page](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.7.0)).
+1. **Download** an installer above (all files are also on the [0.8.0 release page](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.8.0)).
 2. **Run** it and choose **Anyone who uses this computer**, which needs administrator approval, or **Only for me**, which doesn't. The installer isn't code-signed yet, so if Windows SmartScreen says *"Windows protected your PC"*, choose **More info → Run anyway**.
 3. **Start** Markdown Studio from the Start menu, or right-click any `.md` file and choose **Open with Markdown Studio**.
 
@@ -42,7 +42,7 @@ The app appears in **Settings → Apps → Installed apps** and in **Control Pan
 - Convert Folder to Markdown (File menu): converts every Word, PDF, HTML and CSV/TSV file in the open folder to a .md file beside it in one step; files that already have a Markdown version are skipped
 - Combine Folder into One Document (File menu): merges every Markdown file in the folder (README/index first, natural order) into `<Folder> (combined).md` with a table of contents; links between the files become in-document links and image paths are re-based. Export it as PDF or Word to share the folder as a single file
 - Link check (sidebar → Links, or Edit → Check Links in Folder): finds broken links to files, missing images and `file.md#heading` anchors across every Markdown file in the folder. Click a problem to jump to it
-- Update check: Help → Check for Updates, plus an optional daily check (Settings → Startup) that asks GitHub for the latest release and offers the download page. Nothing else is sent
+- Automatic updates: at startup, the app checks GitHub for a newer version and offers **Update Now**. It downloads the update, verifies its signature, installs it over the current version and restarts. You can also use Help → Check for Updates, or turn the startup check off in Settings. Nothing else is sent
 - Table of contents: Format → Insert / Update Table of Contents builds a linked, nested TOC that stays up to date on save (Settings → Files)
 - Export to PDF (selectable text, clickable links, heading bookmarks, tables, task checkboxes, images) and to Word (.docx) with real Word headings, numbered/bulleted/task lists, tables, code, links and embedded images
 - Export to standalone HTML (styled, images inlined, sanitized), Copy as HTML, and Print / Save as PDF (Ctrl/Cmd+P)
@@ -136,7 +136,9 @@ npm run release:github
    - the **offline** installer (~210 MB, with the WebView2 runtime) goes to `release-assets/`. It's too large for git, so it's ignored.
 
    It also writes `SHA256SUMS.txt` and refreshes the download links in this README and in [docs/INSTALL.md](docs/INSTALL.md).
-3. Commit and push, then run `release:github`. It creates or updates the GitHub Release `v<version>` with both installers and the checksums, using the GitHub CLI (`gh auth login` once).
+3. Commit and push, then run `release:github`. It creates or updates the GitHub Release `v<version>` with both installers, the checksums and `latest.json`, using the GitHub CLI (`gh auth login` once). Installed apps pick up the new version automatically on their next start.
+
+**Update signing key.** Updates are signed with a minisign key. `release:installer` reads the private key from `~/.tauri/markdown-studio.key`, or from the `TAURI_SIGNING_PRIVATE_KEY` environment variable. The matching public key is in `src-tauri/tauri.conf.json`. **Never commit the private key, and keep a backup somewhere safe.** Installed apps only accept updates signed with this exact key; if it's lost, users would have to reinstall manually once to switch to a new key.
 
 ## Packaging and releases
 

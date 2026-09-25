@@ -7,6 +7,7 @@ mod scope;
 mod search;
 mod storage;
 mod text;
+mod updater;
 mod watcher;
 
 use commands::AppState;
@@ -30,6 +31,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         // Restores window size/position between launches (FR-003).
         .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             let paths = app.path();
             let config_dir = paths.app_config_dir()?;
@@ -97,6 +99,8 @@ pub fn run() {
             commands::clear_recovery,
             commands::log_event,
             commands::export_logs,
+            updater::check_app_update,
+            updater::install_app_update,
         ])
         // Files and folders dropped onto the window.
         .on_window_event(|window, event| {

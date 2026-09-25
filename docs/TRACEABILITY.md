@@ -66,8 +66,8 @@ Status of each [SRS](SRS.md) requirement. **Done** means implemented and tested 
 | SEC-005 | Done | `open_external` accepts only http, https and mailto |
 | SEC-006/007 | N/A | No AI or secrets in the MVP |
 | SEC-008 | Partial | Signing hooks exist in the release workflow; certificates are needed |
-| UPD-001, UPD-002, UPD-004 | Implemented | `features/updates.ts`: optional daily check against the GitHub Releases API (Settings → Startup) and Help → Check for Updates. Shows the current and available versions, with Skip This Version and Later. Tests: `tests/updates.test.ts` |
-| UPD-003, UPD-005, UPD-006 | Partial | The app never downloads or runs installers itself. Users download from the release page (SHA-256 published) and the installer upgrades in place. In-app signed installs (`tauri-plugin-updater`) need a maintainer-held signing key |
+| UPD-001, UPD-002, UPD-004 | Implemented | `features/updates.ts`: a check on every startup (optional; Settings → Startup) and Help → Check for Updates. Shows the current and available versions, with Update Now, Later and Skip This Version. Tests: `tests/updates.test.ts` |
+| UPD-003, UPD-005, UPD-006 | Implemented | `src-tauri/src/updater.rs` uses `tauri-plugin-updater`. `latest.json` on the latest GitHub Release points to the NSIS installer. The installer's minisign signature is verified against the public key in `tauri.conf.json` before it runs. Unsaved documents are saved first. On any failure the running version is unchanged. Verified end to end on Windows: a tampered manifest is rejected, and a signed update installs in place and relaunches |
 
 ## Beyond the MVP (delivered early)
 
@@ -83,7 +83,7 @@ Status of each [SRS](SRS.md) requirement. **Done** means implemented and tested 
 
 ## Known gaps and next improvements
 
-- Auto-update (UPD-*), planned for v1.0.
+- Code-sign the Windows installer (Authenticode) so SmartScreen doesn't warn; updates are already signature-verified.
 - Startup bundle is 612 KB; the preview pipeline, export and Mermaid are lazy-loaded. Further trimming (highlight.js language subset) is possible.
 - A native OS menu bar on macOS (the in-app menu is used on all platforms today).
 - Large-file benchmark (10 MB+) and incremental preview rendering.

@@ -1,6 +1,6 @@
 [package]
 name = "markdown-studio"
-version = "0.7.0"
+version = "0.8.0"
 description = "Cross-platform, local-first desktop Markdown editor"
 authors = ["Markdown Studio contributors"]
 edition = "2021"
@@ -19,6 +19,7 @@ tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-window-state = "2"
 tauri-plugin-single-instance = "2"
+tauri-plugin-updater = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 dunce = "1"
