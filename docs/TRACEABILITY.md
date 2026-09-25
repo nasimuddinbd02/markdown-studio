@@ -79,6 +79,7 @@ Status of each [SRS](SRS.md) requirement. **Done** means implemented and tested 
 | Find in Files, command palette, formatting commands | §5 Power user needs |
 | Open from OS (file association, single instance, drag and drop) | §13 packaging and desktop integration |
 | Auto save, save options, large-document mode | §10.2, NFR-002 |
+| Combine a folder of Markdown files into one document (TOC, cross-file links as anchors) for single-file PDF/Word export | §19 Future: export |
 
 ## Known gaps and next improvements
 

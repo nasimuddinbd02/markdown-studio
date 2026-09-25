@@ -125,6 +125,12 @@ export const commands: Record<string, Command> = {
     run: async () => void (await (await import("./batchConvert")).convertWorkspaceDocuments()),
     enabled: () => !!useWorkspace.getState().root,
   },
+  combineFolder: {
+    id: "combineFolder",
+    label: "Combine Folder into One Document…",
+    run: async () => void (await (await import("./combine")).combineWorkspace()),
+    enabled: () => !!useWorkspace.getState().root,
+  },
   importHtml: { id: "importHtml", label: "Import Web Page (.html)…", run: async () => (await importing()).importDocument("html") },
   exportHtml: { id: "exportHtml", label: "Export as HTML…", run: async () => (await exporting()).exportActiveAsHtml(), enabled: hasActive },
   exportPdf: { id: "exportPdf", label: "Export as PDF…", run: async () => (await exporting()).exportActiveAsPdf(), enabled: hasActive },

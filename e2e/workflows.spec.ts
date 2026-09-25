@@ -128,3 +128,18 @@ test("formatting shortcuts and table formatting", async ({ page }) => {
   await page.keyboard.press(`${mod}+Alt+t`);
   await expect(page.locator(".cm-line").filter({ hasText: "| ccc | d   |" })).toHaveCount(1);
 });
+
+test("combine the folder into one document", async ({ page }) => {
+  await start(page);
+  await openDemoFolder(page);
+  await page.keyboard.press(`${mod}+Shift+P`);
+  await page.keyboard.type("combine folder");
+  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: "Combine" }).click();
+  await expect(page.getByRole("tab", { name: /demo \(combined\)\.md/ })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("treeitem", { name: /demo \(combined\)\.md/ })).toBeVisible();
+  const preview = page.locator(".markdown-body");
+  await expect(preview.locator("h1")).toHaveText("demo");
+  await expect(preview.locator("h2", { hasText: "Welcome to Markdown Studio" })).toBeVisible();
+  await expect(preview.locator("h2", { hasText: "Guide" })).toBeVisible();
+});
