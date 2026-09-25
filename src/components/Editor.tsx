@@ -21,7 +21,7 @@ import { scrollSync } from "../features/scrollSync";
 import { editorKeymap } from "../features/commands";
 import { minimalChange } from "../features/saveTransforms";
 import { insertImageFiles, isImageFile } from "../features/images";
-import { pasteHtmlAsMarkdown, pastePlainTable } from "../features/richPaste";
+import { linkOverSelection, pasteHtmlAsMarkdown, pastePlainTable } from "../features/richPaste";
 import { markdownLinter } from "../features/lintExtension";
 import { linkCompletion } from "../features/completion";
 
@@ -128,6 +128,12 @@ export function Editor() {
             // Rich text from browsers/Word becomes Markdown (Ctrl+Shift+V still pastes plain text).
             const html = e.clipboardData?.getData("text/html");
             const plainText = e.clipboardData?.getData("text/plain") ?? "";
+            const link = linkOverSelection(view.state, plainText);
+            if (link) {
+              e.preventDefault();
+              view.dispatch(link);
+              return true;
+            }
             if (!useSettings.getState().settings.pasteRichTextAsMarkdown) return false;
             if (!html) {
               if (!plainText.includes("\t")) return false;
