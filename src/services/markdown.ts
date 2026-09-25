@@ -1,3 +1,4 @@
+import { rehypeAlerts } from "./alerts";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
@@ -40,7 +41,8 @@ export interface MarkdownFeatures {
  */
 export function markdownPlugins(features: MarkdownFeatures = { math: true }) {
   const remarkPlugins: NonNullable<Options["remarkPlugins"]> = [remarkGfm];
-  const rehypePlugins: NonNullable<Options["rehypePlugins"]> = [rehypeRaw, [rehypeSanitize, sanitizeSchema]];
+  // GitHub alerts (> [!NOTE]) are styled after sanitizing; they only add fixed class names.
+  const rehypePlugins: NonNullable<Options["rehypePlugins"]> = [rehypeRaw, [rehypeSanitize, sanitizeSchema], rehypeAlerts];
   if (features.math) {
     remarkPlugins.push([remarkMath, { singleDollarTextMath: true }]);
     rehypePlugins.push([rehypeKatex, { output: "mathml", throwOnError: false, strict: "ignore", trust: false }]);

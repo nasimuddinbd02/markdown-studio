@@ -1,3 +1,4 @@
+import { ALERT_KINDS, takeMdastAlert } from "../alerts";
 import { stripFrontMatter } from "../frontMatter";
 import {
   AlignmentType, BorderStyle, Document, ExternalHyperlink, HeadingLevel, ImageRun, LevelFormat, Packer,
@@ -207,11 +208,17 @@ class DocxBuilder {
         );
       case "blockquote": {
         const out: Array<Paragraph | Table> = [];
+        const alert = takeMdastAlert(node);
+        const bar = { left: { style: BorderStyle.SINGLE, size: 12, color: alert ? ALERT_KINDS[alert].color : "C3C9D2", space: 8 } };
+        if (alert) {
+          const { label, color } = ALERT_KINDS[alert];
+          out.push(new Paragraph({ indent: { left: 360 * (indentLevel + 1) }, border: bar, children: [new TextRun({ text: label, bold: true, color })] }));
+        }
         for (const child of node.children) {
           const inner = child.type === "paragraph"
             ? [await this.paragraph(child.children, {
                 indent: { left: 360 * (indentLevel + 1) },
-                border: { left: { style: BorderStyle.SINGLE, size: 12, color: "C3C9D2", space: 8 } },
+                border: bar,
               })]
             : await this.block(child, indentLevel + 1);
           out.push(...inner);

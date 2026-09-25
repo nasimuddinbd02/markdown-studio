@@ -52,6 +52,7 @@ The app appears in **Settings → Apps → Installed apps** and in **Control Pan
 - Mermaid diagrams (lazy-loaded, strict security mode) and LaTeX math (`$…$`, `$$…$$`, rendered as MathML) in the preview and exports
 - Live GitHub Flavored Markdown preview (tables, task lists, strikethrough, autolinks, fenced code with highlighting) with a configurable debounce
 - YAML front matter (`---` metadata at the top, as used by Jekyll, Hugo and Obsidian) is shown as a tidy metadata table in the preview, left out of HTML, PDF and Word exports, and its `title` names exported documents
+- GitHub alerts: `> [!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]` and `[!CAUTION]` render as coloured callouts with icons in the preview and HTML export, and as labelled callouts in PDF and Word
 - Editor-only, split and preview-only views, resizable panels and synced scrolling
 - Light, dark and system themes; configurable font, font size, line numbers, wrapping and tab size
 - Optional auto save (after a delay, or on tab/window focus change) that never overwrites external changes

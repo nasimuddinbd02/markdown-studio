@@ -106,3 +106,12 @@ describe("Markdown → PDF", () => {
     expect(atob(backend.lastExport!.content).slice(0, 5)).toBe("%PDF-");
   }, 30_000);
 });
+
+describe("alerts in PDF export", () => {
+  it("writes the label instead of the [!WARNING] marker", async () => {
+    const md = (await pdfToMarkdown((await markdownToPdf("> [!WARNING]\n> Mind the gap.")).buffer as ArrayBuffer)).markdown;
+    expect(md).toContain("Warning");
+    expect(md).toContain("Mind the gap.");
+    expect(md).not.toContain("[!WARNING]");
+  }, 20000);
+});

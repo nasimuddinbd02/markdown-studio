@@ -99,3 +99,14 @@ describe("Markdown → Word (.docx)", () => {
     expect(atob(backend.lastExport!.content).slice(0, 2)).toBe("PK");
   }, 20_000);
 });
+
+describe("alerts in Word export", () => {
+  it("writes a coloured label instead of the [!NOTE] marker", async () => {
+    const bytes = await markdownToDocx("> [!IMPORTANT]\n> Read this.");
+    const xml = await (await JSZip.loadAsync(bytes)).file("word/document.xml")!.async("string");
+    expect(xml).toContain(">Important<");
+    expect(xml).toContain('w:color w:val="8250DF"');
+    expect(xml).toContain("Read this.");
+    expect(xml).not.toContain("[!IMPORTANT]");
+  });
+});

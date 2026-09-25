@@ -1,3 +1,4 @@
+import { ALERT_KINDS, takeMdastAlert } from "../alerts";
 import { stripFrontMatter } from "../frontMatter";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
@@ -189,15 +190,17 @@ class PdfBuilder {
           },
         ];
       case "blockquote": {
-        const inner: Content[] = [];
+        const alert = takeMdastAlert(node);
+        const style = alert ? ALERT_KINDS[alert] : null;
+        const inner: Content[] = style ? [{ text: style.label, bold: true, color: `#${style.color}`, margin: [0, 0, 0, 4] }] : [];
         for (const child of node.children) inner.push(...(await this.block(child)));
         return [
           {
-            table: { widths: ["*"], body: [[{ stack: inner, color: "#5C6575" }]] },
+            table: { widths: ["*"], body: [[{ stack: inner, color: style ? "#1D2330" : "#5C6575" }]] },
             layout: {
               hLineWidth: () => 0,
               vLineWidth: (i: number) => (i === 0 ? 3 : 0),
-              vLineColor: () => "#C3C9D2",
+              vLineColor: () => (style ? `#${style.color}` : "#C3C9D2"),
               paddingLeft: () => 10,
             },
             margin: [0, 0, 0, 8],
