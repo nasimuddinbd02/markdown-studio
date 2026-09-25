@@ -176,3 +176,28 @@ The user asked for conversion tools (DOCX/PDF to Markdown and the reverse) and c
 1. Signed in-app updates (`tauri-plugin-updater`). This needs a signing key held by the maintainer.
 2. Localization: still waiting on the user's language choices.
 3. Export a folder (all .md) to PDF or Word in one step; merge several files into one document.
+
+## 2026-09-24 (evening): Combine a folder, released as 0.7.0
+
+| # | Feature | Commit |
+| --- | --- | --- |
+| — | Fixed an e2e flake: the accessibility audits timed out when the dev server started cold under parallel load (`test.slow()`) | 0fd48e0 |
+| 29 | File → Combine Folder into One Document: merges every .md in the folder (README/index first, natural order, depth-first) into `<Folder> (combined).md` with a TOC. Headings move one level down under the combined title, links between files become in-document anchors (renumbered where heading ids collide), and relative images and links are re-based. Front matter and old TOC blocks are dropped. Unsaved edits in open tabs are included, and a dirty combined tab is never overwritten | 7b2fa6e |
+
+**Verification:** 6 Vitest tests and a Playwright workflow (palette → Combine → the combined tab opens and the preview shows the heading hierarchy). The preview server can't start in unattended runs, so the browser check ran through Playwright instead. Not verified in the native app this session (the feature uses only existing backend commands).
+
+**Release 0.7.0:** standard installer 6.3 MB (SHA-256 22d3ae03…); offline installer 211.3 MB (SHA-256 7cda0c7d…). Both GitHub download URLs return 200. Installed locally with `/S`, and the registry shows 0.7.0.
+
+**Tests:** Vitest 188, Playwright 18, Rust 27. All passing.
+
+**Next up:**
+
+1. Export a folder straight to one PDF or Word file (combine plus export in one step, without writing the .md).
+2. Signed in-app updates (`tauri-plugin-updater`). Needs a maintainer-held signing key.
+3. Performance: a subset of highlight.js languages; a 10 MB document benchmark.
+4. Localization: waiting on the language choice.
+
+**Questions for the user:**
+
+- Which UI languages should localization cover?
+- Signing key and update endpoint for in-app updates.
