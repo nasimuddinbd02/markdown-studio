@@ -59,6 +59,10 @@ Existing files always keep their own line endings. Untitled documents are never 
 
 The update check asks GitHub for the latest version number; nothing else is sent. See [Privacy](/privacy).
 
+## Reset to defaults
+
+**Reset to Defaults** at the bottom of the Settings dialog restores every setting above to its default. Your open folder and files are kept.
+
 ## Remembered automatically
 
 Markdown Studio also remembers the window size and position, the view (editor, split or preview), whether the explorer and outline are shown, and panel sizes.

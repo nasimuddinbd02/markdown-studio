@@ -185,6 +185,9 @@ export const commands: Record<string, Command> = {
   replace: { id: "replace", label: "Replace", shortcut: isMac ? "Mod+Alt+F" : "Mod+H", run: () => editorCommand("replace"), enabled: hasActive },
   gotoLine: { id: "gotoLine", label: "Go to Line…", shortcut: "Mod+G", run: () => editorCommand("gotoLine"), enabled: hasActive },
   selectAll: { id: "selectAll", label: "Select All", shortcut: "Mod+A", run: () => editorCommand("selectAll"), enabled: hasActive },
+  // CodeMirror also binds these to Ctrl+Alt+[ and Ctrl+Alt+] inside the editor.
+  foldAll: { id: "foldAll", label: "Fold All", run: () => editorCommand("foldAll"), enabled: hasActive },
+  unfoldAll: { id: "unfoldAll", label: "Unfold All", run: () => editorCommand("unfoldAll"), enabled: hasActive },
 
   toggleView: {
     id: "toggleView",

@@ -240,3 +240,20 @@ test("outline context menu moves a section", async ({ page }) => {
   await expect(page.locator(".markdown-body h2").first()).toHaveText("Beta");
   await expect(outline.getByRole("button", { name: /Alpha|Beta/ }).first()).toHaveText(/Beta/);
 });
+
+test("fold and unfold all sections", async ({ page }) => {
+  await start(page);
+  await page.keyboard.press(`${mod}+N`);
+  await page.getByRole("textbox", { name: "Markdown editor" }).click();
+  await page.keyboard.insertText("## One\n\nfirst body\n\n## Two\n\nsecond body\n");
+  await expect(page.locator(".cm-line", { hasText: "second body" })).toHaveCount(1);
+  await page.keyboard.press(`${mod}+Shift+P`);
+  await page.keyboard.type("fold all");
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".cm-line", { hasText: "second body" })).toHaveCount(0);
+  await expect(page.locator(".cm-foldPlaceholder")).toHaveCount(2);
+  await page.keyboard.press(`${mod}+Shift+P`);
+  await page.keyboard.type("unfold all");
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".cm-line", { hasText: "second body" })).toHaveCount(1);
+});

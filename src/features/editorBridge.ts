@@ -2,6 +2,7 @@ import { EditorView } from "@codemirror/view";
 import type { StateCommand } from "@codemirror/state";
 import { undo, redo, selectAll } from "@codemirror/commands";
 import { openSearchPanel, gotoLine } from "@codemirror/search";
+import { foldAll, unfoldAll } from "@codemirror/language";
 
 /** The mounted editor view, so menu commands can drive the editor. */
 let view: EditorView | null = null;
@@ -81,7 +82,7 @@ export function openReplacePanel(v: EditorView): boolean {
   return true;
 }
 
-export type EditorCommandName = "undo" | "redo" | "find" | "replace" | "gotoLine" | "selectAll";
+export type EditorCommandName = "undo" | "redo" | "find" | "replace" | "gotoLine" | "selectAll" | "foldAll" | "unfoldAll";
 
 export function editorCommand(name: EditorCommandName) {
   if (!view) return;
@@ -106,6 +107,14 @@ export function editorCommand(name: EditorCommandName) {
       break;
     case "gotoLine":
       gotoLine(view);
+      break;
+    case "foldAll":
+      foldAll(view);
+      view.focus();
+      break;
+    case "unfoldAll":
+      unfoldAll(view);
+      view.focus();
       break;
   }
 }
