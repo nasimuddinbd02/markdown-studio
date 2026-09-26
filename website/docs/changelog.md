@@ -7,6 +7,18 @@ description: Release notes for every Markdown Studio version, listing what was a
 
 Every release of Markdown Studio, newest first. Dates are the GitHub release dates (UTC). Installers for each version are on the [GitHub releases page](https://github.com/nasimuddinbd02/markdown-studio/releases).
 
+## v0.12.0
+
+Released: 2026-09-26 · [Release files](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.12.0)
+
+### Added
+
+- **Footnotes in PDF and Word exports.** PDF gets superscript numbers linked to a Footnotes section; Word gets real Word footnotes at the bottom of each page.
+- **Mermaid diagrams in PDF and Word exports**, drawn as sharp pictures instead of code.
+- **Outline actions:** right-click a heading to copy a link to it (`#anchor` or a Markdown link) or move its section; **Alt+↑ / Alt+↓** moves the focused heading's section.
+- **View → Fold All / Unfold All.**
+- **This website:** documentation, installation guides, troubleshooting, changelog and roadmap at nasimuddinbd02.github.io/markdown-studio.
+
 ## v0.11.0
 
 Released: 2026-09-26 · [Release files](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.11.0)

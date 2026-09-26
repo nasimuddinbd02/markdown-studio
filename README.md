@@ -9,20 +9,20 @@ The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status pe
 ## Download
 
 <!-- download:start -->
-Markdown Studio 0.11.0 was released on 2026-09-25 and has a separate installer for each operating system. Each one is self-contained: nothing else needs to be installed. All files and checksums are on the [0.11.0 release page](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.11.0).
+Markdown Studio 0.12.0 was released on 2026-09-25 and has a separate installer for each operating system. Each one is self-contained: nothing else needs to be installed. All files and checksums are on the [0.12.0 release page](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.12.0).
 
 | Operating system | Download |
 | --- | --- |
-| **Windows** 10 (1803+) and 11, x64 | [Standard installer](downloads/MarkdownStudio-0.11.0-windows-x64-setup.exe?raw=true) (6.9 MB) · [Offline installer](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.11.0/MarkdownStudio-0.11.0-windows-x64-offline-setup.exe) (211.9 MB) |
-| **macOS** 10.15+ | [Apple Silicon (M1 and later)](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.11.0/MarkdownStudio-0.11.0-macos-arm64.dmg) · [Intel](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.11.0/MarkdownStudio-0.11.0-macos-x64.dmg) |
-| **Linux** x86_64 | [AppImage](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.11.0/MarkdownStudio-0.11.0-linux-x86_64.AppImage) (any distribution) · [.deb](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.11.0/MarkdownStudio-0.11.0-linux-amd64.deb) (Ubuntu, Debian, Mint) · [.rpm](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.11.0/MarkdownStudio-0.11.0-linux-x86_64.rpm) (Fedora, RHEL, openSUSE) |
+| **Windows** 10 (1803+) and 11, x64 | [Standard installer](downloads/MarkdownStudio-0.12.0-windows-x64-setup.exe?raw=true) (6.9 MB) · [Offline installer](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.12.0/MarkdownStudio-0.12.0-windows-x64-offline-setup.exe) (211.9 MB) |
+| **macOS** 10.15+ | [Apple Silicon (M1 and later)](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.12.0/MarkdownStudio-0.12.0-macos-arm64.dmg) · [Intel](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.12.0/MarkdownStudio-0.12.0-macos-x64.dmg) |
+| **Linux** x86_64 | [AppImage](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.12.0/MarkdownStudio-0.12.0-linux-x86_64.AppImage) (any distribution) · [.deb](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.12.0/MarkdownStudio-0.12.0-linux-amd64.deb) (Ubuntu, Debian, Mint) · [.rpm](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.12.0/MarkdownStudio-0.12.0-linux-x86_64.rpm) (Fedora, RHEL, openSUSE) |
 
 ### Windows
 
 | Installer | When to use it | Size | SHA-256 |
 | --- | --- | --- | --- |
-| **Standard**: [MarkdownStudio-0.11.0-windows-x64-setup.exe](downloads/MarkdownStudio-0.11.0-windows-x64-setup.exe?raw=true) | Recommended. WebView2 is already part of Windows 11 and updated Windows 10; if it's missing, the installer adds it automatically (needs internet) | 6.9 MB | `24037ac835b2f150f988dd16a51d38751e3215487f36458847e16b67ea15c14c` |
-| **Offline**: [MarkdownStudio-0.11.0-windows-x64-offline-setup.exe](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.11.0/MarkdownStudio-0.11.0-windows-x64-offline-setup.exe) | Includes WebView2; no internet needed | 211.9 MB | `d5c3f463ad71d1e42cbd2518dba6a99c2cd632ea9194465e40b63dcd41cd482a` |
+| **Standard**: [MarkdownStudio-0.12.0-windows-x64-setup.exe](downloads/MarkdownStudio-0.12.0-windows-x64-setup.exe?raw=true) | Recommended. WebView2 is already part of Windows 11 and updated Windows 10; if it's missing, the installer adds it automatically (needs internet) | 6.9 MB | `34287ae329a82e0e4af9a356641f727b0374e6df836b82b7f229ee1ac38ffd54` |
+| **Offline**: [MarkdownStudio-0.12.0-windows-x64-offline-setup.exe](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.12.0/MarkdownStudio-0.12.0-windows-x64-offline-setup.exe) | Includes WebView2; no internet needed | 211.9 MB | `0dbebc861ed8798c325f3c2c6a6bbc2a9f01b952e6530b77c90c0660df555cd3` |
 
 1. **Download** an installer above.
 2. **Run** it and choose **Anyone who uses this computer**, which needs administrator approval, or **Only for me**, which doesn't. The installer isn't code-signed yet, so if Windows SmartScreen says *"Windows protected your PC"*, choose **More info → Run anyway**.
@@ -39,8 +39,8 @@ The app appears in **Settings → Apps → Installed apps** and in **Control Pan
 ### Linux
 
 - **AppImage** (any distribution, no installation needed): download it, run `chmod +x MarkdownStudio-*.AppImage`, then start it.
-- **Debian, Ubuntu, Mint**: `sudo apt install ./MarkdownStudio-0.11.0-linux-amd64.deb` (apt installs the required system libraries automatically).
-- **Fedora, RHEL, openSUSE**: `sudo dnf install ./MarkdownStudio-0.11.0-linux-x86_64.rpm` (or `sudo zypper install` on openSUSE).
+- **Debian, Ubuntu, Mint**: `sudo apt install ./MarkdownStudio-0.12.0-linux-amd64.deb` (apt installs the required system libraries automatically).
+- **Fedora, RHEL, openSUSE**: `sudo dnf install ./MarkdownStudio-0.12.0-linux-x86_64.rpm` (or `sudo zypper install` on openSUSE).
 
 On macOS and Linux, the app tells you when a new version is available and opens its download page.
 
@@ -180,7 +180,7 @@ Every feature change updates the README feature list, TRACEABILITY and the match
 ## Releasing a new version
 
 ```bash
-npm run version:set 0.11.0
+npm run version:set 0.12.0
 ```
 
 ```bash
