@@ -115,3 +115,43 @@ describe("alerts in PDF export", () => {
     expect(md).not.toContain("[!WARNING]");
   }, 20000);
 });
+
+describe("export a folder as one document", () => {
+  it("combines the folder in memory and exports one PDF without writing a .md", async () => {
+    const { useWorkspace } = await import("../src/stores/workspaceStore");
+    const { exportFolder } = await import("../src/features/exporting");
+    const backend = setupBackend({
+      "/ws/README.md": "# Home\n\nStart with [the guide](guide.md).",
+      "/ws/guide.md": "# Guide\n\nFollow these steps.",
+    });
+    useWorkspace.getState().setRoot("/ws");
+    await exportFolder("pdf");
+    expect(backend.lastExport?.name).toBe("ws.pdf");
+    const bytes = Uint8Array.from(atob(backend.lastExport!.content), (c) => c.charCodeAt(0));
+    const md = (await pdfToMarkdown(bytes.buffer as ArrayBuffer)).markdown;
+    expect(md).toContain("Start with");
+    expect(md).toContain("Follow these steps.");
+    expect(md.indexOf("Home")).toBeLessThan(md.indexOf("Follow these steps."));
+    expect(await backend.listWorkspaceFiles("/ws")).toEqual(expect.not.arrayContaining(["/ws/ws (combined).md"]));
+  }, 30_000);
+
+  it("doesn't offer Print for a folder with characters the PDF font lacks", async () => {
+    const { useWorkspace } = await import("../src/stores/workspaceStore");
+    const { useUi } = await import("../src/stores/uiStore");
+    const { exportFolder } = await import("../src/features/exporting");
+    const backend = setupBackend({ "/ws/a.md": "# 你好", "/ws/b.md": "# B" });
+    useWorkspace.getState().setRoot("/ws");
+    let buttons: string[] = [];
+    const unsub = useUi.subscribe((s) => {
+      const d = s.dialogs.at(-1);
+      if (d && "buttons" in d && Array.isArray(d.buttons)) buttons = d.buttons.map((b: { id: string }) => b.id);
+    });
+    const answers = autoAnswer("cancel");
+    await exportFolder("pdf");
+    answers.stop();
+    unsub();
+    expect(answers.titles).toEqual(["Some characters need a different PDF method"]);
+    expect(buttons).toEqual(["cancel", "anyway"]);
+    expect(backend.lastExport).toBeNull();
+  });
+});

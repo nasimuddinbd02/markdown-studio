@@ -4,6 +4,7 @@ import { buildHtmlDocument, exportFileName, renderHtml } from "../services/expor
 import { activeDoc } from "../stores/documentsStore";
 import { notify } from "../stores/uiStore";
 import { useSettings } from "../stores/settingsStore";
+import { basename } from "../services/paths";
 
 const features = () => {
   const s = useSettings.getState().settings;
@@ -31,18 +32,26 @@ function bytesToBase64(bytes: Uint8Array): string {
   return btoa(bin);
 }
 
-/** Exports the active document as a Word document (.docx). */
-export async function exportActiveAsDocx() {
-  const doc = activeDoc();
-  if (!doc) return;
+/** Markdown to export: a document, or a folder combined in memory. */
+interface ExportSource {
+  content: string;
+  /** Used for the default file name and title. */
+  name: string;
+  /** Where relative image paths are resolved from. */
+  path: string | null;
+}
+
+const fromDoc = (doc: { content: string; name: string; path: string | null }): ExportSource => ({ content: doc.content, name: doc.name, path: doc.path });
+
+async function exportAsDocx(src: ExportSource) {
   try {
     const { markdownToDocx, makeImageLoader } = await import("../services/convert/toDocx");
     const { documentTitle } = await import("../services/exportHtml");
-    const bytes = await markdownToDocx(doc.content, {
-      title: documentTitle(doc.content, doc.name),
-      loadImage: makeImageLoader(doc.path, loadImage),
+    const bytes = await markdownToDocx(src.content, {
+      title: documentTitle(src.content, src.name),
+      loadImage: makeImageLoader(src.path, loadImage),
     });
-    const saved = await backend().exportBinaryFile(exportFileName(doc.name, "docx"), bytesToBase64(bytes), "docx");
+    const saved = await backend().exportBinaryFile(exportFileName(src.name, "docx"), bytesToBase64(bytes), "docx");
     if (saved) notify("success", `Exported to ${saved}`);
   } catch (e) {
     notify("error", describeError(e, "export to Word"));
@@ -50,42 +59,70 @@ export async function exportActiveAsDocx() {
 }
 
 /**
- * Exports the active document as a PDF file with selectable text, links and
- * heading bookmarks. Documents with characters the built-in font can't show
- * (e.g. CJK, Arabic, emoji) are offered Print → Save as PDF instead.
+ * PDF with selectable text, links and heading bookmarks. Text with characters
+ * the built-in font can't show (e.g. CJK, Arabic, emoji) is offered
+ * `onPrint` (Print → Save as PDF) instead, when there is one.
  */
-export async function exportActiveAsPdf() {
-  const doc = activeDoc();
-  if (!doc) return;
+async function exportAsPdf(src: ExportSource, onPrint?: () => Promise<void>) {
   try {
     const { markdownToPdf, pdfExportUnsupportedText } = await import("../services/convert/toPdf");
-    const unsupported = pdfExportUnsupportedText(doc.content);
+    const unsupported = pdfExportUnsupportedText(src.content);
     if (unsupported.length) {
       const { ask } = await import("../stores/uiStore");
       const choice = await ask({
         title: "Some characters need a different PDF method",
-        message: `This document contains characters (${unsupported.join(" ")}) that the built-in PDF font can't display. Print → Save as PDF uses your system fonts and shows them correctly.`,
+        message: onPrint
+          ? `This document contains characters (${unsupported.join(" ")}) that the built-in PDF font can't display. Print → Save as PDF uses your system fonts and shows them correctly.`
+          : `These documents contain characters (${unsupported.join(" ")}) that the built-in PDF font can't display. Export as Word, or combine the folder and use Print → Save as PDF, to keep them.`,
         buttons: [
           { id: "cancel", label: "Cancel" },
-          { id: "anyway", label: "Export Anyway" },
-          { id: "print", label: "Use Print → Save as PDF", variant: "primary" },
+          { id: "anyway", label: "Export Anyway", variant: onPrint ? undefined : "primary" },
+          ...(onPrint ? [{ id: "print", label: "Use Print → Save as PDF", variant: "primary" as const }] : []),
         ],
         cancelId: "cancel",
       });
-      if (choice === "print") return printActive();
+      if (choice === "print" && onPrint) return onPrint();
       if (choice !== "anyway") return;
     }
     const { makeImageLoader } = await import("../services/convert/toDocx");
     const { documentTitle } = await import("../services/exportHtml");
-    const bytes = await markdownToPdf(doc.content, {
-      title: documentTitle(doc.content, doc.name),
-      loadImage: makeImageLoader(doc.path, loadImage),
+    const bytes = await markdownToPdf(src.content, {
+      title: documentTitle(src.content, src.name),
+      loadImage: makeImageLoader(src.path, loadImage),
     });
-    const saved = await backend().exportBinaryFile(exportFileName(doc.name, "pdf"), bytesToBase64(bytes), "pdf");
+    const saved = await backend().exportBinaryFile(exportFileName(src.name, "pdf"), bytesToBase64(bytes), "pdf");
     if (saved) notify("success", `Exported to ${saved}`);
   } catch (e) {
     notify("error", describeError(e, "export to PDF"));
   }
+}
+
+/** Exports the active document as a Word document (.docx). */
+export async function exportActiveAsDocx() {
+  const doc = activeDoc();
+  if (doc) await exportAsDocx(fromDoc(doc));
+}
+
+/** Exports the active document as a PDF file. */
+export async function exportActiveAsPdf() {
+  const doc = activeDoc();
+  if (doc) await exportAsPdf(fromDoc(doc), printActive);
+}
+
+/**
+ * Exports every Markdown file in the open folder as one PDF or Word document
+ * (combined in memory in folder order, with a table of contents), without
+ * writing a combined .md file.
+ */
+export async function exportFolder(format: "pdf" | "docx") {
+  const { readCombinableFolder, combineFolderText, combinedPathFor } = await import("./combine");
+  const folder = await readCombinableFolder();
+  if (!folder) return;
+  const { markdown, count, unreadable } = await combineFolderText(folder.root, folder.inputs);
+  if (unreadable.length) notify("warning", `Skipped ${unreadable.length} of ${count + unreadable.length} files that could not be read (${unreadable.slice(0, 3).join(", ")}).`);
+  // Image paths were re-based onto the folder, as if the text lived in its combined file.
+  const src: ExportSource = { content: markdown, name: basename(folder.root), path: combinedPathFor(folder.root) };
+  await (format === "pdf" ? exportAsPdf(src) : exportAsDocx(src));
 }
 
 /** Copies the rendered HTML of the active document to the clipboard. */

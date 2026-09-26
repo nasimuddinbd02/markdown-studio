@@ -169,3 +169,17 @@ test("combine the folder into one document", async ({ page }) => {
   await expect(preview.locator("h2", { hasText: "Welcome to Markdown Studio" })).toBeVisible();
   await expect(preview.locator("h2", { hasText: "Guide" })).toBeVisible();
 });
+
+test("export the folder as one Word document", async ({ page }) => {
+  await start(page);
+  await openDemoFolder(page);
+  await page.keyboard.press(`${mod}+Shift+P`);
+  await page.keyboard.type("export folder as one word");
+  const download = page.waitForEvent("download");
+  await page.keyboard.press("Enter");
+  const file = await download;
+  expect(file.suggestedFilename()).toBe("demo.docx");
+  const bytes = await (await file.createReadStream()).toArray();
+  expect(Buffer.concat(bytes).subarray(0, 2).toString()).toBe("PK"); // a .docx is a zip file
+  await expect(page.getByRole("treeitem", { name: /combined/ })).toHaveCount(0);
+});

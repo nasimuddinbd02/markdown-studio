@@ -198,24 +198,46 @@ export function combineInputs(files: string[], root: string): string[] {
   );
 }
 
+/** The open folder's Markdown files, combined in memory; null (after telling the user) if there is nothing to combine. */
+export async function readCombinableFolder(): Promise<{ root: string; files: string[]; inputs: string[] } | null> {
+  const root = useWorkspace.getState().root;
+  if (!root) {
+    notify("info", "Open a folder first to combine its documents.");
+    return null;
+  }
+  const files = await backend().listWorkspaceFiles(root);
+  const inputs = combineInputs(files, root);
+  if (inputs.length < 2) {
+    notify("info", inputs.length ? "This folder has only one Markdown file." : "No Markdown files found in this folder.");
+    return null;
+  }
+  return { root, files, inputs };
+}
+
+/** Reads the inputs (unsaved edits in open tabs included, as shown in the editor) and combines them. */
+export async function combineFolderText(root: string, inputs: string[]): Promise<{ markdown: string; count: number; unreadable: string[] }> {
+  const b = backend();
+  const open = new Map(useDocuments.getState().docs.filter((d) => d.path).map((d) => [normKey(d.path!), d.content]));
+  const sources: CombineSource[] = [];
+  const unreadable: string[] = [];
+  for (const path of inputs) {
+    const content = open.get(normKey(path)) ?? (await b.readTextFile(path).then((f) => f.content, () => null));
+    if (content === null) unreadable.push(basename(path));
+    else sources.push({ path, content });
+  }
+  return { markdown: combineDocuments(sources, { outDir: root, title: basename(root), toc: true }), count: sources.length, unreadable };
+}
+
 /**
  * Command: merges every Markdown file in the open folder into
  * `<Folder> (combined).md` (replacing an earlier one) and opens it, ready to
  * export as a single PDF or Word document.
  */
 export async function combineWorkspace(): Promise<string | null> {
-  const root = useWorkspace.getState().root;
-  if (!root) {
-    notify("info", "Open a folder first to combine its documents.");
-    return null;
-  }
+  const folder = await readCombinableFolder();
+  if (!folder) return null;
+  const { root, files, inputs } = folder;
   const b = backend();
-  const files = await b.listWorkspaceFiles(root);
-  const inputs = combineInputs(files, root);
-  if (inputs.length < 2) {
-    notify("info", inputs.length ? "This folder has only one Markdown file." : "No Markdown files found in this folder.");
-    return null;
-  }
   const dest = combinedPathFor(root);
   const openCombined = useDocuments.getState().docs.find((d) => d.path && normKey(d.path) === normKey(dest));
   if (openCombined && isDirty(openCombined)) {
@@ -238,16 +260,7 @@ export async function combineWorkspace(): Promise<string | null> {
   });
   if (choice !== "combine") return null;
 
-  // Unsaved edits in open tabs are included as shown in the editor.
-  const open = new Map(useDocuments.getState().docs.filter((d) => d.path).map((d) => [normKey(d.path!), d.content]));
-  const sources: CombineSource[] = [];
-  const unreadable: string[] = [];
-  for (const path of inputs) {
-    const content = open.get(normKey(path)) ?? (await b.readTextFile(path).then((f) => f.content, () => null));
-    if (content === null) unreadable.push(basename(path));
-    else sources.push({ path, content });
-  }
-  const markdown = combineDocuments(sources, { outDir: root, title: basename(root), toc: true });
+  const { markdown, count, unreadable } = await combineFolderText(root, inputs);
   try {
     await b.writeTextFile({
       path: dest,
@@ -265,7 +278,7 @@ export async function combineWorkspace(): Promise<string | null> {
   if (openCombined) useDocuments.getState().remove(openCombined.id);
   await refreshDir(root);
   await openPath(dest);
-  const summary = `Combined ${sources.length} files into “${basename(dest)}”.`;
+  const summary = `Combined ${count} files into “${basename(dest)}”.`;
   if (unreadable.length) notify("warning", `${summary} Skipped ${unreadable.length} that could not be read (${unreadable.slice(0, 3).join(", ")}).`);
   else notify("success", summary);
   return dest;

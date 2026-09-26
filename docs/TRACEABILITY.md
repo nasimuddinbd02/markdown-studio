@@ -80,7 +80,7 @@ Status of each [SRS](SRS.md) requirement as of version 0.10.0. **Done** means im
 | Local file history with diff and restore | `src-tauri/src/history.rs`, `components/HistoryDialog.tsx` | §19 version history and snapshots |
 | Export to HTML, PDF and Word; Copy as HTML; Print | `services/exportHtml.ts`, `services/convert/toPdf.ts`, `toDocx.ts` | §19 export to HTML and PDF |
 | Import Word, PDF, HTML and CSV/TSV; paste rich text and spreadsheet cells | `services/convert/`, `features/importing.ts`, `features/richPaste.ts` | §5 technical writer needs |
-| Convert a folder to Markdown; combine a folder into one document | `features/batchConvert.ts`, `features/combine.ts` | §19 publishing workflows |
+| Convert a folder to Markdown; combine a folder into one document; export a folder as one PDF or Word file | `features/batchConvert.ts`, `features/combine.ts`, `features/exporting.ts` | §19 publishing workflows |
 | YAML front matter table, GitHub alerts | `services/frontMatter.ts`, `services/alerts.ts` | §10.1 front-matter-aware documents; §18 v0.3 enhanced Markdown |
 | Templates, table of contents, table formatting, heading promote/demote, task checkboxes (click in the preview or Ctrl/Cmd+Enter), footnotes, paste URL as link, link completion | `features/templates.ts`, `toc.ts`, `tables.ts`, `formatting.ts`, `tasks.ts`, `completion.ts` | §18 v0.3 enhanced Markdown and customization |
 | Find in Files, command palette, keyboard shortcuts reference, focus mode | `components/SearchPanel.tsx`, `CommandPalette.tsx`, `ShortcutsDialog.tsx` | §5 power user needs |
