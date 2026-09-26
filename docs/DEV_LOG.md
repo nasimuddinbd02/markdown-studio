@@ -290,3 +290,29 @@ The user asked for all project documents to match the current design, and to be 
 - **INSTALL.md:** macOS and Linux troubleshooting rows.
 
 **Policy from now on:** every feature commit updates the README feature list and TRACEABILITY (plus INSTALL.md or the SRS status notes if affected), and every release updates the download section, INSTALL.md and this log.
+
+## 2026-09-25 (extra hour, 6:18–7:00 PM): Writing and structure tools, released as 0.11.0
+
+The user asked for one more hour today.
+
+| # | Feature | Commit |
+| --- | --- | --- |
+| 38 | Check / Uncheck Task (Ctrl/Cmd+Enter; on other lines the key keeps its default) and Insert Footnote (Ctrl/Cmd+Alt+R: the next `[^n]` at the cursor, its definition at the end, definitions kept together) | 969a371 |
+| 39 | File → Export Folder as One PDF / One Word Document: combines the folder in memory and exports it without writing a combined `.md`. The PDF/Word exporters now take any Markdown source | f63b69e |
+| 40 | Sort Table by Column (A to Z / Z to A): numeric when every filled cell is a number (1,200, 3.5%, $9), otherwise natural order; empty cells last; stable | 1a29f1d |
+| 41 | Reopen Closed Tab (Ctrl/Cmd+Shift+T; up to 20; skips files that are open again or gone) | a03fde0 |
+| 42 | Move Section Up / Down: a heading with its text and subsections moves past its same-level neighbour within its parent; headings in code fences are ignored | 3e39e44 |
+
+**Verification:** Vitest for every command, and a Playwright workflow in Edge for each: the task toggle and footnote rendering in the preview, a folder export producing a real `.docx` download (and no combined file), reopen via the palette, and move section via the palette.
+
+**Release 0.11.0** (6d1ba36): Windows standard 6.9 MB (SHA-256 24037ac8…) and offline 211.9 MB (d5c3f463…). macOS arm64/x64 `.dmg` and Linux `.AppImage`/`.deb`/`.rpm` were built by the release workflow (all 4 jobs green). All 6 README release links return 200, and `latest.json` shows 0.11.0. The docs were updated with each feature (README, TRACEABILITY) and at the release (SRS current version 0.11.0, TRACEABILITY as-of and test counts, INSTALL links).
+
+**Tests:** Vitest 225 (37 files), Playwright 21, Rust 27. All passing.
+
+**Next up:**
+
+1. Outline panel: drag to reorder sections (reusing `sections.ts`), and Copy Link to Heading.
+2. Performance: a highlight.js language subset; a 10 MB document benchmark.
+3. Tauri-driver e2e against the native build; test the macOS and Linux builds on real machines.
+
+**Questions for the user:** unchanged. Apple Developer ID, the updater key as a CI secret, ARM64 builds, licensing, UI languages.
