@@ -269,13 +269,39 @@ async function confirmDiscard(doc: Doc): Promise<boolean> {
   return true;
 }
 
+/** Paths of recently closed tabs, most recent last (for Reopen Closed Tab). */
+const closedPaths: string[] = [];
+const MAX_CLOSED = 20;
+
 export async function closeDocument(id: string): Promise<boolean> {
   const doc = findDoc(id);
   if (!doc) return true;
   if (!(await confirmDiscard(doc))) return false;
   docs().remove(id);
+  if (doc.path) {
+    const at = closedPaths.indexOf(doc.path);
+    if (at >= 0) closedPaths.splice(at, 1);
+    closedPaths.push(doc.path);
+    if (closedPaths.length > MAX_CLOSED) closedPaths.shift();
+  }
   return true;
 }
+
+/**
+ * Reopens the most recently closed file (Ctrl/Cmd+Shift+T), skipping files
+ * that are open again or can no longer be read. Untitled tabs aren't kept.
+ */
+export async function reopenClosedDocument(): Promise<boolean> {
+  while (closedPaths.length > 0) {
+    const path = closedPaths.pop()!;
+    if (findByPath(path)) continue;
+    if (await openPath(path, { quiet: true })) return true;
+  }
+  notify("info", "There are no closed files to reopen.");
+  return false;
+}
+
+export const hasClosedDocuments = () => closedPaths.length > 0;
 
 /** Used before closing the window: every dirty document must be resolved. */
 export async function closeAllDocuments(): Promise<boolean> {

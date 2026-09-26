@@ -6,7 +6,7 @@ import { backend } from "../services";
 import { notify } from "../stores/uiStore";
 import type { ViewMode } from "../types";
 import {
-  closeDocument, newDocument, openFileDialog, saveAll, saveDocument,
+  closeDocument, hasClosedDocuments, newDocument, openFileDialog, reopenClosedDocument, saveAll, saveDocument,
 } from "./documents";
 import { closeWorkspace, createFileIn, openFolderDialog } from "./workspace";
 import { editorCommand, runOnEditor } from "./editorBridge";
@@ -156,6 +156,13 @@ export const commands: Record<string, Command> = {
   exportDocx: { id: "exportDocx", label: "Export as Word (.docx)…", run: async () => (await exporting()).exportActiveAsDocx(), enabled: hasActive },
   copyHtml: { id: "copyHtml", label: "Copy as HTML", run: async () => (await exporting()).copyActiveAsHtml(), enabled: hasActive },
   print: { id: "print", label: "Print / Save as PDF…", shortcut: "Mod+P", run: async () => (await exporting()).printActive(), enabled: hasActive },
+  reopenClosedTab: {
+    id: "reopenClosedTab",
+    label: "Reopen Closed Tab",
+    shortcut: "Mod+Shift+T",
+    run: () => void reopenClosedDocument(),
+    enabled: hasClosedDocuments,
+  },
   closeTab: {
     id: "closeTab",
     label: "Close Tab",

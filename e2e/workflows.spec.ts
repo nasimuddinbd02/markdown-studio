@@ -183,3 +183,15 @@ test("export the folder as one Word document", async ({ page }) => {
   expect(Buffer.concat(bytes).subarray(0, 2).toString()).toBe("PK"); // a .docx is a zip file
   await expect(page.getByRole("treeitem", { name: /combined/ })).toHaveCount(0);
 });
+
+test("reopen a closed tab", async ({ page }) => {
+  await start(page);
+  await openDemoFolder(page);
+  await openFile(page, "README.md");
+  await page.keyboard.press(`${mod}+W`);
+  await expect(docTabs(page)).toHaveCount(0);
+  await page.keyboard.press(`${mod}+Shift+P`);
+  await page.keyboard.type("reopen closed tab");
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("tab", { name: /README\.md/ })).toHaveAttribute("aria-selected", "true");
+});

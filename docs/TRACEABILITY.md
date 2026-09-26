@@ -35,7 +35,7 @@ Status of each [SRS](SRS.md) requirement as of version 0.10.0. **Done** means im
 | FR-040 | Done | Tabs with drag reordering |
 | FR-041 | Done | Accent bar, bold label, `aria-selected` |
 | FR-042 | Done | Save / Don't Save / Cancel on tab close and window close |
-| FR-043 | Done | Ctrl+Tab / Ctrl+Shift+Tab, arrow keys in the tab list |
+| FR-043 | Done | Ctrl+Tab / Ctrl+Shift+Tab, arrow keys in the tab list; Reopen Closed Tab (Ctrl/Cmd+Shift+T) |
 | FR-044 | Done | Backend-owned recent files and folders (File menu, Welcome screen); session restore of the last folder and open files |
 | FR-050 | Done | CodeMirror search panel |
 | FR-051 | Done | Replace / Replace All (Ctrl+H, or Cmd+Alt+F on macOS) |

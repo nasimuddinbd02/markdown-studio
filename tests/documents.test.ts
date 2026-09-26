@@ -194,3 +194,26 @@ describe("error handling (SRS §12)", () => {
     expect(docs()).toHaveLength(0);
   });
 });
+
+describe("reopen closed tab", () => {
+  it("reopens closed files most recent first, skipping missing and already open ones", async () => {
+    const { reopenClosedDocument, hasClosedDocuments } = await import("../src/features/documents");
+    const activeDoc = () => useDocuments.getState().docs.find((d) => d.id === useDocuments.getState().activeId);
+    const backend = setupBackend({ "/ws/a.md": "A", "/ws/b.md": "B", "/ws/c.md": "C" });
+    const a = (await openPath("/ws/a.md"))!;
+    const b = (await openPath("/ws/b.md"))!;
+    const c = (await openPath("/ws/c.md"))!;
+    await closeDocument(a);
+    await closeDocument(c);
+    await closeDocument(b);
+    expect(hasClosedDocuments()).toBe(true);
+
+    await backend.deletePath("/ws/b.md");
+    expect(await reopenClosedDocument()).toBe(true); // b is gone, so c
+    expect(activeDoc()?.path).toBe("/ws/c.md");
+    await openPath("/ws/a.md");
+    expect(await reopenClosedDocument()).toBe(false); // a is already open
+    expect(useUi.getState().toasts.at(-1)?.message).toBe("There are no closed files to reopen.");
+    expect(hasClosedDocuments()).toBe(false);
+  });
+});
