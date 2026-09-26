@@ -195,3 +195,15 @@ test("reopen a closed tab", async ({ page }) => {
   await page.keyboard.press("Enter");
   await expect(page.getByRole("tab", { name: /README\.md/ })).toHaveAttribute("aria-selected", "true");
 });
+
+test("move a section up", async ({ page }) => {
+  await start(page);
+  await page.keyboard.press(`${mod}+N`);
+  await page.getByRole("textbox", { name: "Markdown editor" }).click();
+  await page.keyboard.insertText("## Alpha\n\none\n\n## Beta\n\ntwo");
+  await page.keyboard.press(`${mod}+Shift+P`);
+  await page.keyboard.type("move section up");
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".markdown-body h2").first()).toHaveText("Beta");
+  await expect(page.locator(".markdown-body h2").last()).toHaveText("Alpha");
+});

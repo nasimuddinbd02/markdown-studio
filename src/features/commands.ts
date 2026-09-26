@@ -18,6 +18,7 @@ import type { KeyBinding } from "@codemirror/view";
 import * as fmt from "./formatting";
 import { formatTableAtCursor, sortTableAtCursor } from "./tables";
 import { insertOrUpdateToc } from "./toc";
+import { moveSectionDown, moveSectionUp } from "./sections";
 
 export const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
@@ -51,6 +52,8 @@ export const formatCommands: Record<string, Command> = {
   paragraph: formatCommand("paragraph", "Normal Text", fmt.setHeading(0), "Mod+Alt+0"),
   promoteHeading: formatCommand("promoteHeading", "Promote Heading", fmt.promoteHeading, "Mod+Alt+="),
   demoteHeading: formatCommand("demoteHeading", "Demote Heading", fmt.demoteHeading, "Mod+Alt+-"),
+  moveSectionUp: formatCommand("moveSectionUp", "Move Section Up", moveSectionUp),
+  moveSectionDown: formatCommand("moveSectionDown", "Move Section Down", moveSectionDown),
   bulletList: formatCommand("bulletList", "Bulleted List", fmt.toggleBulletList, "Mod+Shift+8"),
   orderedList: formatCommand("orderedList", "Numbered List", fmt.toggleOrderedList, "Mod+Shift+7"),
   taskList: formatCommand("taskList", "Task List", fmt.toggleTaskList, "Mod+Shift+9"),
