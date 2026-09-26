@@ -275,3 +275,35 @@ test("drag a section in the outline", async ({ page }) => {
   await page.keyboard.press(`${mod}+Z`);
   await expect(page.locator(".markdown-body h2")).toHaveText(["Alpha", "Beta", "Gamma"]);
 });
+
+test("long file names fit on one row in the tab", async ({ page }) => {
+  await start(page);
+  await openDemoFolder(page);
+  await openFile(page, "README.md");
+  await page.keyboard.press(`${mod}+N`);
+  await page.getByRole("textbox", { name: "Markdown editor" }).click();
+  await page.keyboard.insertText("# Spec");
+  await page.evaluate(() => {
+    window.prompt = () => "/demo/DOCUMENTATION_SITE_SPECIFICATION_WITH_A_VERY_LONG_NAME.md";
+  });
+  await page.keyboard.press(`${mod}+S`);
+  const tab = page.locator(".tab.active");
+  await expect(tab).toContainText("DOCUMENTATION_SITE");
+  const box = async (sel: string) => (await tab.locator(sel).boundingBox())!;
+  const [tabBox, icon, label, close] = [await tab.boundingBox(), await box(".tab-icon"), await box(".tab-label"), await box(".tab-close")];
+  const mid = (b: { y: number; height: number }) => b.y + b.height / 2;
+  // Icon, name and close button share one row, inside the tab.
+  expect(Math.abs(mid(icon) - mid(label))).toBeLessThan(3);
+  expect(Math.abs(mid(close) - mid(label))).toBeLessThan(3);
+  expect(close.x + close.width).toBeLessThanOrEqual(tabBox!.x + tabBox!.width + 0.5);
+  // The long name is shortened with an ellipsis, and a saved tab isn't italic.
+  const label$ = tab.locator(".tab-label");
+  expect(await label$.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
+  expect(await label$.evaluate((el) => getComputedStyle(el).fontStyle)).toBe("normal");
+  // The tabs fill the bar's height; no scrollbar squeezes them.
+  const bar = (await page.locator(".tabbar").boundingBox())!;
+  expect(tabBox!.height).toBeGreaterThanOrEqual(bar.height - 2);
+  // An unsaved tab's name is italic.
+  await page.keyboard.insertText(" edited");
+  expect(await label$.evaluate((el) => getComputedStyle(el).fontStyle)).toBe("italic");
+});

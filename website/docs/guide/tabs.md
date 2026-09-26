@@ -9,7 +9,7 @@ Every open document gets a tab above the editor. The active tab is marked with a
 
 ## Unsaved changes
 
-A dot on a tab marks unsaved changes, and the tab's accessible name says "(unsaved)". The status bar and the window title show it too. If you close a tab or quit with unsaved changes, Markdown Studio asks whether to **Save**, **Don't Save** or **Cancel**.
+A dot on a tab marks unsaved changes, its name is shown in italics, and the tab's accessible name says "(unsaved)". The status bar and the window title show it too. If you close a tab or quit with unsaved changes, Markdown Studio asks whether to **Save**, **Don't Save** or **Cancel**.
 
 ## Switching and arranging
 
@@ -21,6 +21,8 @@ A dot on a tab marks unsaved changes, and the tab's accessible name says "(unsav
 | Reopen closed tab | Ctrl+Shift+T (Cmd+Shift+T on macOS) |
 
 - Drag a tab left or right to reorder it.
+- Long file names are shortened with "…"; hover a tab to see its full path.
+- When more tabs are open than fit, scroll the tab strip with the mouse wheel. The active tab is always scrolled into view.
 - When the tab list has focus, the arrow keys move between tabs.
 - The **+** button after the last tab creates a new file.
 

@@ -538,8 +538,12 @@ select {
 .tabs {
   display: flex;
   overflow-x: auto;
-  scrollbar-width: thin;
+  /* No scrollbar inside the 36px bar: the wheel scrolls the tabs, and the active tab is kept in view. */
+  scrollbar-width: none;
   min-width: 0;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
@@ -571,7 +575,7 @@ select {
   height: 2px;
   background: var(--accent);
 }
-.tab.dirty .tab-main {
+.tab-main {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -580,7 +584,7 @@ select {
   align-self: stretch;
   outline-offset: -2px;
 }
-.tab-label {
+.tab.dirty .tab-label {
   font-style: italic;
 }
 .tab.warn .tab-icon {

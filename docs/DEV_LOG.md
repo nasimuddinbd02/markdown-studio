@@ -399,3 +399,12 @@ Released straight after the account rename, so installed apps move to the new up
 - Add https://nasimuddin-dev.github.io/markdown-studio/ to Google Search Console (steps in `website/README.md`).
 - Choose a license.
 - The scheduled daily task's description still mentions the old repository URL in its text. Pushes use the git remote, which is already updated. Should I update the task description too?
+
+## 2026-09-25 (late): Fix, long file names broke the tab layout (unreleased)
+
+The user reported that a tab with a long file name showed its icon above the name, pushed the close button out of line, and had a scrollbar squeezed into the tab bar.
+
+- **Cause:** a regression from the accessibility commit 6106913 (2026-09-23). Two selectors were swapped: the flex layout of the tab's contents was scoped to `.tab.dirty .tab-main` (unsaved tabs only), and the italic style to every `.tab-label`. Saved tabs lost the row layout and the "…" truncation, and every tab name was italic.
+- **Fix:** `.tab-main` is laid out for every tab, and only unsaved tabs are italic. The tab strip's scrollbar is hidden; the mouse wheel scrolls the tabs sideways, and the active tab is scrolled into view.
+- **Test:** a Playwright regression test checks that the icon, name and close button share one row, the long name is truncated, a saved name isn't italic and an unsaved one is, and the tabs fill the bar. It fails on the old CSS (icon 18.5 px above the name) and passes now. Playwright 26.
+- **Docs:** website Tabs page (truncation, wheel scrolling, italic unsaved names). Ships in the next release.

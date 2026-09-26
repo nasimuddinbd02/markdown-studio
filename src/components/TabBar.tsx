@@ -1,4 +1,4 @@
-import { useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type WheelEvent } from "react";
 import { useDocuments, isDirty } from "../stores/documentsStore";
 import { closeDocument, newDocument } from "../features/documents";
 import { commands, formatShortcut } from "../features/commands";
@@ -37,6 +37,16 @@ export function TabBar() {
   };
   const list = useRef<HTMLDivElement>(null);
 
+  // The tab strip has no visible scrollbar: keep the active tab in view…
+  useEffect(() => {
+    list.current?.querySelector(`[data-tab-id="${activeId}"]`)?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+  }, [activeId, docs.length]);
+  // …and let an ordinary mouse wheel scroll it sideways.
+  const onWheel = (e: WheelEvent<HTMLDivElement>) => {
+    const el = list.current;
+    if (el && el.scrollWidth > el.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) el.scrollLeft += e.deltaY;
+  };
+
   const onKey = (e: KeyboardEvent) => {
     if (e.key === "ContextMenu" || (e.shiftKey && e.key === "F10")) {
       const tab = (document.activeElement as HTMLElement | null)?.closest<HTMLElement>("[data-tab-id]");
@@ -70,7 +80,7 @@ export function TabBar() {
 
   return (
     <div className="tabbar">
-      <div className="tabs" role="tablist" aria-label="Open documents" ref={list} onKeyDown={onKey}>
+      <div className="tabs" role="tablist" aria-label="Open documents" ref={list} onKeyDown={onKey} onWheel={onWheel}>
         {docs.map((d) => {
           const dirty = isDirty(d);
           const active = d.id === activeId;
