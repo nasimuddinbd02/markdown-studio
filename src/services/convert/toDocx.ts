@@ -15,6 +15,20 @@ import { collectFootnotes, type Footnotes } from "./footnotes";
 /** Loads an image referenced by the document; returns bytes or null. */
 export type DocxImageLoader = (src: string) => Promise<{ data: Uint8Array; type: "png" | "jpg" | "gif" | "bmp" } | null>;
 
+/**
+ * Draws a Mermaid diagram as a PNG for PDF and Word export; `width` and
+ * `height` are its display size in CSS pixels (the PNG may be larger, for
+ * sharpness). Returns null, or throws, when the diagram can't be drawn: the
+ * exporters then keep the code block.
+ */
+export type DiagramRenderer = (code: string) => Promise<{ data: Uint8Array; width: number; height: number } | null>;
+
+export interface ExportOptions {
+  title?: string;
+  loadImage?: DocxImageLoader;
+  renderDiagram?: DiagramRenderer;
+}
+
 const MONO = "Consolas";
 const MAX_IMAGE_WIDTH = 600; // px (~6.25 in at 96 dpi)
 const HEADINGS = [HeadingLevel.HEADING_1, HeadingLevel.HEADING_2, HeadingLevel.HEADING_3, HeadingLevel.HEADING_4, HeadingLevel.HEADING_5, HeadingLevel.HEADING_6];
@@ -59,6 +73,7 @@ class DocxBuilder {
   constructor(
     private loadImage?: DocxImageLoader,
     private footnotes?: Footnotes,
+    private renderDiagram?: DiagramRenderer,
   ) {}
 
   private run(text: string, s: Style): TextRun {
@@ -206,7 +221,27 @@ class DocxBuilder {
         await this.list(node, indentLevel, out);
         return out;
       }
-      case "code":
+      case "code": {
+        if (node.lang === "mermaid" && this.renderDiagram) {
+          const png = await this.renderDiagram(node.value).catch(() => null);
+          if (png) {
+            const scale = Math.min(1, MAX_IMAGE_WIDTH / png.width);
+            return [
+              new Paragraph({
+                indent,
+                spacing: { before: 120, after: 120 },
+                children: [
+                  new ImageRun({
+                    type: "png",
+                    data: png.data,
+                    transformation: { width: Math.round(png.width * scale), height: Math.round(png.height * scale) },
+                    altText: { name: "Diagram", description: "Mermaid diagram", title: "Diagram" },
+                  }),
+                ],
+              }),
+            ];
+          }
+        }
         return node.value.split("\n").map(
           (line, i, all) =>
             new Paragraph({
@@ -216,6 +251,7 @@ class DocxBuilder {
               children: [new TextRun({ text: line || " ", font: MONO, size: 19 })],
             }),
         );
+      }
       case "blockquote": {
         const out: Array<Paragraph | Table> = [];
         const alert = takeMdastAlert(node);
@@ -269,9 +305,9 @@ class DocxBuilder {
 }
 
 /** Markdown → Word document (.docx) bytes. */
-export async function markdownToDocx(markdown: string, opts: { title?: string; loadImage?: DocxImageLoader } = {}): Promise<Uint8Array> {
+export async function markdownToDocx(markdown: string, opts: ExportOptions = {}): Promise<Uint8Array> {
   const tree = unified().use(remarkParse).use(remarkGfm).parse(stripFrontMatter(markdown)) as Root;
-  const builder = new DocxBuilder(opts.loadImage, collectFootnotes(tree));
+  const builder = new DocxBuilder(opts.loadImage, collectFootnotes(tree), opts.renderDiagram);
   const children: Array<Paragraph | Table> = [];
   for (const node of tree.children) children.push(...(await builder.block(node)));
   const footnotes = await builder.footnoteContent();

@@ -128,3 +128,21 @@ describe("footnotes in Word export", () => {
     expect(doc).not.toContain("Note A.");
   });
 });
+
+describe("Mermaid diagrams in Word export", () => {
+  const md = "Before\n\n```mermaid\ngraph TD\n  A --> B\n```\n\nAfter";
+  const png = () => Uint8Array.from(atob(PNG_B64), (c) => c.charCodeAt(0));
+
+  it("embeds the drawn diagram as a picture", async () => {
+    const zip = await JSZip.loadAsync(await markdownToDocx(md, { renderDiagram: async () => ({ data: png(), width: 400, height: 200 }) }));
+    expect(Object.keys(zip.files).some((f) => /^word\/media\/.+\.png$/.test(f))).toBe(true);
+    const xml = await zip.file("word/document.xml")!.async("string");
+    expect(xml).not.toContain("graph TD");
+    expect(xml).toContain("Mermaid diagram");
+  });
+
+  it("keeps the code when the diagram can't be drawn", async () => {
+    const zip = await JSZip.loadAsync(await markdownToDocx(md, { renderDiagram: async () => { throw new Error("Parse error"); } }));
+    expect(await zip.file("word/document.xml")!.async("string")).toContain("graph TD");
+  });
+});

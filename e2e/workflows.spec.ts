@@ -207,3 +207,24 @@ test("move a section up", async ({ page }) => {
   await expect(page.locator(".markdown-body h2").first()).toHaveText("Beta");
   await expect(page.locator(".markdown-body h2").last()).toHaveText("Alpha");
 });
+
+test("Mermaid diagrams are exported to Word as pictures", async ({ page }) => {
+  await start(page);
+  await openDemoFolder(page);
+  await page.locator(".tree-row", { hasText: /^docs$/ }).click();
+  await openFile(page, "diagrams-and-math.md");
+  await expect(page.locator(".markdown-body svg").first()).toBeVisible({ timeout: 20_000 });
+  await page.keyboard.press(`${mod}+Shift+P`);
+  await page.keyboard.type("export as word");
+  const download = page.waitForEvent("download");
+  await page.keyboard.press("Enter");
+  const file = await download;
+  const bytes = Buffer.concat(await (await file.createReadStream()).toArray());
+  const JSZip = (await import("jszip")).default;
+  const zip = await JSZip.loadAsync(bytes);
+  const media = Object.keys(zip.files).filter((f) => /^word\/media\/.+\.png$/.test(f));
+  expect(media.length).toBe(1);
+  const png = await zip.file(media[0])!.async("uint8array");
+  expect(png.length).toBeGreaterThan(2000); // a real drawing, not an empty canvas
+  expect(await zip.file("word/document.xml")!.async("string")).not.toContain("flowchart LR");
+});

@@ -39,7 +39,7 @@ Yes: tables, task lists, strikethrough, autolinks, fenced code with highlighting
 
 ## Does it support Mermaid?
 
-Yes. Code blocks marked `mermaid` are drawn as diagrams in the preview, HTML export and Print → Save as PDF. See [Mermaid](/markdown/mermaid).
+Yes. Code blocks marked `mermaid` are drawn as diagrams in the preview and in every export (HTML, PDF, Word and Print). See [Mermaid](/markdown/mermaid).
 
 ## Does it support LaTeX?
 

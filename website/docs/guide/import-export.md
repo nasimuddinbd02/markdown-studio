@@ -61,12 +61,12 @@ The document's front matter isn't exported; its `title`, if any, becomes the exp
 
 | | HTML export | Print / Save as PDF | PDF export | Word export |
 | --- | --- | --- | --- | --- |
-| Mermaid diagrams | Rendered | Rendered | As code | As code |
+| Mermaid diagrams | Rendered | Rendered | Drawn as a picture | Drawn as a picture |
 | LaTeX math | Rendered | Rendered | As text | As text |
 | Footnotes | Linked section at the end | Linked section at the end | Section at the end | Word footnotes |
 | Chinese, Japanese, Korean, Arabic, emoji | Yes | Yes | Not in the built-in font | Yes |
 
-**Export as PDF** uses a built-in font. If the document contains characters it can't display, Markdown Studio warns you and offers **Print → Save as PDF**, which uses your system fonts, instead. For documents with diagrams or formulas, use **Print / Save as PDF** or **Export as HTML**.
+**Export as PDF** uses a built-in font. If the document contains characters it can't display, Markdown Studio warns you and offers **Print → Save as PDF**, which uses your system fonts, instead. For documents with formulas, use **Print / Save as PDF** or **Export as HTML**. A diagram with a syntax error is exported as its code.
 
 ### A whole folder as one document
 

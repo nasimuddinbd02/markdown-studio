@@ -167,3 +167,24 @@ describe("footnotes in PDF export", () => {
     expect(text.indexOf("here")).toBeLessThan(text.indexOf("The source of the claim."));
   }, 30_000);
 });
+
+describe("Mermaid diagrams in PDF export", () => {
+  it("draws diagrams as images, or keeps the code if they fail", async () => {
+    const md = "```mermaid\ngraph TD\n  A --> B\n```";
+    const png = Uint8Array.from(atob(PNG_B64), (c) => c.charCodeAt(0));
+    const withImage = await markdownToPdf(md, { renderDiagram: async () => ({ data: png, width: 300, height: 150 }) });
+    expect(new TextDecoder("latin1").decode(withImage)).toMatch(/\/Subtype\s*\/Image/);
+    expect((await pdfToMarkdown(withImage.buffer as ArrayBuffer)).markdown).not.toContain("graph TD");
+    const fallback = await markdownToPdf(md, { renderDiagram: async () => null });
+    expect((await pdfToMarkdown(fallback.buffer as ArrayBuffer)).markdown).toContain("graph TD");
+  }, 30_000);
+});
+
+describe("SVG size", () => {
+  it("reads the viewBox, or width and height", async () => {
+    const { svgSize } = await import("../src/services/mermaid");
+    expect(svgSize('<svg width="100%" viewBox="-8 -8 452.5 190" style="max-width: 452px;">')).toEqual({ width: 452.5, height: 190 });
+    expect(svgSize('<svg width="120px" height="80">')).toEqual({ width: 120, height: 80 });
+    expect(svgSize("<svg>")).toBeNull();
+  });
+});

@@ -6,7 +6,7 @@ import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import type { Root, RootContent, PhrasingContent, List, Table as MdTable } from "mdast";
 import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
-import type { DocxImageLoader } from "./toDocx";
+import type { DiagramRenderer, DocxImageLoader, ExportOptions } from "./toDocx";
 
 /**
  * Markdown → PDF with real, selectable text (pdfmake, vector output):
@@ -51,6 +51,7 @@ class PdfBuilder {
   constructor(
     private loadImage?: DocxImageLoader,
     private footnotes?: Footnotes,
+    private renderDiagram?: DiagramRenderer,
   ) {}
 
   private async inline(nodes: PhrasingContent[], style: Record<string, unknown> = {}): Promise<Inline[]> {
@@ -191,6 +192,14 @@ class PdfBuilder {
       case "list":
         return [await this.list(node)];
       case "code":
+        if (node.lang === "mermaid" && this.renderDiagram) {
+          const png = await this.renderDiagram(node.value).catch(() => null);
+          if (png) {
+            let bin = "";
+            for (let i = 0; i < png.data.length; i += 0x8000) bin += String.fromCharCode(...png.data.subarray(i, i + 0x8000));
+            return [{ image: `data:image/png;base64,${btoa(bin)}`, width: Math.min(CONTENT_WIDTH, png.width * 0.75), margin: [0, 4, 0, 10] }];
+          }
+        }
         return [
           {
             table: { widths: ["*"], body: [[{ text: node.value || " ", style: "code" }]] },
@@ -270,9 +279,9 @@ async function pdfmake() {
 }
 
 /** Markdown → PDF bytes. */
-export async function markdownToPdf(markdown: string, opts: { title?: string; loadImage?: DocxImageLoader } = {}): Promise<Uint8Array> {
+export async function markdownToPdf(markdown: string, opts: ExportOptions = {}): Promise<Uint8Array> {
   const tree = unified().use(remarkParse).use(remarkGfm).parse(stripFrontMatter(markdown)) as Root;
-  const builder = new PdfBuilder(opts.loadImage, collectFootnotes(tree));
+  const builder = new PdfBuilder(opts.loadImage, collectFootnotes(tree), opts.renderDiagram);
   const content: Content[] = [];
   for (const node of tree.children) content.push(...(await builder.block(node)));
   content.push(...(await builder.footnoteSection()));

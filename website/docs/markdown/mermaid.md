@@ -60,9 +60,9 @@ Markdown Studio includes Mermaid 12, so it draws the diagram types that version 
 | --- | --- |
 | Export as HTML | Drawn, embedded in the file as SVG |
 | Print / Save as PDF | Drawn, as in the preview |
-| Export as PDF, Export as Word | The diagram's code, as a code block |
+| Export as PDF, Export as Word | Drawn as a picture (at twice screen resolution, so it prints sharply) |
 
-For a PDF with diagrams, use **File → Print / Save as PDF…**.
+A diagram with a syntax error is exported as its code instead. When **Render Mermaid diagrams** is off in Settings, all exports keep the code.
 
 ## Troubleshooting
 

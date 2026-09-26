@@ -13,6 +13,13 @@ const features = () => {
 
 const loadImage = (path: string) => backend().readImage(path);
 
+/** Draws Mermaid diagrams as pictures in PDF and Word, when diagrams are enabled and the document has any. */
+async function diagramRenderer(markdown: string) {
+  if (!features().diagrams || !/^\s{0,3}(```|~~~)\s*mermaid/m.test(markdown)) return undefined;
+  const { mermaidToPng } = await import("../services/mermaid");
+  return mermaidToPng;
+}
+
 /** Exports the active document as a standalone HTML file. */
 export async function exportActiveAsHtml() {
   const doc = activeDoc();
@@ -50,6 +57,7 @@ async function exportAsDocx(src: ExportSource) {
     const bytes = await markdownToDocx(src.content, {
       title: documentTitle(src.content, src.name),
       loadImage: makeImageLoader(src.path, loadImage),
+      renderDiagram: await diagramRenderer(src.content),
     });
     const saved = await backend().exportBinaryFile(exportFileName(src.name, "docx"), bytesToBase64(bytes), "docx");
     if (saved) notify("success", `Exported to ${saved}`);
@@ -89,6 +97,7 @@ async function exportAsPdf(src: ExportSource, onPrint?: () => Promise<void>) {
     const bytes = await markdownToPdf(src.content, {
       title: documentTitle(src.content, src.name),
       loadImage: makeImageLoader(src.path, loadImage),
+      renderDiagram: await diagramRenderer(src.content),
     });
     const saved = await backend().exportBinaryFile(exportFileName(src.name, "pdf"), bytesToBase64(bytes), "pdf");
     if (saved) notify("success", `Exported to ${saved}`);

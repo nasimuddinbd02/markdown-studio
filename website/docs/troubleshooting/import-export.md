@@ -1,6 +1,6 @@
 ---
 title: Import & Export Problems
-description: Fix Markdown Studio import and export problems, including scanned PDFs, lost layout, PDF characters the built-in font can't show, and diagrams or math shown as code in PDF and Word.
+description: Fix Markdown Studio import and export problems, including scanned PDFs, lost layout, PDF characters the built-in font can't show, and formulas or diagrams shown as code in PDF and Word.
 ---
 
 # Import & export
@@ -29,13 +29,21 @@ description: Fix Markdown Studio import and export problems, including scanned P
 
 **Solution:** choose **Use Print → Save as PDF**, which uses your system fonts, or export as Word or HTML.
 
-## Diagrams or formulas appear as code in PDF or Word
+## Formulas appear as LaTeX text in PDF or Word
 
-**Problem:** a PDF or Word export shows Mermaid diagrams as code and formulas as LaTeX text.
+**Problem:** a PDF or Word export shows formulas as their LaTeX source.
 
-**Possible cause:** the PDF and Word exporters don't render diagrams or math yet. (Footnotes are exported, from version 0.12.0.)
+**Possible cause:** the PDF and Word exporters don't render math yet.
 
-**Solution:** use **File → Print / Save as PDF…** for a PDF, or **Export as HTML**. Both keep diagrams and math exactly as in the preview.
+**Solution:** use **File → Print / Save as PDF…** for a PDF, or **Export as HTML**. Both render formulas exactly as in the preview.
+
+## A diagram appears as code in PDF or Word
+
+**Possible causes:**
+
+- The diagram has a syntax error. The preview shows **Diagram error:** too; fix the diagram (see [Mermaid](/markdown/mermaid#troubleshooting)).
+- **Settings → Preview → Render Mermaid diagrams** is off, so all exports keep the code.
+- The version is older than 0.12.0, which exported diagrams as code. Update Markdown Studio.
 
 ## "Files larger than 100 MB can't be imported"
 
