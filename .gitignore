@@ -13,3 +13,6 @@ release-assets/
 *.key
 *.pem
 *.pfx
+# Documentation website build output
+website/.vitepress/dist/
+website/.vitepress/cache/

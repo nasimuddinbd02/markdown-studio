@@ -1,0 +1,64 @@
+---
+title: Math and LaTeX
+description: Write mathematical formulas in Markdown Studio with LaTeX syntax, inline with $…$ and as display blocks with $$…$$. Rendering, supported syntax, examples and limitations.
+---
+
+# Math / LaTeX
+
+Markdown Studio renders mathematical formulas written in LaTeX syntax, using [KaTeX](https://katex.org). Formulas are converted to MathML, which the system's web engine displays.
+
+## Inline math
+
+Put the formula between single dollar signs:
+
+```markdown
+The famous identity $e^{i\pi} + 1 = 0$ links five constants.
+```
+
+## Display math
+
+Put the formula between double dollar signs on their own lines:
+
+```markdown
+$$
+\int_0^1 x^2 \, dx = \frac{1}{3}
+$$
+```
+
+A ` ```math ` code block works too.
+
+## Examples
+
+```markdown
+Fractions and roots: $\frac{a}{b}$, $\sqrt{x^2 + y^2}$
+Sub- and superscripts: $x_i^2$, $a_{n+1}$
+Greek letters: $\alpha, \beta, \Gamma, \pi$
+Sums and limits: $\sum_{k=1}^{n} k = \frac{n(n+1)}{2}$, $\lim_{x \to 0} \frac{\sin x}{x} = 1$
+
+$$
+\begin{pmatrix} a & b \\ c & d \end{pmatrix}
+\qquad
+f(x) = \begin{cases} x & x \ge 0 \\ -x & x < 0 \end{cases}
+$$
+```
+
+The [Mermaid page](/markdown/mermaid) has a screenshot of math in the preview.
+
+## Supported syntax
+
+KaTeX supports most of LaTeX's **math mode**: fractions, roots, operators, Greek letters, accents, matrices, `cases`, `aligned` and similar environments, and `\text{…}` inside formulas. The full list is in [KaTeX's supported functions](https://katex.org/docs/supported). Text-mode LaTeX (documents, packages, `\usepackage`) isn't supported; this is math inside Markdown.
+
+## Limitations and tips
+
+- **Dollar signs in text.** Because `$` starts math, a sentence like "costs $5 or $10" can be read as a formula. Escape the dollar signs: `\$5`.
+- **Errors** don't break the preview: a formula KaTeX can't parse is shown as its source, in red.
+- **Appearance** depends on your system's MathML support, so formulas can look slightly different on Windows, macOS and Linux.
+- To show formulas as plain text, turn off **Settings → Preview → Render LaTeX math**.
+
+## Export
+
+| Export | Formulas |
+| --- | --- |
+| Export as HTML | Rendered |
+| Print / Save as PDF | Rendered, as in the preview |
+| Export as PDF, Export as Word | As their LaTeX source text |

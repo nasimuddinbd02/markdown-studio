@@ -423,7 +423,7 @@ The product website shall provide OS-specific download options. The site may det
 | Should Markdown HTML be fully supported, partially supported, or sanitized to a strict subset? | **Answered:** raw HTML is parsed, then sanitized to GitHub's allow-list (FR-034, SEC-004). |
 | Should the application include Git integration in the first major release? | Open. |
 | What product name, domain, logo, and application identifier will be used for signing and releases? | **Partly answered:** "Markdown Studio", identifier `com.markdownstudio.app`, releases on GitHub. Domain and signing identity are open. |
-| Will telemetry be collected? If yes, what is collected and what consent mechanism is required? | **Answered:** no telemetry. The only network request is the optional update check to GitHub, which can be turned off in Settings. |
+| Will telemetry be collected? If yes, what is collected and what consent mechanism is required? | **Answered:** no telemetry. The app's only own network request is the optional update check to GitHub, which can be turned off in Settings (web images referenced in a document load when previewed). |
 
 ## Appendix A — Suggested MVP User Flows
 

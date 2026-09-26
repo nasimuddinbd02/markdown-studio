@@ -1,5 +1,7 @@
 # Installing Markdown Studio
 
+> This guide is also on the website, with the rest of the user documentation: [nasimuddinbd02.github.io/markdown-studio/getting-started/installation](https://nasimuddinbd02.github.io/markdown-studio/getting-started/installation).
+
 Markdown Studio is a free, local-first Markdown editor. Your documents stay on your computer: nothing is uploaded, and no account or internet connection is needed to write.
 
 Choose your system: [Windows](#windows) · [macOS](#macos) · [Linux](#linux). Each has its own installer, and none of them needs anything else installed.

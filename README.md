@@ -2,6 +2,8 @@
 
 A fast, local-first, privacy-conscious Markdown editor for Windows, macOS and Linux, built with **Tauri 2**, **React + TypeScript**, **CodeMirror 6** and the **remark/rehype** ecosystem.
 
+**Website and user documentation: [nasimuddinbd02.github.io/markdown-studio](https://nasimuddinbd02.github.io/markdown-studio/)** (download, installation guides, user guide, Markdown reference, FAQ, troubleshooting, changelog).
+
 The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status per requirement is in [docs/TRACEABILITY.md](docs/TRACEABILITY.md).
 
 ## Download
@@ -98,7 +100,7 @@ For requirements, checksum verification, silent install, uninstalling and troubl
 - A path is accessible only after the user selects it in a native dialog, or re-opens it from the backend-owned recent list. Relative paths and `..` traversal are rejected, and symlinks are resolved before the scope check ([scope.rs](src-tauri/src/scope.rs)).
 - The preview parses raw HTML and then sanitizes it with GitHub's allow-list. Scripts, event handlers, iframes, forms, styles and `javascript:` URLs are removed. A strict CSP forbids inline scripts.
 - Links open in the system browser, and only `http`, `https` and `mailto` links are allowed.
-- The only network request the app makes is the update check to GitHub (it can be turned off in Settings). The CSP allows `connect-src` to `api.github.com` only, and downloaded updates are installed only if their minisign signature matches the public key built into the app.
+- The app's only own network request is the update check to GitHub (it can be turned off in Settings). Images with `https://` addresses in a document are loaded from the web when it is previewed, like in a browser; plain `http` images are blocked. The CSP allows `connect-src` to `api.github.com` only, and downloaded updates are installed only if their minisign signature matches the public key built into the app.
 - Logs record the operation and error category, never document content; the home directory is redacted.
 
 ## Development
@@ -125,6 +127,7 @@ That runs the desktop app with hot reload. Other scripts:
 | `npm run build` | Type check and production build of the frontend (`dist/`) |
 | `npm run tauri:build` | Builds installers for the current OS |
 | `npm run version:set <x.y.z>` / `release:installer` / `release:github` | Release pipeline (see [Releasing a new version](#releasing-a-new-version)) |
+| `npm run docs:install`, then `docs:dev` / `docs:check` / `docs:test` | The documentation website (see [website/README.md](website/README.md)) |
 
 Continuous integration ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs the type check, the unit tests, the production build and the Playwright tests on every push, and the Rust tests on Windows, macOS and Linux.
 
@@ -155,20 +158,24 @@ tests/          Vitest unit and component tests
 e2e/            Playwright workflows and axe-core accessibility audits
 scripts/        Versioning and release scripts
 downloads/      The latest standard Windows installer and its checksum
-docs/           SRS, requirement traceability, installation guide and development log
-.github/        CI and the macOS/Linux release workflow
+docs/           SRS, requirement traceability, installation guide, development log, website spec
+website/        Documentation and product website (VitePress, deployed to GitHub Pages)
+.github/        CI, the macOS/Linux release workflow and the website deployment
 ```
 
 ## Documentation
 
 | Document | Contents |
 | --- | --- |
+| [Website](https://nasimuddinbd02.github.io/markdown-studio/) ([source](website/docs/)) | The public user documentation: download, installation, user guide, Markdown reference, FAQ, troubleshooting, changelog, roadmap, blog |
 | [docs/INSTALL.md](docs/INSTALL.md) | Installing, updating and uninstalling on Windows, macOS and Linux; troubleshooting |
 | [docs/SRS.md](docs/SRS.md) | Software requirements specification (the baseline requirements) |
 | [docs/TRACEABILITY.md](docs/TRACEABILITY.md) | Status of every requirement, where it is implemented, and known gaps |
 | [docs/DEV_LOG.md](docs/DEV_LOG.md) | Development history: features per session, releases, test counts and next steps |
+| [docs/DOCUMENTATION_SITE_SPEC.md](docs/DOCUMENTATION_SITE_SPEC.md) | Requirements for the documentation website |
+| [website/README.md](website/README.md) | Maintaining the website: commands, deployment, Google Search Console |
 
-Every feature change updates the README feature list and TRACEABILITY, and every release updates the download section, INSTALL.md and the DEV_LOG.
+Every feature change updates the README feature list, TRACEABILITY and the matching website guide page. Every release updates the download section, INSTALL.md, the website changelog and the DEV_LOG; the website's version, download links and keyboard shortcuts update themselves from the app.
 
 ## Releasing a new version
 

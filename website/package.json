@@ -1,0 +1,21 @@
+{
+  "name": "markdown-studio-website",
+  "private": true,
+  "type": "module",
+  "description": "Documentation and product website for Markdown Studio (VitePress, deployed to GitHub Pages).",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview",
+    "check": "tsc -p tsconfig.json && node scripts/check.mjs && vitepress build && node scripts/check-links.mjs",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "typescript": "^5.9.3",
+    "vitepress": "^1.6.4"
+  },
+  "overrides": {
+    "vite": "^6.4.3"
+  }
+}

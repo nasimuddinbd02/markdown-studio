@@ -89,6 +89,7 @@ Status of each [SRS](SRS.md) requirement as of version 0.11.0. **Done** means im
 | Live folder watching | `src-tauri/src/watcher.rs`, `features/watch.ts` | FR-018 |
 | Auto save, save options (trim whitespace, final newline, line endings), large-document mode | `features/autosave.ts`, `features/saveTransforms.ts` | §10.2, NFR-002 |
 | Separate installers per OS on every release, offline Windows installer with WebView2 | `scripts/`, `.github/workflows/release.yml` | §13 packaging |
+| Documentation and product website (47 pages: download, installation per OS, user guide, Markdown reference, troubleshooting, FAQ, changelog, roadmap, blog) with SEO, sitemap and structured data; version, downloads and shortcut tables generated from the app | `website/`, `.github/workflows/documentation.yml` | §13.4 distribution website, §15 usability |
 
 ## Test coverage
 
@@ -100,6 +101,7 @@ Status of each [SRS](SRS.md) requirement as of version 0.11.0. **Done** means im
 
 ## Known gaps and next improvements
 
+- PDF and Word export leave out footnotes (Word keeps the note text as paragraphs) and show Mermaid diagrams and math as code or text; HTML export and Print → Save as PDF keep them. Documented on the website.
 - Code-sign the Windows installer (Authenticode) so SmartScreen doesn't warn; updates are already signature-verified.
 - macOS builds are ad-hoc signed, not notarized (needs an Apple Developer ID). In-place updates are Windows-only; macOS and Linux are offered the download page (signing their updates in CI needs the updater key as a repository secret).
 - The macOS and Linux builds haven't been run on real hardware yet, only built in CI.

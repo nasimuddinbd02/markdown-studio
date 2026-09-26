@@ -1,0 +1,88 @@
+/**
+ * Keyboard shortcuts, read at build time from the application's command
+ * definitions (src/features/commands.ts) with the TypeScript parser, so the
+ * reference always matches the app. "Mod" is Ctrl on Windows/Linux and Cmd on
+ * macOS; a conditional such as `isMac ? "Mod+Alt+F" : "Mod+H"` gives the
+ * macOS and Windows/Linux variants.
+ */
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import ts from "typescript";
+
+export interface Shortcut {
+  id: string;
+  label: string;
+  windows: string;
+  mac: string;
+  group: string;
+}
+
+declare const data: Shortcut[];
+export { data };
+
+const SOURCE = "../../../src/features/commands.ts";
+
+/** Human-readable keys: "Mod+Shift+P" -> "Ctrl+Shift+P" / "Cmd+Shift+P". */
+function display(shortcut: string, mac: boolean) {
+  return shortcut
+    .split("+")
+    .map((k) => {
+      if (k === "Mod") return mac ? "Cmd" : "Ctrl";
+      if (k === "Alt") return mac ? "Option" : "Alt";
+      if (k === "Ctrl") return "Ctrl";
+      if (k === "") return "+";
+      return k.length === 1 ? k.toUpperCase() : k;
+    })
+    .join("+")
+    .replace("++", "+Plus");
+}
+
+function literal(node: ts.Expression | undefined): { win: string; mac: string } | null {
+  if (!node) return null;
+  if (ts.isStringLiteral(node)) return { win: node.text, mac: node.text };
+  if (ts.isConditionalExpression(node) && ts.isStringLiteral(node.whenTrue) && ts.isStringLiteral(node.whenFalse)) {
+    // `isMac ? macKey : otherKey`
+    return { mac: node.whenTrue.text, win: node.whenFalse.text };
+  }
+  return null;
+}
+
+export default {
+  watch: [SOURCE],
+  load(): Shortcut[] {
+    const path = fileURLToPath(new URL(SOURCE, import.meta.url));
+    const file = ts.createSourceFile(path, readFileSync(path, "utf8"), ts.ScriptTarget.Latest, true);
+    const out: Shortcut[] = [];
+    let group = "";
+    const visit = (node: ts.Node) => {
+      // Which exported table a command belongs to: formatCommands (Format) or commands (App).
+      if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) {
+        if (node.name.text === "formatCommands") group = "format";
+        else if (node.name.text === "commands") group = "app";
+      }
+      // formatCommand("id", "Label", command, "Shortcut")
+      if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === "formatCommand") {
+        const [id, label, , key] = node.arguments;
+        const keys = literal(key);
+        if (id && label && ts.isStringLiteral(id) && ts.isStringLiteral(label) && keys) {
+          out.push({ id: id.text, label: label.text, windows: display(keys.win, false), mac: display(keys.mac, true), group: "format" });
+        }
+      }
+      // { id: "save", label: "Save", shortcut: "Mod+S", ... }
+      if (ts.isObjectLiteralExpression(node) && group === "app") {
+        const prop = (name: string) =>
+          node.properties.find((p): p is ts.PropertyAssignment => ts.isPropertyAssignment(p) && ts.isIdentifier(p.name) && p.name.text === name)?.initializer;
+        const id = prop("id");
+        const label = prop("label");
+        const keys = literal(prop("shortcut"));
+        if (id && label && ts.isStringLiteral(id) && ts.isStringLiteral(label) && keys) {
+          out.push({ id: id.text, label: label.text.replace(/…$/, ""), windows: display(keys.win, false), mac: display(keys.mac, true), group: "app" });
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(file);
+    if (out.length < 30) throw new Error(`Only ${out.length} shortcuts were found in ${SOURCE}; has its structure changed?`);
+    return out;
+  },
+};

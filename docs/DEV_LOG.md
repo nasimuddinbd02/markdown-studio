@@ -316,3 +316,23 @@ The user asked for one more hour today.
 3. Tauri-driver e2e against the native build; test the macOS and Linux builds on real machines.
 
 **Questions for the user:** unchanged. Apple Developer ID, the updater key as a CI secret, ARM64 builds, licensing, UI languages.
+
+## 2026-09-25 (night): Documentation website
+
+The user asked for the documents to follow `docs/DOCUMENTATION_SITE_SPEC.md`: a public documentation and product website.
+
+- **Framework:** VitePress 1.6 in `website/`, with its own `package.json`, so the app's dependencies are untouched. Vite is overridden to 6.4.3, giving 0 vulnerabilities; stock VitePress pulls in a vulnerable Vite 5/esbuild dev server.
+- **47 pages:** home, download, features, FAQ, changelog (v0.3.1–v0.11.0 from the git history), roadmap, privacy; Getting Started (3); installation per OS (3); user guide (10); Markdown reference (8); troubleshooting (9, each in Problem / Symptoms / Cause / Solution / Diagnostics / Report form); reference (keyboard shortcuts, configuration); blog (index and 4 articles).
+- **Single sources of truth:** the version, release date and installer links come from the app's `package.json`, the git tags and the release naming convention (`docs/data/release.data.ts`). The keyboard shortcut tables are parsed from `src/features/commands.ts` with the TypeScript parser at build time.
+- **Screenshots:** real UI captures (`npm run docs:screenshots` drives the browser build with Playwright and encodes WebP), 20–92 KB each.
+- **SEO:** a unique title and description per page (enforced), canonical URLs, Open Graph and Twitter tags, JSON-LD (SoftwareApplication, WebSite and Organization on the home page; BreadcrumbList on documentation pages; Article on blog posts; no ratings, prices or counts), `sitemap.xml` and `robots.txt`.
+- **Validation:** `npm run docs:check` runs the type check, the content check (front matter, one H1, alt text, stray interpolation), the build (fails on dead links) and a link check of every href and src in the output. `--external` checked 69 GitHub and release links, all OK. `npm run docs:test` runs 24 browser checks: axe-core WCAG 2.1 AA on 11 pages in light and dark (all pass), mobile at 375 px with no horizontal scrolling, and the mobile menu.
+- **Accessibility fixes found by the audit:** brand button contrast, code language labels and syntax colours (now `github-light-high-contrast`), collapsible sidebar groups (nested-interactive), and an unlabelled theme switch before hydration (component override with a static `aria-label`).
+- **Deployment:** `.github/workflows/documentation.yml` builds and checks on pull requests and deploys to GitHub Pages on pushes to `main` (website, version or shortcut changes), on releases, and by hand.
+- **Accuracy fixes found while writing:** web (`https`) images do make network requests, so "the only network request is the update check" was corrected in the README and SRS too. A probe showed that PDF export drops footnotes and Word export drops footnote references. This is documented, and recorded in TRACEABILITY known gaps and on the roadmap.
+
+**Desktop app unaffected:** typecheck, Vitest 225, Playwright 21 and `vite build` all pass.
+
+**Next up:** footnotes, Mermaid and math in PDF/Word export; website search console setup (owner); keep the website changelog updated with each release.
+
+**Questions for the user:** enable GitHub Pages (Settings → Pages → Source: GitHub Actions)? Choose a license (the FAQ says one hasn't been published)?

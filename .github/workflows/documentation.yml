@@ -1,0 +1,73 @@
+name: Documentation website
+
+# Builds the VitePress site in website/ and deploys it to GitHub Pages
+# (https://nasimuddinbd02.github.io/markdown-studio/). Pull requests are built
+# and checked but not deployed. A release also redeploys, so the download page
+# and changelog pick up the new version.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "website/**"
+      - "package.json" # the app version shown on the site
+      - "src/features/commands.ts" # the source of the keyboard shortcut tables
+      - ".github/workflows/documentation.yml"
+  pull_request:
+    paths:
+      - "website/**"
+      - "package.json"
+      - "src/features/commands.ts"
+      - ".github/workflows/documentation.yml"
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.event_name == 'pull_request' && github.ref || 'deploy' }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # page "last updated" times and release dates come from git history and tags
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+      - name: Install website dependencies
+        run: npm ci
+        working-directory: website
+      - name: Check content, build and check links
+        run: npm run check
+        working-directory: website
+      - name: Check GitHub and release links
+        # A version bump can land before its release is published, so this is reported but doesn't block.
+        continue-on-error: true
+        run: node scripts/check-links.mjs --external
+        working-directory: website
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: website/.vitepress/dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
