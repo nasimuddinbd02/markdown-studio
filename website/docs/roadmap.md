@@ -25,7 +25,6 @@ Nothing is actively under development right now. The next items are chosen from 
 ## Planned
 
 - **Math in PDF and Word exports.** Today formulas are only rendered in HTML export and Print → Save as PDF.
-- **Drag to reorder** sections in the outline (moving them with the context menu and Alt+↑/↓ is already available).
 - **Performance:** a smaller startup bundle and benchmarks with very large documents.
 - **End-to-end tests of the native app** on Windows, macOS and Linux, and testing the macOS and Linux builds on real hardware.
 
