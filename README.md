@@ -175,7 +175,7 @@ website/        Documentation and product website (VitePress, deployed to GitHub
 | [docs/DOCUMENTATION_SITE_SPEC.md](docs/DOCUMENTATION_SITE_SPEC.md) | Requirements for the documentation website |
 | [website/README.md](website/README.md) | Maintaining the website: commands, deployment, Google Search Console |
 
-Every feature change updates the README feature list, TRACEABILITY and the matching website guide page. Every release updates the download section, INSTALL.md, the website changelog and the DEV_LOG; the website's version, download links and keyboard shortcuts update themselves from the app.
+Every feature change updates the README feature list, TRACEABILITY and the matching website guide page (the checklist is in [CLAUDE.md](CLAUDE.md)). Every release updates the download section, INSTALL.md, the website changelog and the DEV_LOG; the website's version, download links and keyboard shortcuts update themselves from the app.
 
 ## Releasing a new version
 
