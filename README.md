@@ -55,7 +55,7 @@ For requirements, checksum verification, silent install, uninstalling and troubl
 - Tab context menu: Close Others, Close to the Right, Close Saved, Copy Path, Reveal
 - Tabs with dirty indicators, and Save / Don't Save / Cancel prompts on close and on quit; Save All; recent files and folders (File menu and welcome screen)
 - Link autocompletion (workspace files after `](`, images after `![](`, headings after `](#`) and Format Table (Ctrl/Cmd+Alt+T) that aligns GFM tables, CJK-aware
-- Format menu and shortcuts: bold (Ctrl/Cmd+B), italic (I), link (K), inline code (E), strikethrough, headings (Ctrl/Cmd+Alt+1–3), promote/demote heading (Ctrl/Cmd+Alt+= / Ctrl/Cmd+Alt+-), lists, task lists, quotes, code blocks and tables
+- Format menu and shortcuts: bold (Ctrl/Cmd+B), italic (I), link (K), inline code (E), strikethrough, headings (Ctrl/Cmd+Alt+1–3), promote/demote heading (Ctrl/Cmd+Alt+= / Ctrl/Cmd+Alt+-), lists, task lists, check/uncheck task (Ctrl/Cmd+Enter), quotes, code blocks, tables and footnotes (Insert Footnote, Ctrl/Cmd+Alt+R: numbered `[^n]` reference with its definition added at the end)
 - Paste a URL while text is selected to turn the selection into a link: `[selected text](url)`
 - CodeMirror 6 editor with Markdown syntax highlighting, code-block languages, undo/redo, multi-cursor, find & replace (case-sensitive, regex, whole word) and go to line
 - Import Word (.docx), PDF and web pages (.html) as Markdown (headings, lists, tables, links, images saved to assets/), and paste rich text from browsers or Word as Markdown

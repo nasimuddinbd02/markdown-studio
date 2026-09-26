@@ -141,6 +141,18 @@ test("formatting shortcuts and table formatting", async ({ page }) => {
   await expect(page.locator(".cm-line").filter({ hasText: "- [x] second" })).toHaveCount(1);
   await expect(page.getByRole("checkbox", { name: "Completed task" })).toBeChecked();
   await expect(page.locator(".cm-line").filter({ hasText: "- [ ] first" })).toHaveCount(1);
+
+  // Ctrl/Cmd+Enter checks the task on the cursor line.
+  await page.locator(".cm-line").filter({ hasText: "- [ ] first" }).click();
+  await page.keyboard.press(`${mod}+Enter`);
+  await expect(page.getByRole("checkbox", { name: "Completed task" })).toHaveCount(2);
+
+  // Insert Footnote adds the reference and a definition to type into.
+  await page.keyboard.press(`${mod}+End`);
+  await page.keyboard.press(`${mod}+Alt+r`);
+  await page.keyboard.type("The source.");
+  await expect(page.locator(".markdown-body sup a")).toHaveText("1");
+  await expect(page.locator(".markdown-body section li").filter({ hasText: "The source." })).toHaveCount(1);
 });
 
 test("combine the folder into one document", async ({ page }) => {

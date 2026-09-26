@@ -108,6 +108,35 @@ describe("blocks", () => {
 describe("editor keymap", () => {
   it("derives CodeMirror key names from menu shortcuts", () => {
     const keys = editorKeymap().map((k) => k.key).filter(Boolean);
-    expect(keys).toEqual(expect.arrayContaining(["Mod-b", "Mod-i", "Mod-k", "Mod-Shift-x", "Mod-Alt-1", "Mod-Shift-8", "Mod-Alt-c", "Mod-Alt-=", "Mod-Alt--"]));
+    expect(keys).toEqual(expect.arrayContaining(["Mod-b", "Mod-i", "Mod-k", "Mod-Shift-x", "Mod-Alt-1", "Mod-Shift-8", "Mod-Alt-c", "Mod-Alt-=", "Mod-Alt--", "Mod-Enter", "Mod-Alt-r"]));
+  });
+});
+
+describe("tasks and footnotes", () => {
+  it("checks and unchecks tasks on the selected lines", () => {
+    expect(run("- [ ] bu|y milk", fmt.toggleTaskCheck).doc).toBe("- [x] buy milk");
+    expect(run("  * [X] do|ne", fmt.toggleTaskCheck).doc).toBe("  * [ ] done");
+    expect(run("> 1. [ ] quo|ted", fmt.toggleTaskCheck).doc).toBe("> 1. [x] quoted");
+    // Mixed selection: everything becomes checked first.
+    const doc = "- [x] a\n- [ ] b\nplain";
+    const all = EditorState.create({ doc, selection: EditorSelection.single(0, doc.length) });
+    const checked = fmt.applyCommand(all, fmt.toggleTaskCheck).doc.toString();
+    expect(checked).toBe("- [x] a\n- [x] b\nplain");
+    const again = EditorState.create({ doc: checked, selection: EditorSelection.single(0, doc.length) });
+    expect(fmt.applyCommand(again, fmt.toggleTaskCheck).doc.toString()).toBe("- [ ] a\n- [ ] b\nplain");
+  });
+
+  it("falls through on lines that aren't tasks", () => {
+    const state = stateOf("- plain |item");
+    expect(fmt.toggleTaskCheck({ state, dispatch: () => {} })).toBe(false);
+  });
+
+  it("inserts numbered footnotes with their definitions at the end", () => {
+    const first = run("Claim| here.", fmt.insertFootnote);
+    expect(first.doc).toBe("Claim[^1] here.\n\n[^1]: ");
+    expect(first.cursor).toBe(first.doc.length);
+    const second = run("A[^1] and B|.\n\n[^1]: one\n", fmt.insertFootnote);
+    expect(second.doc).toBe("A[^1] and B[^2].\n\n[^1]: one\n[^2]: ");
+    expect(run("Text|\n", fmt.insertFootnote).doc).toBe("Text[^1]\n\n[^1]: ");
   });
 });

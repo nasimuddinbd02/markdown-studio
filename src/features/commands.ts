@@ -56,6 +56,8 @@ export const formatCommands: Record<string, Command> = {
   taskList: formatCommand("taskList", "Task List", fmt.toggleTaskList, "Mod+Shift+9"),
   quote: formatCommand("quote", "Quote", fmt.toggleQuote, "Mod+Shift+."),
   codeBlock: formatCommand("codeBlock", "Code Block", fmt.insertCodeBlock, "Mod+Alt+C"),
+  toggleTaskCheck: formatCommand("toggleTaskCheck", "Check / Uncheck Task", fmt.toggleTaskCheck, "Mod+Enter"),
+  footnote: formatCommand("footnote", "Insert Footnote", fmt.insertFootnote, "Mod+Alt+R"),
   table: formatCommand("table", "Insert Table", fmt.insertTable),
   formatTable: formatCommand("formatTable", "Format Table", formatTableAtCursor, "Mod+Alt+T"),
   toc: formatCommand("toc", "Insert / Update Table of Contents", insertOrUpdateToc),

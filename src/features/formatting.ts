@@ -131,6 +131,58 @@ export function shiftHeadingLevel(delta: -1 | 1): StateCommand {
 export const promoteHeading = shiftHeadingLevel(-1);
 export const demoteHeading = shiftHeadingLevel(1);
 
+const TASK_BOX = /^((?:\s*>)*\s*(?:[-*+]|\d+[.)])\s+\[)([ xX])\]/;
+
+/**
+ * Checks or unchecks the task on each selected line. If any selected task is
+ * open, all of them are checked; otherwise they are unchecked. Returns false
+ * when no selected line is a task, so the key falls through to its default.
+ */
+export const toggleTaskCheck: StateCommand = ({ state, dispatch }) => {
+  const tasks = selectedLines(state)
+    .map((line) => ({ line, m: TASK_BOX.exec(line.text) }))
+    .filter((t): t is { line: (typeof t)["line"]; m: RegExpExecArray } => t.m !== null);
+  if (tasks.length === 0) return false;
+  const check = tasks.some((t) => t.m[2] === " ");
+  const changes = tasks.map(({ line, m }) => ({
+    from: line.from + m[1].length,
+    to: line.from + m[1].length + 1,
+    insert: check ? "x" : " ",
+  }));
+  dispatch(state.update({ changes, userEvent: "input.toggleTask" }));
+  return true;
+};
+
+/**
+ * Inserts the next footnote reference `[^n]` at the cursor and its definition
+ * at the end of the document, then moves the cursor to the definition.
+ */
+export const insertFootnote: StateCommand = ({ state, dispatch }) => {
+  const text = state.doc.toString();
+  const used = [...text.matchAll(/\[\^(\d+)\]/g)].map((m) => Number(m[1]));
+  const n = used.length ? Math.max(...used) + 1 : 1;
+  const at = state.selection.main.to;
+  const end = state.doc.length;
+  // Keep definitions together; otherwise separate them from the text by a blank line.
+  const afterDefinition = /(^|\n)\[\^[^\]\n]+\]:[^\n]*\n?$/.test(text);
+  const newlines = text === "" ? 0 : (text.match(/\n*$/)?.[0].length ?? 0);
+  const wanted = text === "" ? 0 : afterDefinition ? 1 : 2;
+  const definition = `${"\n".repeat(Math.max(0, wanted - newlines))}[^${n}]: `;
+  const ref = `[^${n}]`;
+  dispatch(
+    state.update({
+      changes: [
+        { from: at, insert: ref },
+        { from: end, insert: definition },
+      ],
+      selection: { anchor: end + ref.length + definition.length },
+      scrollIntoView: true,
+      userEvent: "input.footnote",
+    }),
+  );
+  return true;
+};
+
 type LineKind = "bullet" | "ordered" | "task" | "quote";
 
 function prefixFor(kind: LineKind, index: number) {
