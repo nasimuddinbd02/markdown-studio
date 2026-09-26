@@ -59,8 +59,10 @@ Markdown Studio stores files locally.[^1]
 
 **Format → Insert Footnote** (**Ctrl+Alt+R**, **Cmd+Option+R** on macOS) inserts the next free number at the cursor, adds the definition at the end of the document, and moves the cursor there so you can type the note.
 
-In the **preview**, **HTML export** and **Print / Save as PDF**, references become superscript links to a **Footnotes** section at the end, with links back.
+Notes are numbered in the order they're first referenced, whatever their labels, and definitions that are never referenced are left out. In the exports:
 
-::: warning Footnotes in PDF and Word exports
-**Export as PDF** currently leaves footnotes out, and **Export as Word** leaves out the reference numbers and puts the notes' text at the end as paragraphs. To keep footnotes, use **Export as HTML** or **Print / Save as PDF**.
-:::
+| Where | Footnotes |
+| --- | --- |
+| Preview, HTML export, Print / Save as PDF | Superscript links to a **Footnotes** section at the end, with links back |
+| Export as PDF | Superscript numbers that link to a **Footnotes** section at the end of the document |
+| Export as Word | Real Word footnotes: Word numbers them and places each note at the bottom of its page |

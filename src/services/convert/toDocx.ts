@@ -1,7 +1,7 @@
 import { ALERT_KINDS, takeMdastAlert } from "../alerts";
 import { stripFrontMatter } from "../frontMatter";
 import {
-  AlignmentType, BorderStyle, Document, ExternalHyperlink, HeadingLevel, ImageRun, LevelFormat, Packer,
+  AlignmentType, BorderStyle, Document, ExternalHyperlink, FootnoteReferenceRun, HeadingLevel, ImageRun, LevelFormat, Packer,
   Paragraph, ShadingType, Table, TableCell, TableRow, TextRun, WidthType,
   type IParagraphOptions, type ParagraphChild,
 } from "docx";
@@ -10,6 +10,7 @@ import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import type { Root, RootContent, PhrasingContent, List, Table as MdTable, AlignType } from "mdast";
 import { resolveRelative } from "../paths";
+import { collectFootnotes, type Footnotes } from "./footnotes";
 
 /** Loads an image referenced by the document; returns bytes or null. */
 export type DocxImageLoader = (src: string) => Promise<{ data: Uint8Array; type: "png" | "jpg" | "gif" | "bmp" } | null>;
@@ -55,7 +56,10 @@ function plainText(node: RootContent | PhrasingContent): string {
 
 class DocxBuilder {
   private listInstance = 0;
-  constructor(private loadImage?: DocxImageLoader) {}
+  constructor(
+    private loadImage?: DocxImageLoader,
+    private footnotes?: Footnotes,
+  ) {}
 
   private run(text: string, s: Style): TextRun {
     return new TextRun({
@@ -103,6 +107,12 @@ class DocxBuilder {
         case "html":
           out.push(this.run(n.value.replace(/<[^>]+>/g, ""), s));
           break;
+        case "footnoteReference": {
+          // A real Word footnote: Word numbers it and puts the note at the bottom of the page.
+          const number = this.footnotes?.number(n.identifier);
+          out.push(number ? new FootnoteReferenceRun(number) : this.run(`[^${n.label ?? n.identifier}]`, s));
+          break;
+        }
         default:
           out.push(this.run(plainText(n), s));
       }
@@ -233,21 +243,40 @@ class DocxBuilder {
         const text = node.value.replace(/<[^>]+>/g, "").trim();
         return text ? [new Paragraph({ indent, children: [new TextRun(text)] })] : [];
       }
+      case "footnoteDefinition":
+        return []; // becomes a Word footnote (see footnoteContent)
       default: {
         const text = plainText(node).trim();
         return text ? [new Paragraph({ indent, children: [new TextRun(text)] })] : [];
       }
     }
   }
+
+  /** Word footnotes, keyed by number. Footnotes can hold paragraphs only, so tables become text. */
+  async footnoteContent(): Promise<Record<number, { children: Paragraph[] }>> {
+    const out: Record<number, { children: Paragraph[] }> = {};
+    for (const { number, definition } of this.footnotes?.notes ?? []) {
+      const children: Paragraph[] = [];
+      for (const child of definition.children) {
+        for (const part of await this.block(child)) {
+          children.push(part instanceof Paragraph ? part : new Paragraph({ children: [new TextRun(plainText(child))] }));
+        }
+      }
+      out[number] = { children: children.length ? children : [new Paragraph("")] };
+    }
+    return out;
+  }
 }
 
 /** Markdown → Word document (.docx) bytes. */
 export async function markdownToDocx(markdown: string, opts: { title?: string; loadImage?: DocxImageLoader } = {}): Promise<Uint8Array> {
   const tree = unified().use(remarkParse).use(remarkGfm).parse(stripFrontMatter(markdown)) as Root;
-  const builder = new DocxBuilder(opts.loadImage);
+  const builder = new DocxBuilder(opts.loadImage, collectFootnotes(tree));
   const children: Array<Paragraph | Table> = [];
   for (const node of tree.children) children.push(...(await builder.block(node)));
+  const footnotes = await builder.footnoteContent();
   const doc = new Document({
+    footnotes,
     title: opts.title,
     creator: "Markdown Studio",
     styles: {

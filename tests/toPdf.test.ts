@@ -155,3 +155,15 @@ describe("export a folder as one document", () => {
     expect(backend.lastExport).toBeNull();
   });
 });
+
+describe("footnotes in PDF export", () => {
+  it("adds superscript numbers and a Footnotes section", async () => {
+    const md = "A claim[^src] here.\n\n[^src]: The source of the claim.\n[^unused]: Not referenced.";
+    const text = (await pdfToMarkdown((await markdownToPdf(md)).buffer as ArrayBuffer)).markdown;
+    expect(text).toMatch(/claim\s*1\s*here/);
+    expect(text).toContain("Footnotes");
+    expect(text).toContain("The source of the claim.");
+    expect(text).not.toContain("Not referenced");
+    expect(text.indexOf("here")).toBeLessThan(text.indexOf("The source of the claim."));
+  }, 30_000);
+});

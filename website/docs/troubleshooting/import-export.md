@@ -1,6 +1,6 @@
 ---
 title: Import & Export Problems
-description: Fix Markdown Studio import and export problems, including scanned PDFs, lost layout, PDF characters the built-in font can't show, and missing diagrams, math or footnotes in PDF and Word.
+description: Fix Markdown Studio import and export problems, including scanned PDFs, lost layout, PDF characters the built-in font can't show, and diagrams or math shown as code in PDF and Word.
 ---
 
 # Import & export
@@ -29,13 +29,13 @@ description: Fix Markdown Studio import and export problems, including scanned P
 
 **Solution:** choose **Use Print → Save as PDF**, which uses your system fonts, or export as Word or HTML.
 
-## Diagrams, formulas or footnotes are missing in PDF or Word
+## Diagrams or formulas appear as code in PDF or Word
 
-**Problem:** a PDF or Word export shows Mermaid diagrams as code and formulas as LaTeX text, and footnotes are missing (PDF) or appear as plain paragraphs at the end (Word).
+**Problem:** a PDF or Word export shows Mermaid diagrams as code and formulas as LaTeX text.
 
-**Possible cause:** the PDF and Word exporters don't render diagrams, math or footnotes yet.
+**Possible cause:** the PDF and Word exporters don't render diagrams or math yet. (Footnotes are exported, from version 0.12.0.)
 
-**Solution:** use **File → Print / Save as PDF…** for a PDF, or **Export as HTML**. Both keep diagrams, math and footnotes exactly as in the preview.
+**Solution:** use **File → Print / Save as PDF…** for a PDF, or **Export as HTML**. Both keep diagrams and math exactly as in the preview.
 
 ## "Files larger than 100 MB can't be imported"
 

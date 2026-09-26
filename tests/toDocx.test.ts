@@ -110,3 +110,21 @@ describe("alerts in Word export", () => {
     expect(xml).not.toContain("[!IMPORTANT]");
   });
 });
+
+describe("footnotes in Word export", () => {
+  it("creates real Word footnotes, numbered in reference order", async () => {
+    const md = "First claim[^b] and second[^a], first again[^b].\n\n[^a]: Note A.\n[^b]: Note B with **bold**.\n[^unused]: Never referenced.";
+    const zip = await JSZip.loadAsync(await markdownToDocx(md));
+    const doc = await zip.file("word/document.xml")!.async("string");
+    const notes = await zip.file("word/footnotes.xml")!.async("string");
+    const refs = [...doc.matchAll(/<w:footnoteReference w:id="(\d+)"\/>/g)].map((m) => m[1]);
+    expect(refs).toEqual(["1", "2", "1"]);
+    const byId = Object.fromEntries(
+      [...notes.matchAll(/<w:footnote w:id="(\d+)">([\s\S]*?)<\/w:footnote>/g)].map((m) => [m[1], m[2].replace(/<[^>]+>/g, "")]),
+    );
+    expect(byId["1"]).toContain("Note B with bold.");
+    expect(byId["2"]).toContain("Note A.");
+    expect(notes).not.toContain("Never referenced");
+    expect(doc).not.toContain("Note A.");
+  });
+});

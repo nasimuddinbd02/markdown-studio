@@ -1,3 +1,4 @@
+import { collectFootnotes, type Footnotes } from "./footnotes";
 import { ALERT_KINDS, takeMdastAlert } from "../alerts";
 import { stripFrontMatter } from "../frontMatter";
 import { unified } from "unified";
@@ -47,7 +48,10 @@ export function pdfExportUnsupportedText(markdown: string): string[] {
 class PdfBuilder {
   private headingIds: Array<{ depth: number; id: string }> = [];
   private count = 0;
-  constructor(private loadImage?: DocxImageLoader) {}
+  constructor(
+    private loadImage?: DocxImageLoader,
+    private footnotes?: Footnotes,
+  ) {}
 
   private async inline(nodes: PhrasingContent[], style: Record<string, unknown> = {}): Promise<Inline[]> {
     const out: Inline[] = [];
@@ -81,6 +85,11 @@ class PdfBuilder {
         case "html":
           out.push(n.value.replace(/<[^>]+>/g, ""));
           break;
+        case "footnoteReference": {
+          const number = this.footnotes?.number(n.identifier);
+          out.push(number ? { text: String(number), sup: true, linkToDestination: `fn-${number}`, color: "#2F5BEA" } : `[^${n.label ?? n.identifier}]`);
+          break;
+        }
         default:
           out.push(plain(n));
       }
@@ -215,11 +224,33 @@ class PdfBuilder {
         const text = node.value.replace(/<[^>]+>/g, "").trim();
         return text ? [{ text, margin: [0, 0, 0, 8] }] : [];
       }
+      case "footnoteDefinition":
+        return []; // collected into the Footnotes section at the end
       default: {
         const text = plain(node).trim();
         return text ? [{ text, margin: [0, 0, 0, 8] }] : [];
       }
     }
+  }
+
+  /** The Footnotes section: a rule, a heading and the numbered notes. */
+  async footnoteSection(): Promise<Content[]> {
+    const notes = this.footnotes?.notes ?? [];
+    if (!notes.length) return [];
+    const out: Content[] = [
+      { canvas: [{ type: "line", x1: 0, y1: 0, x2: CONTENT_WIDTH / 3, y2: 0, lineWidth: 0.8, lineColor: "#C3C9D2" }], margin: [0, 14, 0, 6] },
+      { text: "Footnotes", bold: true, fontSize: 11, margin: [0, 0, 0, 4] },
+    ];
+    for (const { number, definition } of notes) {
+      const body: Content[] = [];
+      for (const child of definition.children) body.push(...(await this.block(child)));
+      out.push({
+        columns: [{ text: `${number}.`, width: 16, fontSize: 9.5, color: "#5C6575" }, { stack: body, width: "*", fontSize: 9.5 }],
+        columnGap: 4,
+        id: `fn-${number}`,
+      } as Content);
+    }
+    return out;
   }
 }
 
@@ -241,9 +272,10 @@ async function pdfmake() {
 /** Markdown → PDF bytes. */
 export async function markdownToPdf(markdown: string, opts: { title?: string; loadImage?: DocxImageLoader } = {}): Promise<Uint8Array> {
   const tree = unified().use(remarkParse).use(remarkGfm).parse(stripFrontMatter(markdown)) as Root;
-  const builder = new PdfBuilder(opts.loadImage);
+  const builder = new PdfBuilder(opts.loadImage, collectFootnotes(tree));
   const content: Content[] = [];
   for (const node of tree.children) content.push(...(await builder.block(node)));
+  content.push(...(await builder.footnoteSection()));
 
   const doc: TDocumentDefinitions = {
     info: { title: opts.title, creator: "Markdown Studio", producer: "Markdown Studio" },
