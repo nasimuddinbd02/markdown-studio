@@ -134,6 +134,13 @@ test("formatting shortcuts and table formatting", async ({ page }) => {
   await page.keyboard.press(`${mod}+Alt+-`);
   await page.keyboard.press(`${mod}+Alt+-`);
   await expect(page.locator(".markdown-body h4")).toHaveText("Section");
+
+  // Task checkboxes in the preview toggle the task in the source.
+  await page.keyboard.insertText("\n\n- [ ] first\n- [ ] second");
+  await page.getByRole("checkbox", { name: "Open task" }).nth(1).click();
+  await expect(page.locator(".cm-line").filter({ hasText: "- [x] second" })).toHaveCount(1);
+  await expect(page.getByRole("checkbox", { name: "Completed task" })).toBeChecked();
+  await expect(page.locator(".cm-line").filter({ hasText: "- [ ] first" })).toHaveCount(1);
 });
 
 test("combine the folder into one document", async ({ page }) => {

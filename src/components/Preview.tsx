@@ -11,6 +11,15 @@ import { useDocuments } from "../stores/documentsStore";
 import { useSettings } from "../stores/settingsStore";
 import { openPath } from "../features/documents";
 import { scrollSync } from "../features/scrollSync";
+import { toggleTaskInDocument } from "../features/tasks";
+
+/** The position of a task checkbox among the preview's task list items, or -1. */
+function taskIndex(root: HTMLElement, box: HTMLInputElement): number {
+  const boxes = [...root.querySelectorAll<HTMLLIElement>("li.task-list-item")].map((li) =>
+    li.querySelector<HTMLInputElement>(':scope > input[type="checkbox"], :scope > p > input[type="checkbox"]'),
+  );
+  return boxes.indexOf(box);
+}
 
 function useDebounced<T>(value: T, ms: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -105,9 +114,17 @@ const MarkdownView = memo(function MarkdownView({ text, docPath }: { text: strin
       img: ({ src, alt, title }) => (
         <LocalImage src={typeof src === "string" ? src : undefined} alt={alt} title={title} docPath={docPath} />
       ),
-      input: ({ node: _node, ...props }) =>
+      input: ({ node: _node, checked, ...props }) =>
         props.type === "checkbox" ? (
-          <input {...props} aria-label={props.checked ? "Completed task" : "Open task"} />
+          // Enabled so it can be clicked; the click toggles the task in the source, and the
+          // re-render (keyed on the state) shows the result.
+          <input
+            {...props}
+            key={String(!!checked)}
+            defaultChecked={!!checked}
+            disabled={false}
+            aria-label={checked ? "Completed task" : "Open task"}
+          />
         ) : (
           <input {...props} />
         ),
@@ -180,6 +197,14 @@ export function Preview() {
 
   /** Links never navigate the app window (SEC-005). */
   const onClick = async (e: MouseEvent<HTMLDivElement>) => {
+    const clicked = e.target as HTMLElement;
+    if (clicked instanceof HTMLInputElement && clicked.type === "checkbox" && doc && ref.current) {
+      // The re-rendered preview shows the new state; never let the box drift from the source.
+      e.preventDefault();
+      const index = taskIndex(ref.current, clicked);
+      if (index >= 0) toggleTaskInDocument(doc.id, index);
+      return;
+    }
     const anchor = (e.target as HTMLElement).closest("a");
     if (!anchor) return;
     e.preventDefault();

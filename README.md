@@ -51,7 +51,7 @@ The app appears in **Settings → Apps → Installed apps** and in **Control Pan
 - Focus Mode (Ctrl/Cmd+Shift+Enter), Full Screen (F11) and a searchable Keyboard Shortcuts reference (Help menu)
 - Command palette (Ctrl/Cmd+Shift+P), document outline, and Find in Files across the workspace (Ctrl/Cmd+Shift+F; match case, whole word, regex)
 - Mermaid diagrams (lazy-loaded, strict security mode) and LaTeX math (`$…$`, `$$…$$`, rendered as MathML) in the preview and exports
-- Live GitHub Flavored Markdown preview (tables, task lists, strikethrough, autolinks, fenced code with highlighting) with a configurable debounce
+- Live GitHub Flavored Markdown preview (tables, task lists, strikethrough, autolinks, fenced code with highlighting) with a configurable debounce. Click a task checkbox in the preview to check or uncheck it in the source (undoable)
 - YAML front matter (`---` metadata at the top, as used by Jekyll, Hugo and Obsidian) is shown as a tidy metadata table in the preview, left out of HTML, PDF and Word exports, and its `title` names exported documents
 - GitHub alerts: `> [!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]` and `[!CAUTION]` render as coloured callouts with icons in the preview and HTML export, and as labelled callouts in PDF and Word
 - New from Template (File menu): meeting notes, README, blog post, decision record (ADR), weekly status report, changelog and daily journal, with `{{date}}`, `{{time}}`, `{{week}}` and `{{cursor}}` placeholders. Markdown files in a `templates/` folder of the open workspace appear as templates too

@@ -28,7 +28,7 @@ Status of each [SRS](SRS.md) requirement. **Done** means implemented and tested 
 | FR-026 | Done | UTF-8 with BOM preservation; invalid UTF-8 refused rather than corrupted |
 | FR-030 | Done | react-markdown preview |
 | FR-031 | Done | Debounce 0–1000 ms (Settings) |
-| FR-032 | Done | remark-gfm |
+| FR-032 | Done | remark-gfm; task checkboxes in the preview toggle the source ([tasks.ts](../src/features/tasks.ts)) |
 | FR-033 | Done | rehype-highlight (highlight.js common languages) |
 | FR-034 | Done | rehype-raw followed by rehype-sanitize (GitHub schema), plus CSP |
 | FR-035 | Done | Editor / Split / Preview (Ctrl/Cmd+1/2/3, Ctrl/Cmd+\\) |

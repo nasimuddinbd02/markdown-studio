@@ -109,3 +109,8 @@ export function editorCommand(name: EditorCommandName) {
       break;
   }
 }
+
+/** The id of the document the editor is showing, if any. */
+export function editorDocId() {
+  return view ? currentDocId : null;
+}
