@@ -327,3 +327,19 @@ test("display formulas and diagrams are exported to PDF as pictures", async ({ p
   expect(pdf.match(/\/Subtype\s*\/Image/g)?.length).toBe(4);
   expect(pdf.match(/\/SMask\s+\d+\s+0\s+R/g)?.length).toBe(2);
 });
+
+test("replace in files across the folder", async ({ page }) => {
+  await start(page);
+  await openDemoFolder(page);
+  await page.keyboard.press(`${mod}+Shift+F`);
+  await page.getByRole("textbox", { name: "Search in files" }).fill("live preview");
+  await expect(page.getByRole("status").filter({ hasText: /result/ })).toContainText("1 result");
+  await page.getByRole("textbox", { name: "Replace with" }).fill("instant preview");
+  await page.getByRole("button", { name: "Replace All" }).click();
+  await expect(page.getByRole("dialog")).toContainText("Replace 1 match in 1 file");
+  await page.getByRole("dialog").getByRole("button", { name: "Replace All" }).click();
+  await expect(page.getByText("Replaced 1 match in 1 file.")).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: /result/ })).toContainText("No results");
+  await page.getByRole("textbox", { name: "Search in files" }).fill("instant preview");
+  await expect(page.getByRole("status").filter({ hasText: /result/ })).toContainText("1 result");
+});

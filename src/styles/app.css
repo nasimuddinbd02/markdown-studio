@@ -1639,3 +1639,21 @@ select {
 .outline-list.drop-end {
   box-shadow: inset 0 -2px 0 var(--accent);
 }
+
+/* Replace in Files: the field and its button share a row. */
+.replace-box {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding-top: 0;
+}
+.replace-box .text-input {
+  flex: 1;
+  min-width: 0;
+  padding-right: 8px;
+}
+.replace-all {
+  flex: none;
+  padding: 4px 10px;
+  font-size: 12px;
+}

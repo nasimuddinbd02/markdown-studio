@@ -7,6 +7,7 @@ import { basename } from "../services/paths";
 import { openPath } from "../features/documents";
 import { openFolderDialog } from "../features/workspace";
 import { requestReveal } from "../features/editorBridge";
+import { replaceInWorkspace } from "../features/replaceInFiles";
 import type { SearchMatch, SearchResult } from "../types";
 import { Icon } from "./Icon";
 
@@ -45,6 +46,10 @@ export function SearchPanel() {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const input = useRef<HTMLInputElement>(null);
   const run = useRef(0);
+  const [replacement, setReplacement] = useState("");
+  const [replacing, setReplacing] = useState(false);
+  /** Bumped after Replace All, so the search runs again on the new text. */
+  const [searchAgain, setSearchAgain] = useState(0);
 
   useEffect(() => {
     input.current?.focus();
@@ -76,7 +81,18 @@ export function SearchPanel() {
       }
     }, 250);
     return () => clearTimeout(t);
-  }, [root, query, caseSensitive, wholeWord, regex]);
+  }, [root, query, caseSensitive, wholeWord, regex, searchAgain]);
+
+  const replaceAll = async () => {
+    if (!root || !query || replacing) return;
+    setReplacing(true);
+    try {
+      await replaceInWorkspace(root, { query, caseSensitive, wholeWord, regex }, replacement);
+    } finally {
+      setReplacing(false);
+      setSearchAgain((n) => n + 1);
+    }
+  };
 
   const open = async (path: string, m: SearchMatch) => {
     const id = await openPath(path);
@@ -115,6 +131,28 @@ export function SearchPanel() {
           <Toggle label="ab" title="Match whole word" on={wholeWord} set={setWord} />
           <Toggle label=".*" title="Use regular expression" on={regex} set={setRegex} />
         </div>
+      </div>
+      <div className="search-box replace-box">
+        <input
+          className="text-input"
+          placeholder={regex ? "Replace with ($1 for groups)" : "Replace with"}
+          aria-label="Replace with"
+          value={replacement}
+          onChange={(e) => setReplacement(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) void replaceAll();
+          }}
+          spellCheck={false}
+        />
+        <button
+          type="button"
+          className="button replace-all"
+          disabled={!result || result.totalMatches === 0 || replacing}
+          onClick={() => void replaceAll()}
+          title="Replace every match in every Markdown file of the folder (Ctrl+Enter in the field)"
+        >
+          Replace All
+        </button>
       </div>
       <div className="search-summary" role="status" aria-live="polite">
         {error

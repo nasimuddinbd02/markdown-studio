@@ -34,7 +34,23 @@ Press **Ctrl+H** (**Cmd+Option+F** on macOS) to open the search bar with the rep
 - Click a result to open the file with the match selected.
 - Unsaved changes in open tabs are not searched; the search reads the files on disk.
 
-Find in Files needs an open folder. Replacing across files isn't available; open the file and use **Replace**.
+Find in Files needs an open folder.
+
+## Replace in Files
+
+To replace text in every Markdown file of the folder:
+
+1. Search for the text in **Find in Files**, with the options you need.
+2. Type the new text in **Replace with**. With **Use regular expression** on, `$1`, `$2`… insert the matching groups, `$<name>` a named group, `$&` the whole match and `$$` a dollar sign.
+3. Click **Replace All** (or press **Ctrl+Enter** in the field). Markdown Studio counts the matches in every file and asks you to confirm, for example "Replace 12 matches in 4 files".
+
+What happens:
+
+- Replacing works line by line, exactly like the search, so it changes what the results showed.
+- **Files open with unsaved changes are skipped** and listed, so your edits are never overwritten. Save them and replace again if you want them included.
+- A file changed by another program since it was read isn't overwritten, and the message says which files couldn't be written.
+- Open tabs of changed files reload with the new text.
+- **Each changed file's previous version is kept in [File History](/guide/saving-and-recovery#file-history)**, so a replacement can be undone file by file with **Restore**.
 
 ## Command palette
 
