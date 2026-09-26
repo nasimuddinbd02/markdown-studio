@@ -1,6 +1,7 @@
-import { EditorState, type StateCommand, type Text } from "@codemirror/state";
+import { EditorState, Text, type StateCommand } from "@codemirror/state";
 import { useDocuments } from "../stores/documentsStore";
 import { editorDocId, getEditorView } from "./editorBridge";
+import { minimalChange } from "./saveTransforms";
 
 interface Heading {
   /** 1-based line number. */
@@ -117,4 +118,49 @@ export function moveSectionAtLine(docId: string, line: number, direction: -1 | 1
   let moved = false;
   command({ state, dispatch: (tr) => { useDocuments.getState().setContent(docId, tr.newDoc.toString()); moved = true; } });
   return moved;
+}
+
+/**
+ * Moves the section whose heading is on `fromLine` (1-based; its text and
+ * subsections) so it starts just before the heading on `beforeLine`, or to
+ * the end of the document when `beforeLine` is null. Used by dragging in the
+ * outline. Returns the new text, or null when nothing would change (dropping
+ * a section on itself or inside its own subsections, or `fromLine` isn't an
+ * ATX heading). Sections stay separated by a blank line.
+ */
+export function moveSectionTo(text: string, fromLine: number, beforeLine: number | null): string | null {
+  const doc = Text.of(text.split("\n"));
+  const list = headings(doc);
+  const i = list.findIndex((h) => h.line === fromLine);
+  if (i < 0) return null;
+  const start = fromLine;
+  const end = sectionEnd(list, i, doc.lines);
+  if (beforeLine !== null && (beforeLine >= start && beforeLine <= end + 1)) return null;
+  if (beforeLine === null && end === doc.lines) return null;
+
+  const lines = text.split("\n");
+  const block = lines.slice(start - 1, end);
+  while (block.length && block[block.length - 1].trim() === "") block.pop();
+  const rest = [...lines.slice(0, start - 1), ...lines.slice(end)];
+  const finalNewline = text.endsWith("\n");
+  if (beforeLine === null) {
+    while (rest.length && rest[rest.length - 1].trim() === "") rest.pop();
+    return [...rest, "", ...block].join("\n") + (finalNewline ? "\n" : "");
+  }
+  // The target heading's index once the section has been cut out.
+  const at = beforeLine - 1 - (beforeLine > end ? end - start + 1 : 0);
+  const before = rest.slice(0, at);
+  const needsGap = before.length > 0 && before[before.length - 1].trim() !== "";
+  return [...before, ...(needsGap ? [""] : []), ...block, "", ...rest.slice(at)].join("\n");
+}
+
+/** Replaces a document's text, through the editor when it shows it (so it can be undone). */
+export function setDocumentText(docId: string, text: string) {
+  const view = getEditorView();
+  if (view && editorDocId() === docId) {
+    const change = minimalChange(view.state.doc.toString(), text);
+    if (change) view.dispatch({ changes: change, userEvent: "move.section" });
+    return;
+  }
+  useDocuments.getState().setContent(docId, text);
 }

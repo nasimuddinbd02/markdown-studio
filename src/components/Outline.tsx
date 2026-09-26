@@ -3,7 +3,7 @@ import { useDocuments } from "../stores/documentsStore";
 import { useUi } from "../stores/uiStore";
 import { useSettings } from "../stores/settingsStore";
 import { currentHeadingIndex, extractHeadings, headingSlugs, type Heading } from "../features/outline";
-import { moveSectionAtLine } from "../features/sections";
+import { moveSectionAtLine, moveSectionTo, setDocumentText } from "../features/sections";
 import { copyText } from "../features/pathActions";
 import { ContextMenu } from "./ContextMenu";
 import { revealLine } from "../features/editorBridge";
@@ -51,6 +51,49 @@ export function Outline() {
     return moved;
   };
 
+  /** Dragging a heading: `dropIndex` is the heading it will go before, or headings.length for the end. */
+  const drag = useRef<{ index: number; y: number; active: boolean } | null>(null);
+  const suppressClick = useRef(false);
+  const [dragging, setDragging] = useState<{ from: number; drop: number | null } | null>(null);
+
+  const dropTarget = (x: number, y: number): number | null => {
+    const el = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-outline-index]");
+    if (el) return Number(el.dataset.outlineIndex);
+    const r = list.current?.getBoundingClientRect();
+    return r && y > r.bottom - 4 && x >= r.left && x <= r.right ? headings.length : null;
+  };
+
+  const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>, index: number) => {
+    if (e.button !== 0) return;
+    drag.current = { index, y: e.clientY, active: false };
+    const move = (ev: PointerEvent) => {
+      const d = drag.current;
+      if (!d) return;
+      if (!d.active && Math.abs(ev.clientY - d.y) < 5) return;
+      d.active = true;
+      setDragging({ from: d.index, drop: dropTarget(ev.clientX, ev.clientY) });
+    };
+    const up = (ev: PointerEvent) => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      const d = drag.current;
+      drag.current = null;
+      setDragging(null);
+      if (!d?.active) return;
+      suppressClick.current = true;
+      const drop = dropTarget(ev.clientX, ev.clientY);
+      const text = useDocuments.getState().docs.find((doc) => doc.id === docId)?.content;
+      if (drop === null || text === undefined || !docId) return;
+      const next = moveSectionTo(text, headings[d.index].line, drop < headings.length ? headings[drop].line : null);
+      if (next !== null) {
+        refocus.current = { text: headings[d.index].text, level: headings[d.index].level };
+        setDocumentText(docId, next);
+      }
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
+
   const onItemKey = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
     if (e.altKey && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
       e.preventDefault();
@@ -89,15 +132,20 @@ export function Outline() {
         ) : headings.length === 0 ? (
           <p className="sidebar-empty">No headings in this document.</p>
         ) : (
-          <ul className="outline-list" ref={list} role="list">
+          <ul className={`outline-list${dragging?.drop === headings.length ? " drop-end" : ""}`} ref={list} role="list">
             {headings.map((h, i) => (
               <li key={`${h.line}-${i}`}>
                 <button
-                  className={`outline-item${i === current ? " current" : ""}`}
+                  data-outline-index={i}
+                  className={`outline-item${i === current ? " current" : ""}${dragging?.from === i ? " dragging" : ""}${dragging && dragging.drop === i && dragging.from !== i ? " drop-before" : ""}`}
                   style={{ paddingLeft: 12 + (h.level - minLevel) * 14 }}
                   aria-current={i === current ? "location" : undefined}
-                  title={`${h.text} (line ${h.line}). Alt+Up/Down moves the section`}
-                  onClick={() => go(h, i)}
+                  title={`${h.text} (line ${h.line}). Drag, or press Alt+Up/Down, to move the section`}
+                  onClick={() => {
+                    if (suppressClick.current) suppressClick.current = false;
+                    else go(h, i);
+                  }}
+                  onPointerDown={(e) => onPointerDown(e, i)}
                   onKeyDown={(e) => onItemKey(e, i)}
                   onContextMenu={(e) => {
                     e.preventDefault();

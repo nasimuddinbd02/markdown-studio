@@ -257,3 +257,21 @@ test("fold and unfold all sections", async ({ page }) => {
   await page.keyboard.press("Enter");
   await expect(page.locator(".cm-line", { hasText: "second body" })).toHaveCount(1);
 });
+
+test("drag a section in the outline", async ({ page }) => {
+  await start(page);
+  await page.keyboard.press(`${mod}+N`);
+  await page.getByRole("textbox", { name: "Markdown editor" }).click();
+  await page.keyboard.insertText("## Alpha\n\none\n\n## Beta\n\ntwo\n\n## Gamma\n\nthree\n");
+  const outline = page.getByRole("region", { name: "Outline" });
+  const from = await outline.getByRole("button", { name: "Gamma" }).boundingBox();
+  const to = await outline.getByRole("button", { name: "Alpha" }).boundingBox();
+  await page.mouse.move(from!.x + 20, from!.y + from!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(to!.x + 20, to!.y + to!.height / 2, { steps: 8 });
+  await expect(outline.locator(".outline-item.drop-before")).toHaveText(/Alpha/);
+  await page.mouse.up();
+  await expect(page.locator(".markdown-body h2")).toHaveText(["Gamma", "Alpha", "Beta"]);
+  await page.keyboard.press(`${mod}+Z`);
+  await expect(page.locator(".markdown-body h2")).toHaveText(["Alpha", "Beta", "Gamma"]);
+});

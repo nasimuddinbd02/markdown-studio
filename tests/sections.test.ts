@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { EditorSelection, EditorState } from "@codemirror/state";
 import { applyCommand } from "../src/features/formatting";
-import { moveSectionDown, moveSectionUp } from "../src/features/sections";
+import { moveSectionDown, moveSectionTo, moveSectionUp } from "../src/features/sections";
 
 function move(doc: string, cursorAt: string, command: typeof moveSectionUp) {
   const state = EditorState.create({ doc, selection: EditorSelection.cursor(doc.indexOf(cursorAt)) });
@@ -34,5 +34,31 @@ describe("move section", () => {
     expect(moveSectionUp(({ state: state("plain\n# H", "plain"), dispatch: () => {} }))).toBe(false);
     const code = "## One\n\n```sh\n# not a heading\n```\n\n## Two\n\nx\n";
     expect(move(code, "x", moveSectionUp).doc).toBe("## Two\n\nx\n\n## One\n\n```sh\n# not a heading\n```\n");
+  });
+});
+
+describe("move section to (outline drag)", () => {
+  const doc = "# Title\n\n## A\n\na\n\n### A.1\n\ndeep\n\n## B\n\nb\n\n## C\n\nc\n";
+  // Lines: 1 # Title, 3 ## A, 7 ### A.1, 11 ## B, 15 ## C
+
+  it("moves a section, with its subsections, before another heading", () => {
+    expect(moveSectionTo(doc, 3, 15)).toBe("# Title\n\n## B\n\nb\n\n## A\n\na\n\n### A.1\n\ndeep\n\n## C\n\nc\n");
+    expect(moveSectionTo(doc, 15, 3)).toBe("# Title\n\n## C\n\nc\n\n## A\n\na\n\n### A.1\n\ndeep\n\n## B\n\nb\n");
+  });
+
+  it("moves a section to the end of the document", () => {
+    expect(moveSectionTo(doc, 3, null)).toBe("# Title\n\n## B\n\nb\n\n## C\n\nc\n\n## A\n\na\n\n### A.1\n\ndeep\n");
+  });
+
+  it("can move a subsection out of its parent", () => {
+    expect(moveSectionTo(doc, 7, 15)).toBe("# Title\n\n## A\n\na\n\n## B\n\nb\n\n### A.1\n\ndeep\n\n## C\n\nc\n");
+  });
+
+  it("does nothing when dropped on itself, inside itself, or right after itself", () => {
+    expect(moveSectionTo(doc, 3, 3)).toBeNull();
+    expect(moveSectionTo(doc, 3, 7)).toBeNull(); // its own subsection
+    expect(moveSectionTo(doc, 3, 11)).toBeNull(); // already right before ## B
+    expect(moveSectionTo(doc, 15, null)).toBeNull(); // already last
+    expect(moveSectionTo(doc, 5, 15)).toBeNull(); // not a heading
   });
 });

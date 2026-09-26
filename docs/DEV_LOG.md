@@ -357,10 +357,12 @@ The user asked to continue the loop until 10:30 PM. From this session on, every 
 
 **Tests:** Vitest 234 (37 files), Playwright 24, Rust 27, website checks (47 pages; 24 browser checks). All passing.
 
+**After the release (unreleased, ships in the next version):** #47, drag headings in the outline to reorder sections (pointer-based, with a drop indicator; drop below the last heading to move to the end; undoable), with the pure `moveSectionTo()` unit-tested and an Edge e2e test of drag, drop and undo. Vitest 238, Playwright 25.
+
 **Next up:**
 
 1. Math in PDF and Word export: native Word equations (OMML) from LaTeX, or rasterized MathML where the web engine allows it.
-2. Drag to reorder sections in the outline.
-3. Performance: startup bundle (691 KB) and a large-document benchmark.
+2. Performance: startup bundle (691 KB) and a large-document benchmark.
+3. Tauri-driver e2e against the native build; real-hardware checks on macOS and Linux.
 
 **Questions for the user:** add the site to Google Search Console (steps in `website/README.md`); choose a license; Apple Developer ID and Windows code-signing certificate.

@@ -73,7 +73,7 @@ Status of each [SRS](SRS.md) requirement as of version 0.12.0. **Done** means im
 
 | Feature | Where | SRS reference |
 | --- | --- | --- |
-| Document outline, with Copy Link to Heading / Copy Markdown Link and moving sections (context menu, Alt+Up/Down) | `components/Outline.tsx`, `features/outline.ts`, `features/sections.ts` | §19 document outline and navigation |
+| Document outline, with Copy Link to Heading / Copy Markdown Link and moving sections (drag and drop, context menu, Alt+Up/Down) | `components/Outline.tsx`, `features/outline.ts`, `features/sections.ts` | §19 document outline and navigation |
 | Mermaid diagrams and LaTeX math | `components/MermaidDiagram.tsx`, `services/markdown.ts` | §18 v0.3 |
 | Markdown lint with a Problems panel | `features/lint.ts`, `features/lintExtension.ts` | §19 Markdown linting |
 | Workspace link check (files, images, anchors) | `features/linkCheck.ts`, `components/LinkCheckPanel.tsx` | §19 Markdown linting |

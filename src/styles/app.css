@@ -1624,3 +1624,14 @@ select {
 .markdown-body table.front-matter td {
   white-space: pre-wrap;
 }
+
+/* Dragging sections in the outline: a line shows where the section will go. */
+.outline-item.dragging {
+  opacity: 0.55;
+}
+.outline-item.drop-before {
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+.outline-list.drop-end {
+  box-shadow: inset 0 -2px 0 var(--accent);
+}

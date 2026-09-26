@@ -34,7 +34,13 @@ Promote and demote work on every selected heading and stay within H1–H6.
 
 **Format → Move Section Up** and **Move Section Down** move the section at the cursor (its heading, its text and all its subsections) above the previous section or below the next one at the same level. Sections don't leave their parent: a `###` under one `##` never jumps into another. Lines inside code blocks that start with `#` are not treated as headings.
 
-You can also move sections from the **Outline**: right-click a heading and choose **Move Section Up** or **Move Section Down**, or focus it and press **Alt+↑** / **Alt+↓**. Focus stays on the moved heading, so you can press the keys repeatedly.
+You can also move sections from the **Outline**:
+
+- **Drag** a heading onto another one: a line shows where it will go, and the section (with its subsections) is placed just before that heading. Drop it below the last heading to move it to the end. Dragging can also move a subsection into another part of the document.
+- Right-click a heading and choose **Move Section Up** or **Move Section Down**.
+- Focus a heading and press **Alt+↑** / **Alt+↓**. Focus stays on the moved heading, so you can press the keys repeatedly.
+
+Every move can be undone with **Ctrl+Z**. Moving works on `#` headings; underlined (setext) headings can't be dragged.
 
 ## Lists, quotes and tasks
 
