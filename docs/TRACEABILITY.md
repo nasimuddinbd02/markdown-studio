@@ -78,12 +78,15 @@ Status of each [SRS](SRS.md) requirement. **Done** means implemented and tested 
 | Export to HTML, Print / Save as PDF | §19 Future: export to HTML and PDF |
 | Find in Files, command palette, formatting commands | §5 Power user needs |
 | Open from OS (file association, single instance, drag and drop) | §13 packaging and desktop integration |
+| Separate installers per OS on every release: Windows (standard + offline NSIS), macOS (Apple Silicon and Intel `.dmg`), Linux (`.AppImage`, `.deb`, `.rpm`), built by `release-installer.mjs` and `.github/workflows/release.yml`. First published with 0.10.0 | §13 packaging |
 | Auto save, save options, large-document mode | §10.2, NFR-002 |
 | Combine a folder of Markdown files into one document (TOC, cross-file links as anchors) for single-file PDF/Word export | §19 Future: export |
 
 ## Known gaps and next improvements
 
 - Code-sign the Windows installer (Authenticode) so SmartScreen doesn't warn; updates are already signature-verified.
+- macOS builds are ad-hoc signed, not notarized (needs an Apple Developer ID). In-place updates are Windows-only; macOS and Linux are offered the download page (signing their updates in CI needs the updater key as a repository secret).
+- The macOS and Linux builds haven't been run on real hardware yet, only built in CI.
 - Startup bundle is 612 KB; the preview pipeline, export and Mermaid are lazy-loaded. Further trimming (highlight.js language subset) is possible.
 - A native OS menu bar on macOS (the in-app menu is used on all platforms today).
 - Large-file benchmark (10 MB+) and incremental preview rendering.

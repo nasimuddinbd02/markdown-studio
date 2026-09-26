@@ -259,3 +259,23 @@ The user asked for a continuous loop: suggest a feature, build it, test it, push
 - Which UI languages should localization cover?
 - Code-signing certificate (Authenticode) so SmartScreen doesn't warn on install?
 - Local installs need an elevated (UAC) prompt, which unattended runs can't approve. Should the scheduled run skip the local install, or will you run the installer yourself?
+
+## 2026-09-25 (late evening): Separate installers for Windows, macOS and Linux
+
+The user asked for the app to be platform-independent, with a separate installer for each of Windows, macOS and Linux.
+
+| # | Change | Commit |
+| --- | --- | --- |
+| 37 | The release workflow builds macOS (Apple Silicon and Intel `.dmg`) and Linux (`.AppImage`, `.deb`, `.rpm`) installers with stable names, and attaches them and `SHA256SUMS-macos-linux.txt` to the release that `release:github` creates for Windows. It had failed on every release since 0.3.1: empty Apple secrets broke macOS signing (the app is now ad-hoc signed without a certificate), and the updater key isn't in CI (no updater artifacts are built there). It can be run by hand for an existing tag | see git log |
+| — | README Download section: a table for all three systems, then per-OS install steps. The release script generates it, so every release refreshes all three. docs/INSTALL.md has full macOS and Linux guides (requirements, Gatekeeper, apt/dnf/AppImage, updating, uninstalling, checksums) | same |
+| — | On macOS and Linux the update check falls back to the GitHub release page ("Download"), because signed in-place updates are published for Windows only. Takes effect from the next release | same |
+
+**Verification:** re-ran the workflow for v0.10.0. All 4 jobs passed, and all 5 new assets plus the checksum file are on the release. Every README download link returns 200. The `.deb` declares `libwebkit2gtk-4.1-0, libgtk-3-0`, so apt installs the dependencies. **Not verified:** installing and running on a real Mac or Linux machine (not available here). Note that the 0.10.0 macOS/Linux builds were made from the v0.10.0 tag, so the update-check fallback applies only from the next release.
+
+**Tests:** Vitest 213, Playwright 18, Rust 27. All passing.
+
+**Questions for the user:**
+
+- Apple Developer ID (for notarization, so macOS doesn't warn): do you have one to add as `APPLE_*` repository secrets?
+- Should the updater signing key be added as a repository secret (`TAURI_SIGNING_PRIVATE_KEY`), so macOS and Linux get in-place automatic updates like Windows?
+- Linux ARM64 (for example Raspberry Pi) and Windows ARM64 builds: wanted?
