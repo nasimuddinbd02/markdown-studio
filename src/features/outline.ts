@@ -1,3 +1,5 @@
+import GithubSlugger from "github-slugger";
+
 export interface Heading {
   level: number;
   text: string;
@@ -72,4 +74,13 @@ export function currentHeadingIndex(headings: Heading[], line: number): number {
     else break;
   }
   return idx;
+}
+
+/**
+ * The `#anchor` of each heading, as the preview and GitHub create them
+ * (duplicates get -1, -2, …), in the same order as `headings`.
+ */
+export function headingSlugs(headings: Heading[]): string[] {
+  const slugger = new GithubSlugger();
+  return headings.map((h) => slugger.slug(h.text));
 }

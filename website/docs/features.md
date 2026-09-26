@@ -38,7 +38,7 @@ This page lists what Markdown Studio does today. Each feature links to its guide
 - Open a single file or a whole folder. The file explorer can create, rename (F2) and delete files and folders (to the Trash or Recycle Bin), reveal them in your file manager, and copy their paths. [File explorer](/guide/file-explorer)
 - Tabs with unsaved-change markers, reordering, context actions (Close Others, Close to the Right, Close Saved), and Reopen Closed Tab. [Tabs](/guide/tabs)
 - Find and replace in the document (case, whole word, regex), and Find in Files across the folder. [Search & replace](/guide/search-replace)
-- A document outline, a command palette, and recent files and folders.
+- A document outline (copy a link to a heading, move sections), a command palette, and recent files and folders.
 - Live folder watching: the explorer and open files update when other programs change files on disk.
 - Opens files from your operating system: double-click, "Open with", or drag and drop onto the window. On Windows, the right-click menu has **Open with Markdown Studio**.
 

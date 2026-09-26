@@ -228,3 +228,15 @@ test("Mermaid diagrams are exported to Word as pictures", async ({ page }) => {
   expect(png.length).toBeGreaterThan(2000); // a real drawing, not an empty canvas
   expect(await zip.file("word/document.xml")!.async("string")).not.toContain("flowchart LR");
 });
+
+test("outline context menu moves a section", async ({ page }) => {
+  await start(page);
+  await page.keyboard.press(`${mod}+N`);
+  await page.getByRole("textbox", { name: "Markdown editor" }).click();
+  await page.keyboard.insertText("## Alpha\n\none\n\n## Beta\n\ntwo\n");
+  const outline = page.getByRole("region", { name: "Outline" });
+  await outline.getByRole("button", { name: "Alpha" }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: /Move Section Down/ }).click();
+  await expect(page.locator(".markdown-body h2").first()).toHaveText("Beta");
+  await expect(outline.getByRole("button", { name: /Alpha|Beta/ }).first()).toHaveText(/Beta/);
+});

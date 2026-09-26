@@ -17,7 +17,8 @@ export async function revealInFolder(path: string) {
   }
 }
 
-async function copy(text: string, what: string) {
+/** Copies text to the clipboard and confirms it with a toast. */
+export async function copyText(text: string, what: string) {
   try {
     await navigator.clipboard.writeText(text);
     notify("success", `${what} copied.`);
@@ -26,13 +27,13 @@ async function copy(text: string, what: string) {
   }
 }
 
-export const copyPath = (path: string) => copy(path, "Path");
+export const copyPath = (path: string) => copyText(path, "Path");
 
 /** Copies the path relative to the open workspace (forward slashes). */
 export function copyRelativePath(path: string) {
   const root = useWorkspace.getState().root;
   const rel = root && isInside(path, root) ? relativePath(root, path) : null;
-  return copy(rel ?? path, rel ? "Relative path" : "Path");
+  return copyText(rel ?? path, rel ? "Relative path" : "Path");
 }
 
 const docs = () => useDocuments.getState().docs;

@@ -1,4 +1,6 @@
-import type { StateCommand, Text } from "@codemirror/state";
+import { EditorState, type StateCommand, type Text } from "@codemirror/state";
+import { useDocuments } from "../stores/documentsStore";
+import { editorDocId, getEditorView } from "./editorBridge";
 
 interface Heading {
   /** 1-based line number. */
@@ -95,3 +97,24 @@ export function moveSection(direction: -1 | 1): StateCommand {
 
 export const moveSectionUp = moveSection(-1);
 export const moveSectionDown = moveSection(1);
+
+/**
+ * Moves the section whose heading is on `line` (1-based), for the outline.
+ * Goes through the editor when it shows the document, so it can be undone.
+ */
+export function moveSectionAtLine(docId: string, line: number, direction: -1 | 1): boolean {
+  const command = moveSection(direction);
+  const view = getEditorView();
+  if (view && editorDocId() === docId) {
+    const at = view.state.doc.line(Math.min(line, view.state.doc.lines)).from;
+    view.dispatch({ selection: { anchor: at } });
+    return command({ state: view.state, dispatch: view.dispatch });
+  }
+  const doc = useDocuments.getState().docs.find((d) => d.id === docId);
+  if (!doc) return false;
+  let state = EditorState.create({ doc: doc.content });
+  state = state.update({ selection: { anchor: state.doc.line(Math.min(line, state.doc.lines)).from } }).state;
+  let moved = false;
+  command({ state, dispatch: (tr) => { useDocuments.getState().setContent(docId, tr.newDoc.toString()); moved = true; } });
+  return moved;
+}

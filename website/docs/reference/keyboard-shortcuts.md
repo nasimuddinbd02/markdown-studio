@@ -37,6 +37,8 @@ These come with the [CodeMirror](https://codemirror.net) editor.
 | Next / previous match (in the search bar) | <kbd>Enter</kbd> / <kbd>Shift+Enter</kbd> | <kbd>Enter</kbd> / <kbd>Shift+Enter</kbd> |
 | Paste as plain text (Windows) | <kbd>Ctrl+Shift+V</kbd> | Turn off rich paste in Settings |
 | Leave Focus Mode, close the search bar | <kbd>Esc</kbd> | <kbd>Esc</kbd> |
+| Move the focused outline heading's section up / down | <kbd>Alt+↑</kbd> / <kbd>Alt+↓</kbd> | <kbd>Option+↑</kbd> / <kbd>Option+↓</kbd> |
+| Open the context menu (tabs, explorer, outline) | <kbd>Shift+F10</kbd> or the Menu key | <kbd>Shift+F10</kbd> |
 
 ## Notes
 
