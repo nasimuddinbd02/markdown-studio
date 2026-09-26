@@ -1,2 +1,2 @@
-6442eb92d11b24b54978f1427e29cc68a6cbe69a14a492bf05c9891bfcbc32a0  MarkdownStudio-0.10.0-windows-x64-setup.exe
-b9fec90b0fd900f9a03307f45c0d51034c04d2a79641a49fc7a91ba4148b131a  MarkdownStudio-0.10.0-windows-x64-offline-setup.exe
+24037ac835b2f150f988dd16a51d38751e3215487f36458847e16b67ea15c14c  MarkdownStudio-0.11.0-windows-x64-setup.exe
+d5c3f463ad71d1e42cbd2518dba6a99c2cd632ea9194465e40b63dcd41cd482a  MarkdownStudio-0.11.0-windows-x64-offline-setup.exe

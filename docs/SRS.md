@@ -14,7 +14,7 @@
 | Desktop Framework | Tauri |
 | Frontend | React + TypeScript |
 | Initial Release | MVP / v0.1 |
-| Current Product Version | 0.10.0 |
+| Current Product Version | 0.11.0 |
 
 ### Revision History
 
@@ -23,7 +23,7 @@
 | 1.0 | — | Baseline, converted from `Markdown_Studio_SRS_v1.0.docx`. |
 | 1.1 | 2026-09-25 | Added the revision history and implementation-status notes (§13, §18, §21). Requirement text is unchanged. |
 
-> **Implementation status.** Requirement-by-requirement status is tracked in [TRACEABILITY.md](TRACEABILITY.md). As of 0.10.0, every MVP functional requirement (FR-001 to FR-063) is implemented, as are the auto-update requirements. Many §19 future enhancements have been delivered early: outline, linting, Mermaid and math, export to HTML, PDF and Word, and version history. The notes marked *Status* below record decisions made during development.
+> **Implementation status.** Requirement-by-requirement status is tracked in [TRACEABILITY.md](TRACEABILITY.md). As of 0.11.0, every MVP functional requirement (FR-001 to FR-063) is implemented, as are the auto-update requirements. Many §19 future enhancements have been delivered early: outline, linting, Mermaid and math, export to HTML, PDF and Word, and version history. The notes marked *Status* below record decisions made during development.
 
 ## Table of Contents
 
@@ -315,7 +315,7 @@ Recommended architecture:
 - Provide .deb and optionally .rpm for package-manager-oriented distributions.
 - Document minimum tested distributions.
 
-> *Status (0.10.0):* every GitHub Release carries a separate installer for each OS: Windows NSIS standard and offline (WebView2 included), macOS `.dmg` for Apple Silicon and Intel, and Linux `.AppImage`, `.deb` and `.rpm` (x86_64). Minimum versions are documented in [INSTALL.md](INSTALL.md). Code signing (Authenticode, Apple notarization) is still pending certificates, and Windows/Linux ARM64 are not built yet.
+> *Status (0.11.0):* every GitHub Release carries a separate installer for each OS: Windows NSIS standard and offline (WebView2 included), macOS `.dmg` for Apple Silicon and Intel, and Linux `.AppImage`, `.deb` and `.rpm` (x86_64). Minimum versions are documented in [INSTALL.md](INSTALL.md). Code signing (Authenticode, Apple notarization) is still pending certificates, and Windows/Linux ARM64 are not built yet.
 
 ### 13.4 Distribution Website
 
@@ -380,7 +380,7 @@ The product website shall provide OS-specific download options. The site may det
 | v1.0 | Stable cross-platform release, signing/notarization, updater, polished UX, documented support matrix. |
 | Future | AI assistant, plugins, Git integration, cloud sync, collaboration, publishing workflows. |
 
-> *Status (0.10.0):* the v0.1, v0.2 and v0.3 scopes are delivered, and the updater from v1.0 is too (signed in-place updates on Windows; macOS and Linux are offered the download page). The remaining v1.0 items are installer signing and notarization, and cross-platform verification on real macOS and Linux hardware. The project's version numbers (0.4 to 0.10) count feature releases and don't map one-to-one to this table.
+> *Status (0.11.0):* the v0.1, v0.2 and v0.3 scopes are delivered, and the updater from v1.0 is too (signed in-place updates on Windows; macOS and Linux are offered the download page). The remaining v1.0 items are installer signing and notarization, and cross-platform verification on real macOS and Linux hardware. The project's version numbers (0.4 to 0.11) count feature releases and don't map one-to-one to this table.
 
 ## 19. Future Enhancements
 
