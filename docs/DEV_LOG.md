@@ -375,3 +375,27 @@ The user renamed the GitHub account from `nasimuddinbd02` to `nasimuddin-dev`. G
 - Installed apps up to 0.12.0 still check the old updater URL. GitHub's redirect serves them `latest.json` today (verified: HTTP 200), and the next release's `latest.json` points to the new account. **If anyone ever registers the old username, those redirects stop**, so users on ≤0.12.0 should update once to a release built after this change.
 - Older DEV_LOG entries and the user's copy of the website spec keep the old URL as historical text.
 - **Website:** https://nasimuddin-dev.github.io/markdown-studio/ (Google Search Console should use this URL).
+
+## 2026-09-25 (10:00–10:30 PM): Released as 0.13.0
+
+Released straight after the account rename, so installed apps move to the new update address quickly.
+
+- **Contents:** #47, drag sections in the outline (345af4c), and the move to `github.com/nasimuddin-dev` (bae2891): updater endpoint, release links, release-check API and website URL.
+- **Release 0.13.0** (0d8ca4b): Windows standard (SHA-256 d83a901c…) and offline 211.9 MB (2d877ec1…). `latest.json` points to `github.com/nasimuddin-dev/.../v0.13.0/…`. The macOS arm64/x64 and Linux AppImage/deb/rpm builds all pass, and all 6 README release links return 200. `latest.json` resolves to 0.13.0 through both the new URL and the old one (via GitHub's redirect), so installed 0.8.0–0.12.0 apps are offered 0.13.0 and move to the new endpoint. The website redeployed and shows 0.13.0. **Installed locally with `/S`: the registry shows 0.13.0.**
+- **Docs:** website changelog v0.13.0 (Added: outline drag; Changed: new account), SRS current version, TRACEABILITY as-of and test counts, README and INSTALL (generated).
+
+**Tests:** Vitest 238 (37 files), Playwright 25, Rust 27, website checks (47 pages, 70 external links OK). All passing.
+
+**Session total (9:17–10:30 PM):** 5 features (#43–#47), 2 releases (0.12.0, 0.13.0), a docs-workflow fix and the account migration.
+
+**Next up:**
+
+1. Math in PDF and Word export (OMML or rasterized MathML).
+2. Performance: startup bundle (691 KB) and a large-document benchmark.
+3. Tauri-driver e2e against the native build; real-hardware checks on macOS and Linux.
+
+**Questions for the user:**
+
+- Add https://nasimuddin-dev.github.io/markdown-studio/ to Google Search Console (steps in `website/README.md`).
+- Choose a license.
+- The scheduled daily task's description still mentions the old repository URL in its text. Pushes use the git remote, which is already updated. Should I update the task description too?
