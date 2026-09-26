@@ -54,4 +54,4 @@ Linux builds are available for x86_64 only at the moment.
 
 ## Report an issue
 
-The Linux builds are new. If something doesn't work, [report it on GitHub](https://github.com/nasimuddinbd02/markdown-studio/issues/new) with your distribution, its version, and the package you used.
+The Linux builds are new. If something doesn't work, [report it on GitHub](https://github.com/nasimuddin-dev/markdown-studio/issues/new) with your distribution, its version, and the package you used.

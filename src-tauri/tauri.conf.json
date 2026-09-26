@@ -90,14 +90,14 @@
       }
     },
     "publisher": "Markdown Studio",
-    "homepage": "https://github.com/nasimuddinbd02/markdown-studio",
+    "homepage": "https://github.com/nasimuddin-dev/markdown-studio",
     "createUpdaterArtifacts": true
   },
   "plugins": {
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY2Q0NDNkE4QTA1MDc4ODcKUldTSGVGQ2dxTWJNWnJzNlFmUksxTk16blBHREloUXhmWFgySThyM2Q1eGhpMWxhYzN2NldsbTMK",
       "endpoints": [
-        "https://github.com/nasimuddinbd02/markdown-studio/releases/latest/download/latest.json"
+        "https://github.com/nasimuddin-dev/markdown-studio/releases/latest/download/latest.json"
       ],
       "windows": {
         "installMode": "passive"

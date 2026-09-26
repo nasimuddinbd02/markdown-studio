@@ -33,4 +33,4 @@ xattr -dr com.apple.quarantine "/Applications/Markdown Studio.app"
 
 ## Report an issue
 
-The macOS builds are new. If something doesn't work, [report it on GitHub](https://github.com/nasimuddinbd02/markdown-studio/issues/new) with your macOS version and chip (Apple Silicon or Intel).
+The macOS builds are new. If something doesn't work, [report it on GitHub](https://github.com/nasimuddin-dev/markdown-studio/issues/new) with your macOS version and chip (Apple Silicon or Intel).

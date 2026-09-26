@@ -61,4 +61,4 @@ description: Fix Markdown Studio preview problems, including a paused preview, i
 
 ## Report an issue
 
-If a document renders differently from GitHub, [report it on GitHub](https://github.com/nasimuddinbd02/markdown-studio/issues/new) with a small Markdown sample.
+If a document renders differently from GitHub, [report it on GitHub](https://github.com/nasimuddin-dev/markdown-studio/issues/new) with a small Markdown sample.

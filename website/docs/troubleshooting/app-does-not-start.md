@@ -51,4 +51,4 @@ description: What to do when Markdown Studio doesn't start, shows a blank window
 
 ## Report an issue
 
-If none of this helps, [report it on GitHub](https://github.com/nasimuddinbd02/markdown-studio/issues/new) with your version, operating system, and the diagnostic log. See [Troubleshooting](/troubleshooting/#report-an-issue).
+If none of this helps, [report it on GitHub](https://github.com/nasimuddin-dev/markdown-studio/issues/new) with your version, operating system, and the diagnostic log. See [Troubleshooting](/troubleshooting/#report-an-issue).

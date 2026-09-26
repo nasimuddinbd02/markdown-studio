@@ -5,7 +5,7 @@ description: What's done, what's planned and what's being considered for Markdow
 
 # Roadmap
 
-This roadmap comes from the project's [requirements specification](https://github.com/nasimuddinbd02/markdown-studio/blob/main/docs/SRS.md) and [development log](https://github.com/nasimuddinbd02/markdown-studio/blob/main/docs/DEV_LOG.md). It shows direction, not commitments: there are no dates, and plans can change. Suggestions are welcome in [GitHub issues](https://github.com/nasimuddinbd02/markdown-studio/issues).
+This roadmap comes from the project's [requirements specification](https://github.com/nasimuddin-dev/markdown-studio/blob/main/docs/SRS.md) and [development log](https://github.com/nasimuddin-dev/markdown-studio/blob/main/docs/DEV_LOG.md). It shows direction, not commitments: there are no dates, and plans can change. Suggestions are welcome in [GitHub issues](https://github.com/nasimuddin-dev/markdown-studio/issues).
 
 ## Completed
 

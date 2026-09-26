@@ -43,4 +43,4 @@ description: Fix Markdown Studio installation problems on Windows, including Sma
 
 ## Report an issue
 
-[Report installation problems on GitHub](https://github.com/nasimuddinbd02/markdown-studio/issues/new) with your Windows version and the installer you used.
+[Report installation problems on GitHub](https://github.com/nasimuddin-dev/markdown-studio/issues/new) with your Windows version and the installer you used.

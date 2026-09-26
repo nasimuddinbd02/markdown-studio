@@ -69,4 +69,4 @@ Markdown Studio's error messages say what happened and what you can do next. The
 
 ## Report an issue
 
-If a file won't open or save and none of this applies, [report it on GitHub](https://github.com/nasimuddinbd02/markdown-studio/issues/new) with the exact message and the diagnostic log.
+If a file won't open or save and none of this applies, [report it on GitHub](https://github.com/nasimuddin-dev/markdown-studio/issues/new) with the exact message and the diagnostic log.

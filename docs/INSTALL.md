@@ -1,6 +1,6 @@
 # Installing Markdown Studio
 
-> This guide is also on the website, with the rest of the user documentation: [nasimuddinbd02.github.io/markdown-studio/getting-started/installation](https://nasimuddinbd02.github.io/markdown-studio/getting-started/installation).
+> This guide is also on the website, with the rest of the user documentation: [nasimuddin-dev.github.io/markdown-studio/getting-started/installation](https://nasimuddin-dev.github.io/markdown-studio/getting-started/installation).
 
 Markdown Studio is a free, local-first Markdown editor. Your documents stay on your computer: nothing is uploaded, and no account or internet connection is needed to write.
 
@@ -23,9 +23,9 @@ Choose one installer:
 | Installer | Use it when | Size |
 | --- | --- | --- |
 | **Standard**: <!-- installer-link -->[**MarkdownStudio-0.12.0-windows-x64-setup.exe**](../downloads/MarkdownStudio-0.12.0-windows-x64-setup.exe?raw=true)<!-- /installer-link --> | Recommended for almost everyone. If WebView2 is missing, it's downloaded automatically during setup (needs internet only in that case). | ~7 MB |
-| **Offline**: <!-- offline-link -->[**MarkdownStudio-0.12.0-windows-x64-offline-setup.exe**](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.12.0/MarkdownStudio-0.12.0-windows-x64-offline-setup.exe)<!-- /offline-link --> | The PC has **no internet access**, is locked down, or you're deploying to many machines. It includes the WebView2 runtime, so nothing is downloaded. | ~210 MB |
+| **Offline**: <!-- offline-link -->[**MarkdownStudio-0.12.0-windows-x64-offline-setup.exe**](https://github.com/nasimuddin-dev/markdown-studio/releases/download/v0.12.0/MarkdownStudio-0.12.0-windows-x64-offline-setup.exe)<!-- /offline-link --> | The PC has **no internet access**, is locked down, or you're deploying to many machines. It includes the WebView2 runtime, so nothing is downloaded. | ~210 MB |
 
-On GitHub you can also open the [`downloads`](../downloads/) folder, click the `.exe` file, and then click **Download raw file** (the ⬇ button). The offline installer is too large for the repository, so it's published on the project's [Releases page](https://github.com/nasimuddinbd02/markdown-studio/releases/latest).
+On GitHub you can also open the [`downloads`](../downloads/) folder, click the `.exe` file, and then click **Download raw file** (the ⬇ button). The offline installer is too large for the repository, so it's published on the project's [Releases page](https://github.com/nasimuddin-dev/markdown-studio/releases/latest).
 
 ### 2. Check the download (optional)
 
@@ -98,7 +98,7 @@ To uninstall silently, run `uninstall.exe /S` from the installation folder.
 
 ### Install
 
-1. Download the `.dmg` for your Mac from the [latest release](https://github.com/nasimuddinbd02/markdown-studio/releases/latest): `MarkdownStudio-<version>-macos-arm64.dmg` for Apple Silicon, or `MarkdownStudio-<version>-macos-x64.dmg` for Intel.
+1. Download the `.dmg` for your Mac from the [latest release](https://github.com/nasimuddin-dev/markdown-studio/releases/latest): `MarkdownStudio-<version>-macos-arm64.dmg` for Apple Silicon, or `MarkdownStudio-<version>-macos-x64.dmg` for Intel.
 2. Open the `.dmg`, then drag **Markdown Studio** onto the **Applications** folder.
 3. Start Markdown Studio from **Applications** or Launchpad.
 
@@ -128,7 +128,7 @@ To uninstall, drag **Markdown Studio** from Applications to the Trash. Settings 
 
 ### Install
 
-Download one package from the [latest release](https://github.com/nasimuddinbd02/markdown-studio/releases/latest):
+Download one package from the [latest release](https://github.com/nasimuddin-dev/markdown-studio/releases/latest):
 
 | Package | Distributions | Install |
 | --- | --- | --- |

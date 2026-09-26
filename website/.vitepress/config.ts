@@ -5,8 +5,8 @@ import { fileURLToPath } from "node:url";
 // The application version is read from the app's package.json, never typed here.
 const app = JSON.parse(readFileSync(fileURLToPath(new URL("../../package.json", import.meta.url)), "utf8"));
 
-export const REPO = "https://github.com/nasimuddinbd02/markdown-studio";
-const SITE = "https://nasimuddinbd02.github.io/markdown-studio/";
+export const REPO = "https://github.com/nasimuddin-dev/markdown-studio";
+const SITE = "https://nasimuddin-dev.github.io/markdown-studio/";
 const BASE = "/markdown-studio/";
 const SOCIAL_IMAGE = `${SITE}images/social-preview.webp`;
 

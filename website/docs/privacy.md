@@ -55,4 +55,4 @@ This documentation website is a static site hosted on GitHub Pages. It uses no c
 
 ## Questions
 
-Ask in [GitHub issues](https://github.com/nasimuddinbd02/markdown-studio/issues).
+Ask in [GitHub issues](https://github.com/nasimuddin-dev/markdown-studio/issues).

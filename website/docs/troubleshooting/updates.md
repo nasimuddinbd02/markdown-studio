@@ -46,4 +46,4 @@ On macOS and Linux, Markdown Studio tells you about new versions and opens the d
 
 ## Report an issue
 
-If updates keep failing, [report it on GitHub](https://github.com/nasimuddinbd02/markdown-studio/issues/new) with the message and the diagnostic log (**Help → Export Diagnostic Logs…**).
+If updates keep failing, [report it on GitHub](https://github.com/nasimuddin-dev/markdown-studio/issues/new) with the message and the diagnostic log (**Help → Export Diagnostic Logs…**).

@@ -366,3 +366,12 @@ The user asked to continue the loop until 10:30 PM. From this session on, every 
 3. Tauri-driver e2e against the native build; real-hardware checks on macOS and Linux.
 
 **Questions for the user:** add the site to Google Search Console (steps in `website/README.md`); choose a license; Apple Developer ID and Windows code-signing certificate.
+
+## 2026-09-25 (10 PM): GitHub account renamed to nasimuddin-dev
+
+The user renamed the GitHub account from `nasimuddinbd02` to `nasimuddin-dev`. GitHub redirects the repository, releases and API, but **GitHub Pages doesn't**: the old site URL returned 404.
+
+- All references were updated (56 across 27 files): the website's `SITE`/canonical URLs, sitemap host and `robots.txt`; README and INSTALL links; every website "report an issue" and release link; the release data loader; the link checker; `src/services/updates.ts` (release API and page); `src-tauri/tauri.conf.json` (homepage and **updater endpoint**, effective from the next release); and the NSIS installer's homepage. The git remote now points to `github.com/nasimuddin-dev/markdown-studio` (at the user's request).
+- Installed apps up to 0.12.0 still check the old updater URL. GitHub's redirect serves them `latest.json` today (verified: HTTP 200), and the next release's `latest.json` points to the new account. **If anyone ever registers the old username, those redirects stop**, so users on ≤0.12.0 should update once to a release built after this change.
+- Older DEV_LOG entries and the user's copy of the website spec keep the old URL as historical text.
+- **Website:** https://nasimuddin-dev.github.io/markdown-studio/ (Google Search Console should use this URL).

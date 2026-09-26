@@ -17,7 +17,7 @@ hero:
       link: /download
     - theme: alt
       text: View on GitHub
-      link: https://github.com/nasimuddinbd02/markdown-studio
+      link: https://github.com/nasimuddin-dev/markdown-studio
     - theme: alt
       text: Read the docs
       link: /getting-started/
@@ -87,4 +87,4 @@ Read the full [privacy notes](/privacy).
 
 ## Developed in public on GitHub
 
-Markdown Studio's source code, issues and releases are public at [github.com/nasimuddinbd02/markdown-studio](https://github.com/nasimuddinbd02/markdown-studio). [Report a bug or request a feature](https://github.com/nasimuddinbd02/markdown-studio/issues), browse [releases](https://github.com/nasimuddinbd02/markdown-studio/releases), or read the source.
+Markdown Studio's source code, issues and releases are public at [github.com/nasimuddin-dev/markdown-studio](https://github.com/nasimuddin-dev/markdown-studio). [Report a bug or request a feature](https://github.com/nasimuddin-dev/markdown-studio/issues), browse [releases](https://github.com/nasimuddin-dev/markdown-studio/releases), or read the source.

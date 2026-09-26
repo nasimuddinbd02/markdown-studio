@@ -40,7 +40,7 @@ for (const page of pages) {
   for (const m of html.matchAll(/\s(?:href|src)="([^"]+)"/g)) {
     const url = m[1].replace(/&amp;/g, "&");
     if (/^https?:\/\//.test(url)) {
-      if (/github\.com\/nasimuddinbd02\/markdown-studio/.test(url)) externalUrls.add(url);
+      if (/github\.com\/nasimuddin-dev\/markdown-studio/.test(url)) externalUrls.add(url);
       continue;
     }
     if (/^(mailto:|data:|#|javascript:)/.test(url)) continue;

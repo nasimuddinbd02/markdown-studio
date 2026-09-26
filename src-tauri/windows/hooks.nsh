@@ -14,7 +14,7 @@
 !define MS_EXE "$INSTDIR\${MAINBINARYNAME}.exe"
 !define MS_CAPS "Software\MarkdownStudio\Capabilities"
 !define MS_UNINST "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCTNAME}"
-!define MS_HOMEPAGE "https://github.com/nasimuddinbd02/markdown-studio"
+!define MS_HOMEPAGE "https://github.com/nasimuddin-dev/markdown-studio"
 
 !macro MS_REGISTER_EXT EXT
   WriteRegStr SHCTX "Software\Classes\${EXT}\OpenWithProgids" "${MS_PROGID}" ""

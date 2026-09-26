@@ -50,4 +50,4 @@ sha256sum MarkdownStudio-*
 - [Install on macOS](/installation/macos)
 - [Install on Linux](/installation/linux)
 
-Older versions are available on the [GitHub releases page](https://github.com/nasimuddinbd02/markdown-studio/releases). To build from source, see the [repository README](https://github.com/nasimuddinbd02/markdown-studio#development).
+Older versions are available on the [GitHub releases page](https://github.com/nasimuddin-dev/markdown-studio/releases). To build from source, see the [repository README](https://github.com/nasimuddin-dev/markdown-studio#development).

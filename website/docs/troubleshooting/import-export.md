@@ -57,4 +57,4 @@ description: Fix Markdown Studio import and export problems, including scanned P
 
 ## Report an issue
 
-If a document converts badly and you can share it (or a similar one), [report it on GitHub](https://github.com/nasimuddinbd02/markdown-studio/issues/new). Samples help us improve the converters.
+If a document converts badly and you can share it (or a similar one), [report it on GitHub](https://github.com/nasimuddin-dev/markdown-studio/issues/new). Samples help us improve the converters.

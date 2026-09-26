@@ -8,7 +8,7 @@ import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-const REPO = "https://github.com/nasimuddinbd02/markdown-studio";
+const REPO = "https://github.com/nasimuddin-dev/markdown-studio";
 
 export interface Installer {
   label: string;

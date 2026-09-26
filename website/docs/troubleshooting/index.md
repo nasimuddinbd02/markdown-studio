@@ -26,7 +26,7 @@ To attach the log to a bug report, choose **Help → Export Diagnostic Logs…**
 
 ## Report an issue
 
-If the articles don't help, [open an issue on GitHub](https://github.com/nasimuddinbd02/markdown-studio/issues/new) with:
+If the articles don't help, [open an issue on GitHub](https://github.com/nasimuddin-dev/markdown-studio/issues/new) with:
 
 1. Your Markdown Studio version (**Help → About Markdown Studio**) and operating system.
 2. What you did, what you expected, and what happened, including the exact error message.

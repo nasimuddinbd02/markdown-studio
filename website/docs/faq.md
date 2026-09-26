@@ -19,7 +19,7 @@ ARM64 builds for Windows and Linux aren't available yet. See [Installation](/get
 
 ## Is Markdown Studio free?
 
-Yes. Markdown Studio is free to download and use, and there's no paid edition. The source code is public on [GitHub](https://github.com/nasimuddinbd02/markdown-studio); a license for reusing the code hasn't been published yet.
+Yes. Markdown Studio is free to download and use, and there's no paid edition. The source code is public on [GitHub](https://github.com/nasimuddin-dev/markdown-studio); a license for reusing the code hasn't been published yet.
 
 ## Does it work offline?
 
@@ -59,11 +59,11 @@ The installers aren't code-signed with a commercial certificate yet (Windows) or
 
 ## How do I report a bug?
 
-Open an issue on [GitHub](https://github.com/nasimuddinbd02/markdown-studio/issues/new). Include your version (**Help → About Markdown Studio**), your operating system, the steps to reproduce, and if relevant the log from **Help → Export Diagnostic Logs…** (it never contains your text). See [Troubleshooting](/troubleshooting/#report-an-issue).
+Open an issue on [GitHub](https://github.com/nasimuddin-dev/markdown-studio/issues/new). Include your version (**Help → About Markdown Studio**), your operating system, the steps to reproduce, and if relevant the log from **Help → Export Diagnostic Logs…** (it never contains your text). See [Troubleshooting](/troubleshooting/#report-an-issue).
 
 ## How do I request a feature?
 
-Open an issue on [GitHub](https://github.com/nasimuddinbd02/markdown-studio/issues/new) describing what you'd like to do and why. Check the [roadmap](/roadmap) first; it may already be planned.
+Open an issue on [GitHub](https://github.com/nasimuddin-dev/markdown-studio/issues/new) describing what you'd like to do and why. Check the [roadmap](/roadmap) first; it may already be planned.
 
 ## How do I uninstall Markdown Studio?
 

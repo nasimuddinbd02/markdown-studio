@@ -1,6 +1,6 @@
 # Markdown Studio website
 
-The public documentation and product website, built with [VitePress](https://vitepress.dev) and deployed to GitHub Pages at **https://nasimuddinbd02.github.io/markdown-studio/**. This file is for maintainers; it isn't published.
+The public documentation and product website, built with [VitePress](https://vitepress.dev) and deployed to GitHub Pages at **https://nasimuddin-dev.github.io/markdown-studio/**. This file is for maintainers; it isn't published.
 
 ## Why VitePress
 
@@ -64,9 +64,9 @@ website/
 ## Google Search Console
 
 1. Open [Google Search Console](https://search.google.com/search-console) and choose **Add property**.
-2. Choose **URL prefix** and enter `https://nasimuddinbd02.github.io/markdown-studio/`. (A **Domain** property would need DNS access to `github.io`, which isn't possible.)
+2. Choose **URL prefix** and enter `https://nasimuddin-dev.github.io/markdown-studio/`. (A **Domain** property would need DNS access to `github.io`, which isn't possible.)
 3. **Verify ownership** with the **HTML tag** method: Search Console shows a tag like `<meta name="google-site-verification" content="…">`. Add it to `head` in `.vitepress/config.ts`, for example `["meta", { name: "google-site-verification", content: "…" }]`, push, wait for the deployment, and click **Verify**. The verification code is public by design and isn't a secret, but never commit passwords, tokens or keys.
-4. **Submit the sitemap:** in **Sitemaps**, enter `sitemap.xml` (the full URL is `https://nasimuddinbd02.github.io/markdown-studio/sitemap.xml`) and submit. `robots.txt` also points crawlers to it.
+4. **Submit the sitemap:** in **Sitemaps**, enter `sitemap.xml` (the full URL is `https://nasimuddin-dev.github.io/markdown-studio/sitemap.xml`) and submit. `robots.txt` also points crawlers to it.
 5. **Monitor indexing** under **Indexing → Pages**: it lists indexed pages and why others aren't indexed. Use **URL inspection** to check a page or request indexing after a big change.
 6. **Review search queries** under **Performance**: the queries people use to find the site, with impressions, clicks and positions. Use them to improve page titles and descriptions.
 7. **Review issues** under **Experience** (Core Web Vitals, HTTPS) and **Enhancements** (structured data such as breadcrumbs and articles). Fix reported problems in the pages or `config.ts`, and use **Validate fix** afterwards.

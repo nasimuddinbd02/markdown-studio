@@ -57,7 +57,7 @@ For highlighted notes and warnings, see [alerts](/markdown/extras#alerts).
 ## Links
 
 ```markdown
-[Markdown Studio on GitHub](https://github.com/nasimuddinbd02/markdown-studio)
+[Markdown Studio on GitHub](https://github.com/nasimuddin-dev/markdown-studio)
 [Another document](docs/guide.md)
 [A heading in this document](#links)
 [A heading in another document](docs/guide.md#install)

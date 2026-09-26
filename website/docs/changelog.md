@@ -5,11 +5,11 @@ description: Release notes for every Markdown Studio version, listing what was a
 
 # Changelog
 
-Every release of Markdown Studio, newest first. Dates are the GitHub release dates (UTC). Installers for each version are on the [GitHub releases page](https://github.com/nasimuddinbd02/markdown-studio/releases).
+Every release of Markdown Studio, newest first. Dates are the GitHub release dates (UTC). Installers for each version are on the [GitHub releases page](https://github.com/nasimuddin-dev/markdown-studio/releases).
 
 ## v0.12.0
 
-Released: 2026-09-26 · [Release files](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.12.0)
+Released: 2026-09-26 · [Release files](https://github.com/nasimuddin-dev/markdown-studio/releases/tag/v0.12.0)
 
 ### Added
 
@@ -17,11 +17,11 @@ Released: 2026-09-26 · [Release files](https://github.com/nasimuddinbd02/markdo
 - **Mermaid diagrams in PDF and Word exports**, drawn as sharp pictures instead of code.
 - **Outline actions:** right-click a heading to copy a link to it (`#anchor` or a Markdown link) or move its section; **Alt+↑ / Alt+↓** moves the focused heading's section.
 - **View → Fold All / Unfold All.**
-- **This website:** documentation, installation guides, troubleshooting, changelog and roadmap at nasimuddinbd02.github.io/markdown-studio.
+- **This website:** documentation, installation guides, troubleshooting, changelog and roadmap at nasimuddin-dev.github.io/markdown-studio.
 
 ## v0.11.0
 
-Released: 2026-09-26 · [Release files](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.11.0)
+Released: 2026-09-26 · [Release files](https://github.com/nasimuddin-dev/markdown-studio/releases/tag/v0.11.0)
 
 ### Added
 
@@ -39,7 +39,7 @@ Released: 2026-09-26 · [Release files](https://github.com/nasimuddinbd02/markdo
 
 ## v0.10.0
 
-Released: 2026-09-26 · [Release files](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.10.0)
+Released: 2026-09-26 · [Release files](https://github.com/nasimuddin-dev/markdown-studio/releases/tag/v0.10.0)
 
 ### Added
 
@@ -48,7 +48,7 @@ Released: 2026-09-26 · [Release files](https://github.com/nasimuddinbd02/markdo
 
 ## v0.9.0
 
-Released: 2026-09-25 · [Release files](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.9.0)
+Released: 2026-09-25 · [Release files](https://github.com/nasimuddin-dev/markdown-studio/releases/tag/v0.9.0)
 
 The first release delivered through the in-app updater.
 
@@ -61,7 +61,7 @@ The first release delivered through the in-app updater.
 
 ## v0.8.0
 
-Released: 2026-09-25 · [Release files](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.8.0)
+Released: 2026-09-25 · [Release files](https://github.com/nasimuddin-dev/markdown-studio/releases/tag/v0.8.0)
 
 ### Added
 
@@ -73,7 +73,7 @@ Released: 2026-09-25 · [Release files](https://github.com/nasimuddinbd02/markdo
 
 ## v0.7.0
 
-Released: 2026-09-25 · [Release files](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.7.0)
+Released: 2026-09-25 · [Release files](https://github.com/nasimuddin-dev/markdown-studio/releases/tag/v0.7.0)
 
 ### Added
 
@@ -81,7 +81,7 @@ Released: 2026-09-25 · [Release files](https://github.com/nasimuddinbd02/markdo
 
 ## v0.6.0
 
-Released: 2026-09-24 · [Release files](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.6.0)
+Released: 2026-09-24 · [Release files](https://github.com/nasimuddin-dev/markdown-studio/releases/tag/v0.6.0)
 
 ### Added
 
@@ -94,7 +94,7 @@ Released: 2026-09-24 · [Release files](https://github.com/nasimuddinbd02/markdo
 
 ## v0.5.0
 
-Released: 2026-09-24 · [Release files](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.5.0)
+Released: 2026-09-24 · [Release files](https://github.com/nasimuddin-dev/markdown-studio/releases/tag/v0.5.0)
 
 ### Added
 
@@ -104,7 +104,7 @@ Released: 2026-09-24 · [Release files](https://github.com/nasimuddinbd02/markdo
 
 ## v0.4.0
 
-Released: 2026-09-24 · [Release files](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.4.0)
+Released: 2026-09-24 · [Release files](https://github.com/nasimuddin-dev/markdown-studio/releases/tag/v0.4.0)
 
 ### Added
 
@@ -118,7 +118,7 @@ Released: 2026-09-24 · [Release files](https://github.com/nasimuddinbd02/markdo
 
 ## v0.3.1
 
-Released: 2026-09-24 · [Release files](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.3.1)
+Released: 2026-09-24 · [Release files](https://github.com/nasimuddin-dev/markdown-studio/releases/tag/v0.3.1)
 
 The first public release, with a Windows installer (standard, and offline with WebView2 included).
 
