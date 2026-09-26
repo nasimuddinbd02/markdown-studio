@@ -279,3 +279,14 @@ The user asked for the app to be platform-independent, with a separate installer
 - Apple Developer ID (for notarization, so macOS doesn't warn): do you have one to add as `APPLE_*` repository secrets?
 - Should the updater signing key be added as a repository secret (`TAURI_SIGNING_PRIVATE_KEY`), so macOS and Linux get in-place automatic updates like Windows?
 - Linux ARM64 (for example Raspberry Pi) and Windows ARM64 builds: wanted?
+
+## 2026-09-25 (night): Documentation brought up to date with the current design
+
+The user asked for all project documents to match the current design, and to be updated whenever a feature is developed.
+
+- **README:** added missing features (Save All and recent files, word count and statistics, spell check, Export Diagnostic Logs, the three-OS note). The security model now describes the only network request (the update check) and signed updates. Development now covers the Node 22 requirement, `npm run build`, the release scripts and what CI runs. The project structure lists every folder and module, and a new Documentation section describes each doc and the update policy.
+- **TRACEABILITY:** status as of 0.10.0. NFR-011 is now Done (minimum OS versions are documented). NFR-006, SEC-001, SEC-008 and the UPD rows are corrected. The "Beyond the MVP" table grew from 7 to 16 rows with source locations, and there is a new test-coverage table. Known gaps are refreshed: startup bundle 691 KB (232 KB gzipped), ARM64, and the stale "Playwright to do" item removed.
+- **SRS:** now version 1.1, with a revision history, an implementation-status summary, status notes for §13 (per-OS installers) and §18 (release scopes), and §21 open questions marked answered, partly answered or open. The requirement text is unchanged.
+- **INSTALL.md:** macOS and Linux troubleshooting rows.
+
+**Policy from now on:** every feature commit updates the README feature list and TRACEABILITY (plus INSTALL.md or the SRS status notes if affected), and every release updates the download section, INSTALL.md and this log.

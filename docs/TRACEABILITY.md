@@ -1,6 +1,6 @@
 # Requirements Traceability
 
-Status of each [SRS](SRS.md) requirement. **Done** means implemented and tested (automated or manual). **Partial** means some of it is implemented and the gap is noted. **Planned** means it's scheduled for the release named in the SRS.
+Status of each [SRS](SRS.md) requirement as of version 0.10.0. **Done** means implemented and tested (automated or manual). **Partial** means some of it is implemented and the gap is noted. **Planned** means it's scheduled for the release named in the SRS.
 
 ## Functional requirements
 
@@ -19,7 +19,7 @@ Status of each [SRS](SRS.md) requirement. **Done** means implemented and tested 
 | FR-016 | Done | Rename from context menu or F2; open tabs follow the rename |
 | FR-017 | Done | Delete with confirmation; moves to the OS Trash (`trash` crate) |
 | FR-018 | Done | mtime conflict check on save, plus polling and focus checks with Reload / Compare / Keep Mine |
-| FR-020 | Done | CodeMirror Markdown language with nested code-block languages |
+| FR-020 | Done | CodeMirror Markdown language with nested code-block languages; formatting commands ([formatting.ts](../src/features/formatting.ts)), including heading promote/demote |
 | FR-021 | Done | Per-tab undo history (state preserved across tab switches) |
 | FR-022 | Done | CodeMirror default keymap and native clipboard |
 | FR-023 | Done | Ln/Col in the status bar; Go to Line (Ctrl/Cmd+G) |
@@ -36,7 +36,7 @@ Status of each [SRS](SRS.md) requirement. **Done** means implemented and tested 
 | FR-041 | Done | Accent bar, bold label, `aria-selected` |
 | FR-042 | Done | Save / Don't Save / Cancel on tab close and window close |
 | FR-043 | Done | Ctrl+Tab / Ctrl+Shift+Tab, arrow keys in the tab list |
-| FR-044 | Done | Backend-owned recent files and folders (File menu, Welcome screen) |
+| FR-044 | Done | Backend-owned recent files and folders (File menu, Welcome screen); session restore of the last folder and open files |
 | FR-050 | Done | CodeMirror search panel |
 | FR-051 | Done | Replace / Replace All (Ctrl+H, or Cmd+Alt+F on macOS) |
 | FR-052 | Done | Match-case toggle |
@@ -50,45 +50,62 @@ Status of each [SRS](SRS.md) requirement. **Done** means implemented and tested 
 
 | ID | Status | Notes |
 | --- | --- | --- |
-| NFR-001/002 | Done | CodeMirror virtualised rendering; debounced preview. A benchmark for very large files is still to be added |
+| NFR-001/002 | Done | CodeMirror virtualised rendering; debounced preview; live preview pauses above 1 MB (render on demand). The preview pipeline, exporters and Mermaid are lazy-loaded. A benchmark for very large files is still to be added |
 | NFR-003 | Done | Measured at startup and logged |
 | NFR-004 | Done | Save failures keep the document dirty; errors are shown as toasts or dialogs |
 | NFR-005 | Done | No network access is required |
-| NFR-006 | Done | Tauri bundles for all 3 operating systems via GitHub Actions |
+| NFR-006 | Done | A separate installer for each OS on every release: Windows NSIS (standard and offline) built by `scripts/release-installer.mjs`; macOS `.dmg` (Apple Silicon, Intel) and Linux `.AppImage`/`.deb`/`.rpm` built by [release.yml](../.github/workflows/release.yml). Rust tests run on all three in CI |
 | NFR-007 | Done | Scope enforced in Rust ([scope.rs](../src-tauri/src/scope.rs)) |
 | NFR-008 | Done | No telemetry; content never leaves the machine |
 | NFR-009 | Done | Modular services and stores; Vitest and Rust tests |
 | NFR-010 | Done | Keyboard menus, tree, tabs and dialogs; focus rings; automated axe-core WCAG 2.1 AA audit (light and dark) in e2e |
-| NFR-011 | Partial | Minimum OS versions still need to be documented (open question in SRS §21) |
-| SEC-001 | Done | Capability grants only `core:default`, set-title and destroy |
+| NFR-011 | Done | Documented in [INSTALL.md](INSTALL.md): Windows 10 1803+ and 11 (x64), macOS 10.15+ (Apple Silicon and Intel), Linux x86_64 distributions from 2022 (Ubuntu 22.04+, Debian 12+, Fedora 36+). ARM64 Windows/Linux are not built yet |
+| SEC-001 | Done | The capability grants only `core:default`, set-title, destroy and full-screen; no filesystem, dialog or shell permissions ([default.json](../src-tauri/capabilities/default.json)) |
 | SEC-002/003 | Done | Absolute paths only, `..` rejected, canonicalised scope check |
 | SEC-004 | Done | Sanitisation tests in [markdown.test.tsx](../tests/markdown.test.tsx) |
 | SEC-005 | Done | `open_external` accepts only http, https and mailto |
 | SEC-006/007 | N/A | No AI or secrets in the MVP |
-| SEC-008 | Partial | Signing hooks exist in the release workflow; certificates are needed |
-| UPD-001, UPD-002, UPD-004 | Implemented | `features/updates.ts`: a check on every startup (optional; Settings → Startup) and Help → Check for Updates. Shows the current and available versions, with Update Now, Later and Skip This Version. Tests: `tests/updates.test.ts` |
-| UPD-003, UPD-005, UPD-006 | Implemented | `src-tauri/src/updater.rs` uses `tauri-plugin-updater`. `latest.json` on the latest GitHub Release points to the NSIS installer. The installer's minisign signature is verified against the public key in `tauri.conf.json` before it runs. Unsaved documents are saved first. On any failure the running version is unchanged. Verified end to end on Windows: a tampered manifest is rejected, and a signed update installs in place and relaunches |
+| SEC-008 | Partial | Updates are minisign-signed and verified. Installers aren't code-signed yet: Windows needs an Authenticode certificate; macOS is ad-hoc signed until an Apple Developer ID is added as `APPLE_*` secrets (the workflow then signs and notarizes) |
+| UPD-001, UPD-002, UPD-004 | Done | `features/updates.ts`: a check on every startup (optional; Settings → Startup) and Help → Check for Updates. Shows the current and available versions, with Update Now, Later and Skip This Version. Where no in-place update exists for the platform (macOS, Linux), it offers the release page instead. Tests: `tests/updates.test.ts` |
+| UPD-003, UPD-005, UPD-006 | Done (Windows) | `src-tauri/src/updater.rs` uses `tauri-plugin-updater`. `latest.json` on the latest GitHub Release points to the NSIS installer. The installer's minisign signature is verified against the public key in `tauri.conf.json` before it runs. Unsaved documents are saved first. On any failure the running version is unchanged. Verified end to end on Windows: a tampered manifest is rejected, and a signed update installs in place and relaunches |
 
 ## Beyond the MVP (delivered early)
 
-| Feature | SRS reference |
-| --- | --- |
-| Document outline | §19 Future: document outline and navigation |
-| Mermaid diagrams and LaTeX math | §18 v0.3 |
-| Export to HTML, Print / Save as PDF | §19 Future: export to HTML and PDF |
-| Find in Files, command palette, formatting commands | §5 Power user needs |
-| Open from OS (file association, single instance, drag and drop) | §13 packaging and desktop integration |
-| Separate installers per OS on every release: Windows (standard + offline NSIS), macOS (Apple Silicon and Intel `.dmg`), Linux (`.AppImage`, `.deb`, `.rpm`), built by `release-installer.mjs` and `.github/workflows/release.yml`. First published with 0.10.0 | §13 packaging |
-| Auto save, save options, large-document mode | §10.2, NFR-002 |
-| Combine a folder of Markdown files into one document (TOC, cross-file links as anchors) for single-file PDF/Word export | §19 Future: export |
+| Feature | Where | SRS reference |
+| --- | --- | --- |
+| Document outline | `components/Outline.tsx`, `features/outline.ts` | §19 document outline and navigation |
+| Mermaid diagrams and LaTeX math | `components/MermaidDiagram.tsx`, `services/markdown.ts` | §18 v0.3 |
+| Markdown lint with a Problems panel | `features/lint.ts`, `features/lintExtension.ts` | §19 Markdown linting |
+| Workspace link check (files, images, anchors) | `features/linkCheck.ts`, `components/LinkCheckPanel.tsx` | §19 Markdown linting |
+| Local file history with diff and restore | `src-tauri/src/history.rs`, `components/HistoryDialog.tsx` | §19 version history and snapshots |
+| Export to HTML, PDF and Word; Copy as HTML; Print | `services/exportHtml.ts`, `services/convert/toPdf.ts`, `toDocx.ts` | §19 export to HTML and PDF |
+| Import Word, PDF, HTML and CSV/TSV; paste rich text and spreadsheet cells | `services/convert/`, `features/importing.ts`, `features/richPaste.ts` | §5 technical writer needs |
+| Convert a folder to Markdown; combine a folder into one document | `features/batchConvert.ts`, `features/combine.ts` | §19 publishing workflows |
+| YAML front matter table, GitHub alerts | `services/frontMatter.ts`, `services/alerts.ts` | §10.1 front-matter-aware documents; §18 v0.3 enhanced Markdown |
+| Templates, table of contents, table formatting, heading promote/demote, clickable task checkboxes, paste URL as link, link completion | `features/templates.ts`, `toc.ts`, `tables.ts`, `formatting.ts`, `tasks.ts`, `completion.ts` | §18 v0.3 enhanced Markdown and customization |
+| Find in Files, command palette, keyboard shortcuts reference, focus mode | `components/SearchPanel.tsx`, `CommandPalette.tsx`, `ShortcutsDialog.tsx` | §5 power user needs |
+| Paste or drop images into an `assets/` folder | `features/images.ts` | §17.2 images |
+| Open from OS (file association, single instance, drag and drop), Explorer "Open with" | `src-tauri/src/open_paths.rs`, `src-tauri/windows/hooks.nsh` | §13 packaging and desktop integration |
+| Live folder watching | `src-tauri/src/watcher.rs`, `features/watch.ts` | FR-018 |
+| Auto save, save options (trim whitespace, final newline, line endings), large-document mode | `features/autosave.ts`, `features/saveTransforms.ts` | §10.2, NFR-002 |
+| Separate installers per OS on every release, offline Windows installer with WebView2 | `scripts/`, `.github/workflows/release.yml` | §13 packaging |
+
+## Test coverage
+
+| Level | Where | Count (0.10.0) |
+| --- | --- | --- |
+| Unit and component | `tests/` (Vitest, Testing Library, jsdom) | 213 tests in 36 files |
+| End-to-end and accessibility | `e2e/` (Playwright; axe-core WCAG 2.1 AA audits in light and dark themes) | 18 tests |
+| Rust | `#[cfg(test)]` modules in `src-tauri/src/` | 27 tests |
 
 ## Known gaps and next improvements
 
 - Code-sign the Windows installer (Authenticode) so SmartScreen doesn't warn; updates are already signature-verified.
 - macOS builds are ad-hoc signed, not notarized (needs an Apple Developer ID). In-place updates are Windows-only; macOS and Linux are offered the download page (signing their updates in CI needs the updater key as a repository secret).
 - The macOS and Linux builds haven't been run on real hardware yet, only built in CI.
-- Startup bundle is 612 KB; the preview pipeline, export and Mermaid are lazy-loaded. Further trimming (highlight.js language subset) is possible.
+- ARM64 builds for Windows and Linux (SRS §13.1, §21).
+- The startup bundle is 691 KB (232 KB gzipped); the preview pipeline, export and Mermaid are lazy-loaded. It could be trimmed further (a highlight.js language subset).
 - A native OS menu bar on macOS (the in-app menu is used on all platforms today).
 - Large-file benchmark (10 MB+) and incremental preview rendering.
-- Playwright e2e covers the browser demo (6 workflows); a Tauri-driver e2e run against the native build is still to do.
-- i18n (localization), Playwright end-to-end tests.
+- Playwright runs against the browser demo; a Tauri-driver e2e run against the native build is still to do.
+- Localization (i18n): waiting on the choice of languages.

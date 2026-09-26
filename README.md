@@ -53,7 +53,7 @@ For requirements, checksum verification, silent install, uninstalling and troubl
 - Paste or drop images into a document: they are saved to an `assets/` folder next to it and linked automatically
 - Workspace folders with a file explorer: new file/folder, rename (F2), delete to the Trash/Recycle Bin, Reveal in File Explorer, Copy (Relative) Path
 - Tab context menu: Close Others, Close to the Right, Close Saved, Copy Path, Reveal
-- Tabs with dirty indicators, and Save / Don't Save / Cancel prompts on close and on quit
+- Tabs with dirty indicators, and Save / Don't Save / Cancel prompts on close and on quit; Save All; recent files and folders (File menu and welcome screen)
 - Link autocompletion (workspace files after `](`, images after `![](`, headings after `](#`) and Format Table (Ctrl/Cmd+Alt+T) that aligns GFM tables, CJK-aware
 - Format menu and shortcuts: bold (Ctrl/Cmd+B), italic (I), link (K), inline code (E), strikethrough, headings (Ctrl/Cmd+Alt+1–3), promote/demote heading (Ctrl/Cmd+Alt+= / Ctrl/Cmd+Alt+-), lists, task lists, quotes, code blocks and tables
 - Paste a URL while text is selected to turn the selection into a link: `[selected text](url)`
@@ -86,7 +86,11 @@ For requirements, checksum verification, silent install, uninstalling and troubl
 - External change detection: clean tabs reload automatically; dirty tabs get Reload / Compare / Keep Mine
 - Crash recovery for unsaved documents, and session restore for the last folder and open files
 - UTF-8 (with or without BOM), with LF/CRLF line endings preserved per file
+- Word count in the status bar, with a statistics popover (words, characters, lines, paragraphs, reading time) for the document and the selection
+- Spell checking with the system dictionary (Settings)
 - Keyboard-first: every core action has a shortcut and an accessible menu, with visible focus states
+- Help → Export Diagnostic Logs for support requests (logs never contain document text)
+- Runs on Windows, macOS and Linux, with a separate native installer for each (see [Download](#download))
 
 ## Security model
 
@@ -94,11 +98,12 @@ For requirements, checksum verification, silent install, uninstalling and troubl
 - A path is accessible only after the user selects it in a native dialog, or re-opens it from the backend-owned recent list. Relative paths and `..` traversal are rejected, and symlinks are resolved before the scope check ([scope.rs](src-tauri/src/scope.rs)).
 - The preview parses raw HTML and then sanitizes it with GitHub's allow-list. Scripts, event handlers, iframes, forms, styles and `javascript:` URLs are removed. A strict CSP forbids inline scripts.
 - Links open in the system browser, and only `http`, `https` and `mailto` links are allowed.
+- The only network request the app makes is the update check to GitHub (it can be turned off in Settings). The CSP allows `connect-src` to `api.github.com` only, and downloaded updates are installed only if their minisign signature matches the public key built into the app.
 - Logs record the operation and error category, never document content; the home directory is redacted.
 
 ## Development
 
-Prerequisites: **Node.js 20+**, **Rust (stable)** and the [Tauri system dependencies](https://v2.tauri.app/start/prerequisites/) for your OS: Microsoft C++ Build Tools and WebView2 on Windows, Xcode Command Line Tools on macOS, and `libwebkit2gtk-4.1-dev` and friends on Linux.
+Prerequisites: **Node.js 22 LTS** (20.19+ works), **Rust (stable)** and the [Tauri system dependencies](https://v2.tauri.app/start/prerequisites/) for your OS: Microsoft C++ Build Tools and WebView2 on Windows, Xcode Command Line Tools on macOS, and `libwebkit2gtk-4.1-dev` and friends on Linux.
 
 ```bash
 npm install
@@ -116,8 +121,12 @@ That runs the desktop app with hot reload. Other scripts:
 | `npm test` | Frontend unit/component tests (Vitest + Testing Library) |
 | `npm run test:e2e` | End-to-end tests (Playwright) against the browser demo; uses the installed Microsoft Edge on Windows |
 | `npm run typecheck` | TypeScript type check |
-| `cargo test --manifest-path src-tauri/Cargo.toml` | Rust tests (scope, safe save, encoding, settings) |
+| `cargo test --manifest-path src-tauri/Cargo.toml` | Rust tests (scope, safe save, encoding, settings, history, search, watcher) |
+| `npm run build` | Type check and production build of the frontend (`dist/`) |
 | `npm run tauri:build` | Builds installers for the current OS |
+| `npm run version:set <x.y.z>` / `release:installer` / `release:github` | Release pipeline (see [Releasing a new version](#releasing-a-new-version)) |
+
+Continuous integration ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs the type check, the unit tests, the production build and the Playwright tests on every push, and the Rust tests on Windows, macOS and Linux.
 
 ### Browser demo mode
 
@@ -127,18 +136,39 @@ When it runs outside Tauri, the app uses [`MemoryBackend`](src/services/memoryBa
 
 ```text
 src/
-  components/   UI: MenuBar, FileExplorer, TabBar, Editor, Preview, StatusBar, dialogs
-  features/     Behaviour: document/workspace actions, commands & shortcuts, lifecycle
-  services/     Backend abstraction (Tauri + in-memory), Markdown pipeline, paths, errors
+  components/   UI: MenuBar, FileExplorer, TabBar, Editor, Preview, Outline, StatusBar,
+                CommandPalette, SearchPanel, LinkCheckPanel, Settings/History/Shortcuts dialogs
+  features/     Behaviour: documents, workspace, commands & shortcuts, formatting, tables, TOC,
+                tasks, templates, import/export, combine, link check, lint, autosave, updates
+  services/     Backend abstraction (Tauri + in-memory demo), Markdown pipeline, front matter,
+                alerts, HTML export, search, paths, errors
+    convert/    Word, PDF, HTML and CSV import; PDF and Word export
   stores/       Zustand stores: documents, workspace, settings, UI
   styles/       App and preview CSS (theme tokens)
   types/        Shared types
 src-tauri/
-  src/          Rust: commands, scope, safe file ops, text encoding, settings/recovery/logs
+  src/          Rust: commands, scope (path checks), fs_ops (safe save, trash), text (encoding),
+                storage (settings, recovery, logs), history, search, watcher, open_paths, updater
   capabilities/ Least-privilege permission set
-tests/          Vitest tests
-docs/           SRS and requirement traceability
+  windows/      NSIS installer hooks (Explorer "Open with Markdown Studio")
+tests/          Vitest unit and component tests
+e2e/            Playwright workflows and axe-core accessibility audits
+scripts/        Versioning and release scripts
+downloads/      The latest standard Windows installer and its checksum
+docs/           SRS, requirement traceability, installation guide and development log
+.github/        CI and the macOS/Linux release workflow
 ```
+
+## Documentation
+
+| Document | Contents |
+| --- | --- |
+| [docs/INSTALL.md](docs/INSTALL.md) | Installing, updating and uninstalling on Windows, macOS and Linux; troubleshooting |
+| [docs/SRS.md](docs/SRS.md) | Software requirements specification (the baseline requirements) |
+| [docs/TRACEABILITY.md](docs/TRACEABILITY.md) | Status of every requirement, where it is implemented, and known gaps |
+| [docs/DEV_LOG.md](docs/DEV_LOG.md) | Development history: features per session, releases, test counts and next steps |
+
+Every feature change updates the README feature list and TRACEABILITY, and every release updates the download section, INSTALL.md and the DEV_LOG.
 
 ## Releasing a new version
 
@@ -169,9 +199,9 @@ npm run release:github
 
 `npm run tauri:build` produces:
 
-- **Windows**: `.msi` and NSIS `.exe` installers
-- **macOS**: `.app` and `.dmg`
-- **Linux**: `.AppImage`, `.deb` and `.rpm`
+- **Windows**: `.msi` and NSIS `.exe` installers (releases ship the NSIS installer, standard and offline)
+- **macOS**: `.app` and `.dmg` (Apple Silicon and Intel)
+- **Linux**: `.AppImage`, `.deb` and `.rpm` (x86_64)
 
 Each platform has its own installers: Windows ones are built locally by `npm run release:installer` (see above), and macOS and Linux ones are built by [.github/workflows/release.yml](.github/workflows/release.yml) when the version tag is pushed. Without Apple signing secrets, the macOS app is ad-hoc signed; add the `APPLE_*` repository secrets listed in the workflow to sign and notarize it.
 

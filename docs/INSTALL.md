@@ -156,4 +156,8 @@ Every release has `SHA256SUMS.txt` (Windows) and `SHA256SUMS-macos-linux.txt`. C
 | Installer says the app is running | Close Markdown Studio, then run the installer again. |
 | Not listed under Installed apps | See the note under *Run the installer*: "Only for me" installs are visible only to the account that installed them. |
 | No "Open with Markdown Studio" in the right-click menu | On Windows 11 choose **Show more options**. If it's still missing, reinstall the latest version (0.3.1 or later). |
+| macOS: "cannot be opened because Apple cannot check it" | **System Settings → Privacy & Security → Open Anyway** (once). The app isn't notarized yet. |
+| macOS: "Markdown Studio is damaged" | Run `xattr -dr com.apple.quarantine "/Applications/Markdown Studio.app"` in Terminal, then open it again. |
+| Linux: the AppImage doesn't start | Make it executable (`chmod +x`). If it reports a missing `libwebkit2gtk-4.1`, install that package, or use the `.deb`/`.rpm`, which install it automatically. |
+| Linux: `apt` says the package can't be found | Include the `./` path: `sudo apt install ./MarkdownStudio-<version>-linux-amd64.deb`. |
 | Something else went wrong | In the app choose **Help → Export Diagnostic Logs…** and attach the file to an issue. Logs never contain your document text. |
