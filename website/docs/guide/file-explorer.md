@@ -25,6 +25,7 @@ The file explorer shows the folder you're working in, your **workspace**. Open i
 | --- | --- |
 | New file | The **New file** button at the top of the Explorer, or right-click a folder → **New File…** |
 | New folder | The **New folder** button, or right-click a folder → **New Folder…** |
+| Duplicate | Right-click a file → **Duplicate**. The copy is named like `notes copy.md` (or `notes copy 2.md`, … if that exists), keeps the original's line endings, and opens. It copies the saved file, so unsaved changes in an open tab aren't included |
 | Rename | Select an item and press **F2**, or right-click → **Rename…**. Open tabs follow the rename |
 | Delete | Right-click → **Delete…**. After you confirm, the item goes to the Trash or Recycle Bin, so it can be restored |
 | Refresh | The **Refresh** button |

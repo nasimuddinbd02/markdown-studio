@@ -1,5 +1,5 @@
 import { backend } from "../services";
-import { describeError } from "../services/errors";
+import { describeError, toAppError } from "../services/errors";
 import { basename, dirname, isInside } from "../services/paths";
 import { useWorkspace } from "../stores/workspaceStore";
 import { useDocuments } from "../stores/documentsStore";
@@ -145,5 +145,42 @@ export async function deleteEntry(entry: DirEntry) {
     await refreshDir(dirname(entry.path));
   } catch (e) {
     notify("error", describeError(e, `delete “${entry.name}”`));
+  }
+}
+
+/** "notes.md" -> "notes copy.md", then "notes copy 2.md", … */
+export function copyName(name: string, n: number): string {
+  const dot = name.lastIndexOf(".");
+  const [stem, ext] = dot > 0 ? [name.slice(0, dot), name.slice(dot)] : [name, ""];
+  return `${stem} copy${n > 1 ? ` ${n}` : ""}${ext}`;
+}
+
+/**
+ * Explorer → Duplicate: copies a file next to itself under the first free
+ * "name copy.md" name (never overwriting anything), keeping its line endings
+ * and BOM, then opens the copy. It copies the saved file on disk.
+ */
+export async function duplicateFile(path: string): Promise<string | null> {
+  const b = backend();
+  const dir = dirname(path);
+  try {
+    const original = await b.readTextFile(path);
+    let copy: string | null = null;
+    for (let n = 1; n <= 50 && !copy; n++) {
+      try {
+        copy = await b.createFile(dir, copyName(basename(path), n));
+      } catch (e) {
+        if (toAppError(e).kind !== "alreadyExists") throw e;
+      }
+    }
+    if (!copy) throw new Error("There are already too many copies of this file.");
+    await b.writeTextFile({ path: copy, content: original.content, lineEnding: original.lineEnding, bom: original.bom, expectedMtime: null, force: true });
+    await refreshDir(dir);
+    ws().select(copy);
+    await openPath(copy);
+    return copy;
+  } catch (e) {
+    notify("error", describeError(e, `duplicate “${basename(path)}”`));
+    return null;
   }
 }

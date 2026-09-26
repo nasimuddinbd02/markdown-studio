@@ -5,7 +5,7 @@ import { basename } from "../services/paths";
 import type { DirEntry } from "../types";
 import { openPath } from "../features/documents";
 import {
-  createFileIn, createFolderIn, deleteEntry, openFolderDialog, refreshWorkspace, renameEntry, toggleDir,
+  createFileIn, createFolderIn, deleteEntry, duplicateFile, openFolderDialog, refreshWorkspace, renameEntry, toggleDir,
 } from "../features/workspace";
 import { Icon } from "./Icon";
 import { ContextMenu, type MenuEntry } from "./ContextMenu";
@@ -175,7 +175,11 @@ export function FileExplorer() {
                   { label: "New Folder…", run: () => createFolderIn(menuDir) },
                   "separator",
                 ] as MenuEntry[])
-              : ([{ label: "Open", run: () => openPath(menu.entry.path) }, "separator"] as MenuEntry[])),
+              : ([
+                  { label: "Open", run: () => openPath(menu.entry.path) },
+                  { label: "Duplicate", run: () => duplicateFile(menu.entry.path) },
+                  "separator",
+                ] as MenuEntry[])),
             { label: revealLabel, run: () => revealInFolder(menu.entry.path), disabled: !backend().isNative },
             { label: "Copy Path", run: () => copyPath(menu.entry.path) },
             { label: "Copy Relative Path", run: () => copyRelativePath(menu.entry.path) },

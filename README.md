@@ -53,7 +53,7 @@ For requirements, checksum verification, silent install, uninstalling and troubl
 - Windows shell integration: "Open with Markdown Studio" in the right-click menu, listed under Open with and Default apps, Installed apps / Programs and Features entry, install for "Only me" or "Everyone"
 - Opens files from the OS: double-click / "Open with" (file association), drag and drop onto the window, and single-instance hand-off
 - Paste or drop images into a document: they are saved to an `assets/` folder next to it and linked automatically
-- Workspace folders with a file explorer: new file/folder, rename (F2), delete to the Trash/Recycle Bin, Reveal in File Explorer, Copy (Relative) Path
+- Workspace folders with a file explorer: new file/folder, duplicate, rename (F2), delete to the Trash/Recycle Bin, Reveal in File Explorer, Copy (Relative) Path
 - Tab context menu: Close Others, Close to the Right, Close Saved, Copy Path, Reveal
 - Tabs with dirty indicators, and Save / Don't Save / Cancel prompts on close and on quit; Save All; Reopen Closed Tab (Ctrl/Cmd+Shift+T); recent files and folders (File menu and welcome screen)
 - Link autocompletion (workspace files after `](`, images after `![](`, headings after `](#`) and Format Table (Ctrl/Cmd+Alt+T) that aligns GFM tables, CJK-aware; Sort Table by Column (A to Z / Z to A) sorts rows by the column under the cursor (numbers numerically, text in natural order, empty cells last)

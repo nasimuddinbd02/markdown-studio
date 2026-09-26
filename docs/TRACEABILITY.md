@@ -16,7 +16,7 @@ Status of each [SRS](SRS.md) requirement as of version 0.13.0. **Done** means im
 | FR-013 | Done | New File (Ctrl/Cmd+N), New File in Folder |
 | FR-014 | Done | Save (Ctrl/Cmd+S), atomic write |
 | FR-015 | Done | Save As (Ctrl/Cmd+Shift+S) |
-| FR-016 | Done | Rename from context menu or F2; open tabs follow the rename |
+| FR-016 | Done | Rename from context menu or F2; open tabs follow the rename. Also Duplicate (first free "name copy.md", never overwrites) |
 | FR-017 | Done | Delete with confirmation; moves to the OS Trash (`trash` crate) |
 | FR-018 | Done | mtime conflict check on save, plus polling and focus checks with Reload / Compare / Keep Mine |
 | FR-020 | Done | CodeMirror Markdown language with nested code-block languages; folding (View → Fold All / Unfold All); formatting commands ([formatting.ts](../src/features/formatting.ts)), including heading promote/demote |

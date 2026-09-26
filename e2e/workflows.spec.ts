@@ -355,3 +355,13 @@ test("go to a file by name", async ({ page }) => {
   await page.keyboard.press("Enter");
   await expect(page.getByRole("tab", { name: /diagrams-and-math\.md/ })).toHaveAttribute("aria-selected", "true");
 });
+
+test("duplicate a file from the explorer", async ({ page }) => {
+  await start(page);
+  await openDemoFolder(page);
+  await page.getByRole("treeitem", { name: /README\.md/ }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "Duplicate" }).click();
+  await expect(page.getByRole("tab", { name: /README copy\.md/ })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("treeitem", { name: /README copy\.md/ })).toBeVisible();
+  await expect(page.locator(".markdown-body h1")).toHaveText("Welcome to Markdown Studio");
+});
