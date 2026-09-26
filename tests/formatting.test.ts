@@ -58,6 +58,20 @@ describe("headings", () => {
     expect(run("## Ti|tle", fmt.setHeading(2)).doc).toBe("Title");
     expect(run("### Ti|tle", fmt.setHeading(0)).doc).toBe("Title");
   });
+
+  it("promotes and demotes selected headings within H1-H6", () => {
+    expect(run("### Ti|tle", fmt.promoteHeading).doc).toBe("## Title");
+    expect(run("### Ti|tle", fmt.demoteHeading).doc).toBe("#### Title");
+    expect(run("# Ti|tle", fmt.promoteHeading).doc).toBe("# Title");
+    expect(run("###### Ti|tle", fmt.demoteHeading).doc).toBe("###### Title");
+    expect(run("[## A\ntext\n### B]", fmt.demoteHeading).doc).toBe("### A\ntext\n#### B");
+  });
+
+  it("leaves non-heading lines alone", () => {
+    const state = stateOf("plain |text");
+    expect(fmt.promoteHeading({ state, dispatch: () => {} })).toBe(false);
+    expect(run("#hashtag|", fmt.demoteHeading).doc).toBe("#hashtag");
+  });
 });
 
 describe("line prefixes", () => {
@@ -94,6 +108,6 @@ describe("blocks", () => {
 describe("editor keymap", () => {
   it("derives CodeMirror key names from menu shortcuts", () => {
     const keys = editorKeymap().map((k) => k.key).filter(Boolean);
-    expect(keys).toEqual(expect.arrayContaining(["Mod-b", "Mod-i", "Mod-k", "Mod-Shift-x", "Mod-Alt-1", "Mod-Shift-8", "Mod-Alt-c"]));
+    expect(keys).toEqual(expect.arrayContaining(["Mod-b", "Mod-i", "Mod-k", "Mod-Shift-x", "Mod-Alt-1", "Mod-Shift-8", "Mod-Alt-c", "Mod-Alt-=", "Mod-Alt--"]));
   });
 });

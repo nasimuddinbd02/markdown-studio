@@ -49,6 +49,8 @@ export const formatCommands: Record<string, Command> = {
   heading2: formatCommand("heading2", "Heading 2", fmt.setHeading(2), "Mod+Alt+2"),
   heading3: formatCommand("heading3", "Heading 3", fmt.setHeading(3), "Mod+Alt+3"),
   paragraph: formatCommand("paragraph", "Normal Text", fmt.setHeading(0), "Mod+Alt+0"),
+  promoteHeading: formatCommand("promoteHeading", "Promote Heading", fmt.promoteHeading, "Mod+Alt+="),
+  demoteHeading: formatCommand("demoteHeading", "Demote Heading", fmt.demoteHeading, "Mod+Alt+-"),
   bulletList: formatCommand("bulletList", "Bulleted List", fmt.toggleBulletList, "Mod+Shift+8"),
   orderedList: formatCommand("orderedList", "Numbered List", fmt.toggleOrderedList, "Mod+Shift+7"),
   taskList: formatCommand("taskList", "Task List", fmt.toggleTaskList, "Mod+Shift+9"),

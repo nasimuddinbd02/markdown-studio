@@ -109,6 +109,28 @@ export function setHeading(level: number): StateCommand {
   };
 }
 
+/**
+ * Moves each selected heading up (`delta` < 0, fewer `#`) or down a level,
+ * staying within H1–H6. Lines that aren't headings are left alone.
+ */
+export function shiftHeadingLevel(delta: -1 | 1): StateCommand {
+  return ({ state, dispatch }) => {
+    const changes = selectedLines(state).flatMap((line) => {
+      const m = HEADING.exec(line.text);
+      if (!m) return [];
+      const level = Math.min(6, Math.max(1, m[1].length + delta));
+      if (level === m[1].length) return [];
+      return [{ from: line.from, to: line.from + m[1].length, insert: "#".repeat(level) }];
+    });
+    if (changes.length === 0) return false;
+    dispatch(state.update({ changes, scrollIntoView: true, userEvent: "input.format" }));
+    return true;
+  };
+}
+
+export const promoteHeading = shiftHeadingLevel(-1);
+export const demoteHeading = shiftHeadingLevel(1);
+
 type LineKind = "bullet" | "ordered" | "task" | "quote";
 
 function prefixFor(kind: LineKind, index: number) {

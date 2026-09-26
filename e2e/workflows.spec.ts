@@ -127,6 +127,13 @@ test("formatting shortcuts and table formatting", async ({ page }) => {
   // Lowercase key, as a physical keyboard reports it (Ctrl+Alt doubles as AltGr on Windows).
   await page.keyboard.press(`${mod}+Alt+t`);
   await expect(page.locator(".cm-line").filter({ hasText: "| ccc | d   |" })).toHaveCount(1);
+
+  await page.keyboard.insertText("\n\n### Section");
+  await page.keyboard.press(`${mod}+Alt+=`);
+  await expect(page.locator(".markdown-body h2")).toHaveText("Section");
+  await page.keyboard.press(`${mod}+Alt+-`);
+  await page.keyboard.press(`${mod}+Alt+-`);
+  await expect(page.locator(".markdown-body h4")).toHaveText("Section");
 });
 
 test("combine the folder into one document", async ({ page }) => {
