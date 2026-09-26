@@ -84,6 +84,13 @@ export const commands: Record<string, Command> = {
   },
   openFile: { id: "openFile", label: "Open File…", shortcut: "Mod+O", run: openFileDialog },
   openFolder: { id: "openFolder", label: "Open Folder…", shortcut: "Mod+Shift+O", run: openFolderDialog },
+  goToFile: {
+    id: "goToFile",
+    label: "Go to File…",
+    shortcut: "Mod+Alt+O",
+    run: () => useUi.getState().openFilePicker(),
+    enabled: () => !!useWorkspace.getState().root,
+  },
   closeFolder: {
     id: "closeFolder",
     label: "Close Folder",

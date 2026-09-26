@@ -4,6 +4,23 @@ import { useDocuments } from "../stores/documentsStore";
 import { commands, formatShortcut } from "../features/commands";
 import { fuzzyFilter } from "../features/fuzzy";
 import { listTemplates, newFromTemplate, type Template } from "../features/templates";
+import { useWorkspace } from "../stores/workspaceStore";
+import { backend } from "../services";
+import { isMarkdownPath } from "../services/paths";
+import { openPath } from "../features/documents";
+
+type PaletteMode = "commands" | "templates" | "files";
+
+const LABELS: Record<PaletteMode, { dialog: string; placeholder: string; list: string; empty: string }> = {
+  commands: { dialog: "Command palette", placeholder: "Type a command or tab name…", list: "Commands", empty: "No matching commands" },
+  templates: { dialog: "New from template", placeholder: "Choose a template…", list: "Templates", empty: "No matching templates" },
+  files: { dialog: "Go to file", placeholder: "Type part of a file name or path…", list: "Files", empty: "No matching files" },
+};
+
+/** A path relative to the folder, with forward slashes. */
+function relativePath(path: string, root: string) {
+  return (path.startsWith(root) ? path.slice(root.length) : path).replace(/^[\\/]+/, "").replace(/\\/g, "/");
+}
 
 interface PaletteItem {
   id: string;
@@ -28,20 +45,38 @@ export function CommandPalette() {
   return <PaletteBody key={mode} mode={mode} onClose={() => setOpen(false)} />;
 }
 
-function PaletteBody({ mode, onClose }: { mode: "commands" | "templates"; onClose(): void }) {
+function PaletteBody({ mode, onClose }: { mode: PaletteMode; onClose(): void }) {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const input = useRef<HTMLInputElement>(null);
   const list = useRef<HTMLUListElement>(null);
   const docs = useDocuments((s) => s.docs);
   const [templates, setTemplates] = useState<Template[] | null>(null);
+  const [files, setFiles] = useState<string[] | null>(null);
+  const root = useWorkspace((s) => s.root);
   useEffect(() => {
     if (mode === "templates") void listTemplates().then(setTemplates);
-  }, [mode]);
+    if (mode === "files" && root) {
+      void backend()
+        .listWorkspaceFiles(root)
+        .then((all) => setFiles(all.filter(isMarkdownPath)), () => setFiles([]));
+    }
+  }, [mode, root]);
 
   const items = useMemo<PaletteItem[]>(() => {
     if (mode === "templates") {
       return (templates ?? []).map((t) => ({ id: `tpl:${t.id}`, label: t.name, hint: t.description, run: () => void newFromTemplate(t) }));
+    }
+    if (mode === "files") {
+      // Open files first, then the rest in folder order; matching uses the relative path.
+      const open = new Set(docs.map((d) => d.path));
+      const sorted = [...(files ?? [])].sort((a, b) => Number(open.has(b)) - Number(open.has(a)));
+      return sorted.map((path) => ({
+        id: `file:${path}`,
+        label: relativePath(path, root ?? ""),
+        hint: open.has(path) ? "Open" : undefined,
+        run: () => void openPath(path),
+      }));
     }
     const cmdItems = Object.values(commands)
       .filter((c) => c.id !== "commandPalette" && (!c.enabled || c.enabled()))
@@ -53,7 +88,7 @@ function PaletteBody({ mode, onClose }: { mode: "commands" | "templates"; onClos
       run: () => useDocuments.getState().setActive(d.id),
     }));
     return [...cmdItems, ...tabItems];
-  }, [docs, mode, templates]);
+  }, [docs, mode, templates, files, root]);
 
   const results = useMemo(() => fuzzyFilter(items, query, (i) => i.label).slice(0, 50), [items, query]);
 
@@ -76,11 +111,11 @@ function PaletteBody({ mode, onClose }: { mode: "commands" | "templates"; onClos
 
   return (
     <div className="palette-backdrop" onPointerDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="palette" role="dialog" aria-modal="true" aria-label={mode === "templates" ? "New from template" : "Command palette"}>
+      <div className="palette" role="dialog" aria-modal="true" aria-label={LABELS[mode].dialog}>
         <input
           ref={input}
           className="palette-input"
-          placeholder={mode === "templates" ? "Choose a template…" : "Type a command or tab name…"}
+          placeholder={LABELS[mode].placeholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           role="combobox"
@@ -100,9 +135,9 @@ function PaletteBody({ mode, onClose }: { mode: "commands" | "templates"; onClos
             e.stopPropagation();
           }}
         />
-        <ul className="palette-list" id="palette-list" role="listbox" ref={list} aria-label={mode === "templates" ? "Templates" : "Commands"}>
-          {results.length === 0 && (templates !== null || mode === "commands") && (
-            <li className="palette-empty">{mode === "templates" ? "No matching templates" : "No matching commands"}</li>
+        <ul className="palette-list" id="palette-list" role="listbox" ref={list} aria-label={LABELS[mode].list}>
+          {results.length === 0 && (mode === "commands" || (mode === "templates" ? templates !== null : files !== null)) && (
+            <li className="palette-empty">{LABELS[mode].empty}</li>
           )}
           {results.map(({ item, match }, i) => (
             <li

@@ -343,3 +343,15 @@ test("replace in files across the folder", async ({ page }) => {
   await page.getByRole("textbox", { name: "Search in files" }).fill("instant preview");
   await expect(page.getByRole("status").filter({ hasText: /result/ })).toContainText("1 result");
 });
+
+test("go to a file by name", async ({ page }) => {
+  await start(page);
+  await openDemoFolder(page);
+  await page.keyboard.press(`${mod}+Alt+o`);
+  const dialog = page.getByRole("dialog", { name: "Go to file" });
+  await expect(dialog).toBeVisible();
+  await page.keyboard.type("diagmath");
+  await expect(dialog.getByRole("option").first()).toContainText("docs/diagrams-and-math.md");
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("tab", { name: /diagrams-and-math\.md/ })).toHaveAttribute("aria-selected", "true");
+});

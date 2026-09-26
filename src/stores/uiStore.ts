@@ -35,8 +35,9 @@ interface UiState {
   aboutOpen: boolean;
   paletteOpen: boolean;
   /** What the palette lists: commands and tabs, or document templates. */
-  paletteMode: "commands" | "templates";
+  paletteMode: "commands" | "templates" | "files";
   openTemplatePicker(): void;
+  openFilePicker(): void;
   shortcutsOpen: boolean;
   setShortcutsOpen(open: boolean): void;
   /** Distraction-free writing: hides chrome and centres the editor. */
@@ -77,6 +78,7 @@ export const useUi = create<UiState>((set, get) => ({
   paletteOpen: false,
   paletteMode: "commands",
   openTemplatePicker: () => set({ paletteOpen: true, paletteMode: "templates" }),
+  openFilePicker: () => set({ paletteOpen: true, paletteMode: "files" }),
   shortcutsOpen: false,
   setShortcutsOpen: (shortcutsOpen) => set({ shortcutsOpen }),
   focusMode: false,
