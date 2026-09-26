@@ -7,22 +7,42 @@ The requirements are in [docs/SRS.md](docs/SRS.md), and implementation status pe
 ## Download
 
 <!-- download:start -->
-### ⬇️ [Download Markdown Studio 0.10.0 for Windows (64-bit)](downloads/MarkdownStudio-0.10.0-windows-x64-setup.exe?raw=true)
+Markdown Studio 0.10.0 was released on 2026-09-25 and has a separate installer for each operating system. Each one is self-contained: nothing else needs to be installed. All files and checksums are on the [0.10.0 release page](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.10.0).
 
-Released 2026-09-25 for Windows 10 (1803+) and 11, x64. Nothing else needs to be installed: the app is self-contained.
+| Operating system | Download |
+| --- | --- |
+| **Windows** 10 (1803+) and 11, x64 | [Standard installer](downloads/MarkdownStudio-0.10.0-windows-x64-setup.exe?raw=true) (6.9 MB) · [Offline installer](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.10.0/MarkdownStudio-0.10.0-windows-x64-offline-setup.exe) (211.9 MB) |
+| **macOS** 10.15+ | [Apple Silicon (M1 and later)](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.10.0/MarkdownStudio-0.10.0-macos-arm64.dmg) · [Intel](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.10.0/MarkdownStudio-0.10.0-macos-x64.dmg) |
+| **Linux** x86_64 | [AppImage](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.10.0/MarkdownStudio-0.10.0-linux-x86_64.AppImage) (any distribution) · [.deb](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.10.0/MarkdownStudio-0.10.0-linux-amd64.deb) (Ubuntu, Debian, Mint) · [.rpm](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.10.0/MarkdownStudio-0.10.0-linux-x86_64.rpm) (Fedora, RHEL, openSUSE) |
+
+### Windows
 
 | Installer | When to use it | Size | SHA-256 |
 | --- | --- | --- | --- |
 | **Standard**: [MarkdownStudio-0.10.0-windows-x64-setup.exe](downloads/MarkdownStudio-0.10.0-windows-x64-setup.exe?raw=true) | Recommended. WebView2 is already part of Windows 11 and updated Windows 10; if it's missing, the installer adds it automatically (needs internet) | 6.9 MB | `6442eb92d11b24b54978f1427e29cc68a6cbe69a14a492bf05c9891bfcbc32a0` |
 | **Offline**: [MarkdownStudio-0.10.0-windows-x64-offline-setup.exe](https://github.com/nasimuddinbd02/markdown-studio/releases/download/v0.10.0/MarkdownStudio-0.10.0-windows-x64-offline-setup.exe) | Includes WebView2; no internet needed | 211.9 MB | `b9fec90b0fd900f9a03307f45c0d51034c04d2a79641a49fc7a91ba4148b131a` |
 
-**Install in 3 steps:**
-
-1. **Download** an installer above (all files are also on the [0.10.0 release page](https://github.com/nasimuddinbd02/markdown-studio/releases/tag/v0.10.0)).
+1. **Download** an installer above.
 2. **Run** it and choose **Anyone who uses this computer**, which needs administrator approval, or **Only for me**, which doesn't. The installer isn't code-signed yet, so if Windows SmartScreen says *"Windows protected your PC"*, choose **More info → Run anyway**.
 3. **Start** Markdown Studio from the Start menu, or right-click any `.md` file and choose **Open with Markdown Studio**.
 
-The app appears in **Settings → Apps → Installed apps** and in **Control Panel → Programs and Features**, where it can be uninstalled. Newer versions install over older ones and keep your settings. For requirements, checksum verification, silent install, uninstalling and troubleshooting, see the **[installation guide](docs/INSTALL.md)**.
+The app appears in **Settings → Apps → Installed apps** and in **Control Panel → Programs and Features**, where it can be uninstalled. Newer versions install over older ones, keep your settings, and are offered automatically when the app starts.
+
+### macOS
+
+1. **Download** the `.dmg` for your Mac: **Apple Silicon** for M1 and later, **Intel** for older Macs (Apple menu → About This Mac shows which one you have).
+2. **Open** the `.dmg` and drag **Markdown Studio** to **Applications**.
+3. **Start** it from Applications. The app isn't notarized by Apple yet, so the first time, macOS blocks it: open **System Settings → Privacy & Security** and choose **Open Anyway**. If macOS says the app *"is damaged"*, run `xattr -dr com.apple.quarantine "/Applications/Markdown Studio.app"` in Terminal once.
+
+### Linux
+
+- **AppImage** (any distribution, no installation needed): download it, run `chmod +x MarkdownStudio-*.AppImage`, then start it.
+- **Debian, Ubuntu, Mint**: `sudo apt install ./MarkdownStudio-0.10.0-linux-amd64.deb` (apt installs the required system libraries automatically).
+- **Fedora, RHEL, openSUSE**: `sudo dnf install ./MarkdownStudio-0.10.0-linux-x86_64.rpm` (or `sudo zypper install` on openSUSE).
+
+On macOS and Linux, the app tells you when a new version is available and opens its download page.
+
+For requirements, checksum verification, silent install, uninstalling and troubleshooting, see the **[installation guide](docs/INSTALL.md)**.
 <!-- download:end -->
 
 ## Features
@@ -123,7 +143,7 @@ docs/           SRS and requirement traceability
 ## Releasing a new version
 
 ```bash
-npm run version:set 0.4.0
+npm run version:set 0.10.0
 ```
 
 ```bash
@@ -136,11 +156,12 @@ npm run release:github
 
 1. `version:set` updates the version in `package.json`, `tauri.conf.json` and `Cargo.toml`.
 2. `release:installer -- --offline` builds two Windows installers:
-   - the **standard** installer (~4 MB) replaces the one in [`downloads/`](downloads/), where only the latest version is kept;
+   - the **standard** installer (~7 MB) replaces the one in [`downloads/`](downloads/), where only the latest version is kept;
    - the **offline** installer (~210 MB, with the WebView2 runtime) goes to `release-assets/`. It's too large for git, so it's ignored.
 
-   It also writes `SHA256SUMS.txt` and refreshes the download links in this README and in [docs/INSTALL.md](docs/INSTALL.md).
-3. Commit and push, then run `release:github`. It creates or updates the GitHub Release `v<version>` with both installers, the checksums and `latest.json`, using the GitHub CLI (`gh auth login` once). Installed apps pick up the new version automatically on their next start.
+   It also writes `SHA256SUMS.txt` and refreshes the download section (Windows, macOS and Linux links) in this README and the links in [docs/INSTALL.md](docs/INSTALL.md).
+3. Commit and push, then run `release:github`. It creates or updates the GitHub Release `v<version>` with both installers, the checksums and `latest.json`, using the GitHub CLI (`gh auth login` once). Installed Windows apps pick up the new version automatically on their next start.
+4. Creating the release pushes the tag `v<version>`, which starts [.github/workflows/release.yml](.github/workflows/release.yml) on GitHub Actions. It builds the **macOS** (Apple Silicon and Intel `.dmg`) and **Linux** (`.AppImage`, `.deb`, `.rpm`) installers and attaches them to the same release, with `SHA256SUMS-macos-linux.txt`. Follow it with `gh run watch`. To rebuild them for an existing release, run the workflow by hand: `gh workflow run release.yml -f tag=v<version>`.
 
 **Update signing key.** Updates are signed with a minisign key. `release:installer` reads the private key from `~/.tauri/markdown-studio.key`, or from the `TAURI_SIGNING_PRIVATE_KEY` environment variable. The matching public key is in `src-tauri/tauri.conf.json`. **Never commit the private key, and keep a backup somewhere safe.** Installed apps only accept updates signed with this exact key; if it's lost, users would have to reinstall manually once to switch to a new key.
 
@@ -152,6 +173,6 @@ npm run release:github
 - **macOS**: `.app` and `.dmg`
 - **Linux**: `.AppImage`, `.deb` and `.rpm`
 
-Pushing a tag like `v0.1.0` runs [.github/workflows/release.yml](.github/workflows/release.yml), which builds every platform (including both macOS architectures) and creates a draft GitHub Release. Code signing and notarization secrets are documented inline in the workflow.
+Each platform has its own installers: Windows ones are built locally by `npm run release:installer` (see above), and macOS and Linux ones are built by [.github/workflows/release.yml](.github/workflows/release.yml) when the version tag is pushed. Without Apple signing secrets, the macOS app is ad-hoc signed; add the `APPLE_*` repository secrets listed in the workflow to sign and notarize it.
 
 Settings, recovery data and logs live in the platform's application-data folders, under the identifier `com.markdownstudio.app`.

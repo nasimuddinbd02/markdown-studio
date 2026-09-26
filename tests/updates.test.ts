@@ -123,6 +123,19 @@ describe("in-app update (desktop)", () => {
     expect(b.installAppUpdate).not.toHaveBeenCalled();
   });
 
+  it("offers the download page when there is no in-place update for this platform (macOS, Linux)", async () => {
+    const b = nativeBackend(async () => {});
+    b.checkAppUpdate = async () => { throw new Error("the platform `darwin-aarch64` was not found on the response `platforms` object"); };
+    vi.stubGlobal("fetch", release("v99.0.0"));
+    const opened = vi.fn(async () => {});
+    b.openExternal = opened;
+    const answered = autoAnswer("install");
+    expect(await checkForUpdates({ manual: false })).toBe("available");
+    answered.stop();
+    expect(opened).toHaveBeenCalledWith("https://github.com/o/r/releases/tag/v99.0.0");
+    expect(b.installAppUpdate).not.toHaveBeenCalled();
+  });
+
   it("keeps the current version running when installing fails", async () => {
     nativeBackend(async () => { throw new Error("Update failed: signature mismatch"); });
     const answered = autoAnswer("install");

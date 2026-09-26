@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Builds the Windows installers and publishes them:
+// Builds the Windows installers and publishes them (the macOS and Linux
+// installers are built by .github/workflows/release.yml):
 //   * the standard installer (small; downloads WebView2 only if it is missing)
 //     goes into downloads/ so it can be downloaded straight from the repository;
 //   * with --offline, an offline installer that bundles the WebView2 runtime
@@ -134,22 +135,51 @@ const offlineUrl = `https://github.com/${repo}/releases/download/v${version}/${o
 const offlineRow = hasOffline
   ? `\n| **Offline**: [${offlineName}](${offlineUrl}) | Includes WebView2; no internet needed | ${mb(offlineTarget)} MB | \`${offlineSha}\` |`
   : "";
+const asset = (name) => `https://github.com/${repo}/releases/download/v${version}/${name}`;
+const mac = (arch) => `MarkdownStudio-${version}-macos-${arch}.dmg`;
+const linux = {
+  appImage: `MarkdownStudio-${version}-linux-x86_64.AppImage`,
+  deb: `MarkdownStudio-${version}-linux-amd64.deb`,
+  rpm: `MarkdownStudio-${version}-linux-x86_64.rpm`,
+};
+// The macOS and Linux installers are built by .github/workflows/release.yml
+// when the tag is pushed, and attached to the same release.
 const section = `<!-- download:start -->
-### ⬇️ [Download Markdown Studio ${version} for Windows (64-bit)](${link})
+Markdown Studio ${version} was released on ${date} and has a separate installer for each operating system. Each one is self-contained: nothing else needs to be installed. All files and checksums are on the [${version} release page](${releaseUrl}).
 
-Released ${date} for Windows 10 (1803+) and 11, x64. Nothing else needs to be installed: the app is self-contained.
+| Operating system | Download |
+| --- | --- |
+| **Windows** 10 (1803+) and 11, x64 | [Standard installer](${link}) (${sizeMb} MB)${hasOffline ? ` · [Offline installer](${offlineUrl}) (${mb(offlineTarget)} MB)` : ""} |
+| **macOS** 10.15+ | [Apple Silicon (M1 and later)](${asset(mac("arm64"))}) · [Intel](${asset(mac("x64"))}) |
+| **Linux** x86_64 | [AppImage](${asset(linux.appImage)}) (any distribution) · [.deb](${asset(linux.deb)}) (Ubuntu, Debian, Mint) · [.rpm](${asset(linux.rpm)}) (Fedora, RHEL, openSUSE) |
+
+### Windows
 
 | Installer | When to use it | Size | SHA-256 |
 | --- | --- | --- | --- |
 | **Standard**: [${fileName}](${link}) | Recommended. WebView2 is already part of Windows 11 and updated Windows 10; if it's missing, the installer adds it automatically (needs internet) | ${sizeMb} MB | \`${sha256}\` |${offlineRow}
 
-**Install in 3 steps:**
-
-1. **Download** an installer above${hasOffline ? ` (all files are also on the [${version} release page](${releaseUrl}))` : ""}.
+1. **Download** an installer above.
 2. **Run** it and choose **Anyone who uses this computer**, which needs administrator approval, or **Only for me**, which doesn't. The installer isn't code-signed yet, so if Windows SmartScreen says *"Windows protected your PC"*, choose **More info → Run anyway**.
 3. **Start** Markdown Studio from the Start menu, or right-click any \`.md\` file and choose **Open with Markdown Studio**.
 
-The app appears in **Settings → Apps → Installed apps** and in **Control Panel → Programs and Features**, where it can be uninstalled. Newer versions install over older ones and keep your settings. For requirements, checksum verification, silent install, uninstalling and troubleshooting, see the **[installation guide](docs/INSTALL.md)**.
+The app appears in **Settings → Apps → Installed apps** and in **Control Panel → Programs and Features**, where it can be uninstalled. Newer versions install over older ones, keep your settings, and are offered automatically when the app starts.
+
+### macOS
+
+1. **Download** the \`.dmg\` for your Mac: **Apple Silicon** for M1 and later, **Intel** for older Macs (Apple menu → About This Mac shows which one you have).
+2. **Open** the \`.dmg\` and drag **Markdown Studio** to **Applications**.
+3. **Start** it from Applications. The app isn't notarized by Apple yet, so the first time, macOS blocks it: open **System Settings → Privacy & Security** and choose **Open Anyway**. If macOS says the app *"is damaged"*, run \`xattr -dr com.apple.quarantine "/Applications/Markdown Studio.app"\` in Terminal once.
+
+### Linux
+
+- **AppImage** (any distribution, no installation needed): download it, run \`chmod +x MarkdownStudio-*.AppImage\`, then start it.
+- **Debian, Ubuntu, Mint**: \`sudo apt install ./${linux.deb}\` (apt installs the required system libraries automatically).
+- **Fedora, RHEL, openSUSE**: \`sudo dnf install ./${linux.rpm}\` (or \`sudo zypper install\` on openSUSE).
+
+On macOS and Linux, the app tells you when a new version is available and opens its download page.
+
+For requirements, checksum verification, silent install, uninstalling and troubleshooting, see the **[installation guide](docs/INSTALL.md)**.
 <!-- download:end -->`;
 
 let readme = readFileSync("README.md", "utf8");

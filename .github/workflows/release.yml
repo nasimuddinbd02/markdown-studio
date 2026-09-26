@@ -1,34 +1,58 @@
 name: Release
 
-# Builds installers for Windows (.msi/.exe), macOS (.dmg/.app, Intel + Apple
-# Silicon) and Linux (.AppImage/.deb/.rpm) and attaches them to a draft
-# GitHub Release (SRS §13). Push a tag like v0.1.0 to trigger.
+# Builds the macOS and Linux installers and attaches them to the GitHub
+# Release for the tag (SRS §13). The Windows installers (standard, offline and
+# the signed in-app update) are built on Windows by `npm run release:installer`
+# and published by `npm run release:github`, which also pushes the tag that
+# starts this workflow. To rebuild an existing release, run the workflow by
+# hand with its tag (for example v0.10.0).
+#
+# Asset names are stable so the README can link to them:
+#   MarkdownStudio-<version>-macos-arm64.dmg      Apple Silicon
+#   MarkdownStudio-<version>-macos-x64.dmg        Intel
+#   MarkdownStudio-<version>-linux-x86_64.AppImage
+#   MarkdownStudio-<version>-linux-amd64.deb
+#   MarkdownStudio-<version>-linux-x86_64.rpm
+#   SHA256SUMS-macos-linux.txt
 on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to build and upload to, e.g. v0.10.0"
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
 
 jobs:
   build:
-    permissions:
-      contents: write
+    name: Build (${{ matrix.name }})
     strategy:
       fail-fast: false
       matrix:
         include:
-          - platform: windows-latest
-            args: ""
-          - platform: macos-latest
-            args: "--target aarch64-apple-darwin"
-          - platform: macos-latest
-            args: "--target x86_64-apple-darwin"
-          - platform: ubuntu-22.04
-            args: ""
+          - name: macOS Apple Silicon
+            platform: macos-latest
+            target: aarch64-apple-darwin
+          - name: macOS Intel
+            platform: macos-latest
+            target: x86_64-apple-darwin
+          # 22.04 keeps the glibc requirement low so the app runs on older distributions too.
+          - name: Linux x86_64
+            platform: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install Linux dependencies
-        if: matrix.platform == 'ubuntu-22.04'
+        with:
+          ref: ${{ env.TAG }}
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf rpm
@@ -38,27 +62,86 @@ jobs:
           cache: npm
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+          targets: ${{ matrix.target }}
       - uses: swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
       - run: npm ci
-      - uses: tauri-apps/tauri-action@v0
+
+      - name: Configure macOS code signing
+        if: runner.os == 'macOS'
+        shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Code signing (SEC-008). Configure these repository secrets to sign builds:
-          # Windows: see https://v2.tauri.app/distribute/sign/windows/
-          # macOS:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        with:
-          tagName: ${{ github.ref_name }}
-          releaseName: "Markdown Studio ${{ github.ref_name }}"
-          releaseBody: "See the assets below to download and install this version."
-          releaseDraft: true
-          prerelease: false
-          args: ${{ matrix.args }}
+        run: |
+          if [ -n "$APPLE_CERTIFICATE" ]; then
+            # Developer ID signing and notarization (SEC-008).
+            for v in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
+              { echo "$v<<__EOF__"; printenv "$v"; echo "__EOF__"; } >> "$GITHUB_ENV"
+            done
+          else
+            # No certificate configured: ad-hoc sign so the app runs on Apple Silicon.
+            echo "APPLE_SIGNING_IDENTITY=-" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build
+        shell: bash
+        # In-app updates on macOS and Linux aren't published yet (the updater
+        # key stays on the maintainer's machine), so no updater artifacts here.
+        run: |
+          case "${{ runner.os }}" in
+            macOS) bundles="app,dmg" ;;
+            Linux) bundles="appimage,deb,rpm" ;;
+          esac
+          npx tauri build --target "${{ matrix.target }}" --bundles "$bundles" \
+            --config '{"bundle":{"createUpdaterArtifacts":false}}'
+
+      - name: Collect installers
+        shell: bash
+        run: |
+          version="${TAG#v}"
+          bundle="src-tauri/target/${{ matrix.target }}/release/bundle"
+          mkdir -p out
+          case "${{ matrix.target }}" in
+            aarch64-apple-darwin) cp "$bundle"/dmg/*.dmg "out/MarkdownStudio-$version-macos-arm64.dmg" ;;
+            x86_64-apple-darwin)  cp "$bundle"/dmg/*.dmg "out/MarkdownStudio-$version-macos-x64.dmg" ;;
+            x86_64-unknown-linux-gnu)
+              cp "$bundle"/appimage/*.AppImage "out/MarkdownStudio-$version-linux-x86_64.AppImage"
+              cp "$bundle"/deb/*.deb "out/MarkdownStudio-$version-linux-amd64.deb"
+              cp "$bundle"/rpm/*.rpm "out/MarkdownStudio-$version-linux-x86_64.rpm"
+              ;;
+          esac
+          ls -l out
+
+      - name: Upload to the GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The Windows side creates the release; wait for it if this build finished first.
+          for i in $(seq 1 30); do
+            gh release view "$TAG" > /dev/null 2>&1 && break
+            echo "Waiting for release $TAG…"; sleep 60
+          done
+          gh release upload "$TAG" out/* --clobber
+
+  checksums:
+    name: Checksums
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload SHA256SUMS-macos-linux.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          mkdir assets && cd assets
+          gh release download "$TAG" --pattern "*-macos-*" --pattern "*-linux-*"
+          sha256sum * > ../SHA256SUMS-macos-linux.txt
+          cat ../SHA256SUMS-macos-linux.txt
+          gh release upload "$TAG" ../SHA256SUMS-macos-linux.txt --clobber

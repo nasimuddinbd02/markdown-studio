@@ -46,8 +46,15 @@ interface Found {
 async function findUpdate(): Promise<Found | null> {
   const b = backend();
   if (b.isNative) {
-    const u = await b.checkAppUpdate();
-    return u ? { version: u.version, current: u.currentVersion, notes: u.notes ?? "", url: null } : null;
+    try {
+      const u = await b.checkAppUpdate();
+      return u ? { version: u.version, current: u.currentVersion, notes: u.notes ?? "", url: null } : null;
+    } catch (e) {
+      // No in-place update for this platform (signed updates are published for
+      // Windows only so far) or the manifest is unreachable: fall back to the
+      // release page, so macOS and Linux users still hear about new versions.
+      b.log("warn", "update.check", (e as Error)?.message ?? String(e));
+    }
   }
   const current = (await b.appInfo()).version;
   const latest = await fetchLatestRelease();

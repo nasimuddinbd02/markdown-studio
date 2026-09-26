@@ -2,6 +2,8 @@
 
 Markdown Studio is a free, local-first Markdown editor. Your documents stay on your computer: nothing is uploaded, and no account or internet connection is needed to write.
 
+Choose your system: [Windows](#windows) · [macOS](#macos) · [Linux](#linux). Each has its own installer, and none of them needs anything else installed.
+
 ## Windows
 
 ### Requirements
@@ -84,9 +86,65 @@ The installer supports unattended installation. Add `/AllUsers` (run elevated) o
 
 To uninstall silently, run `uninstall.exe /S` from the installation folder.
 
-## macOS and Linux
+## macOS
 
-Native builds (`.dmg` for macOS, and `.AppImage` / `.deb` / `.rpm` for Linux) are produced by the project's release workflow on GitHub Actions. Until they are published, build them from source; see [Development](../README.md#development).
+### Requirements
+
+- macOS 10.15 (Catalina) or later.
+- A Mac with **Apple Silicon** (M1 and later) or an **Intel** processor. To check, open the Apple menu → **About This Mac**: it shows *Chip: Apple M…* or *Processor: Intel*.
+- Nothing else. The app uses the WebKit engine built into macOS.
+
+### Install
+
+1. Download the `.dmg` for your Mac from the [latest release](https://github.com/nasimuddinbd02/markdown-studio/releases/latest): `MarkdownStudio-<version>-macos-arm64.dmg` for Apple Silicon, or `MarkdownStudio-<version>-macos-x64.dmg` for Intel.
+2. Open the `.dmg`, then drag **Markdown Studio** onto the **Applications** folder.
+3. Start Markdown Studio from **Applications** or Launchpad.
+
+The app isn't notarized by Apple yet, so macOS stops it the first time:
+
+- If macOS says it *"cannot be opened because Apple cannot check it"*, open **System Settings → Privacy & Security**, scroll down, and choose **Open Anyway**. You only need to do this once.
+- If macOS says the app *"is damaged and can't be opened"*, the download was quarantined. Run this once in Terminal, then open the app again:
+
+  ```bash
+  xattr -dr com.apple.quarantine "/Applications/Markdown Studio.app"
+  ```
+
+To open `.md` files with Markdown Studio by default, select a file in Finder, choose **File → Get Info**, pick Markdown Studio under **Open with**, and click **Change All…**.
+
+### Updating and uninstalling
+
+When a new version is published, Markdown Studio tells you at startup (or from **Help → Check for Updates…**) and opens its download page. Download the new `.dmg` and drag the app onto Applications again to replace the old version. Your settings are kept.
+
+To uninstall, drag **Markdown Studio** from Applications to the Trash. Settings and history are in `~/Library/Application Support/com.markdownstudio.app`; delete that folder too if you want to remove them.
+
+## Linux
+
+### Requirements
+
+- A 64-bit (x86_64) distribution from 2022 or later, such as Ubuntu 22.04+, Debian 12+, Fedora 36+ or openSUSE Leap 15.5+.
+- The system WebKitGTK library. The `.deb` and `.rpm` packages declare it, so your package manager installs it automatically. The AppImage needs `libwebkit2gtk-4.1`, which current desktop distributions include.
+
+### Install
+
+Download one package from the [latest release](https://github.com/nasimuddinbd02/markdown-studio/releases/latest):
+
+| Package | Distributions | Install |
+| --- | --- | --- |
+| `MarkdownStudio-<version>-linux-amd64.deb` | Ubuntu, Debian, Linux Mint, Pop!_OS | `sudo apt install ./MarkdownStudio-<version>-linux-amd64.deb` |
+| `MarkdownStudio-<version>-linux-x86_64.rpm` | Fedora, RHEL, Rocky, openSUSE | `sudo dnf install ./MarkdownStudio-<version>-linux-x86_64.rpm` (openSUSE: `sudo zypper install ./…rpm`) |
+| `MarkdownStudio-<version>-linux-x86_64.AppImage` | Any distribution; no installation or root access needed | `chmod +x MarkdownStudio-*.AppImage`, then run `./MarkdownStudio-<version>-linux-x86_64.AppImage` |
+
+The `.deb` and `.rpm` packages add Markdown Studio to your applications menu and register it for `.md` files.
+
+### Updating and uninstalling
+
+When a new version is published, Markdown Studio tells you at startup and opens its download page. Install the new package the same way; it replaces the old version and keeps your settings. For the AppImage, replace the file.
+
+To uninstall, run `sudo apt remove markdown-studio` or `sudo dnf remove markdown-studio`, or delete the AppImage. Settings and history are in `~/.config/com.markdownstudio.app` and `~/.local/share/com.markdownstudio.app`.
+
+## Checking a download (all platforms)
+
+Every release has `SHA256SUMS.txt` (Windows) and `SHA256SUMS-macos-linux.txt`. Compare them with the checksum of your file: `sha256sum <file>` on Linux, `shasum -a 256 <file>` on macOS, or `Get-FileHash <file>` in PowerShell on Windows.
 
 ## Troubleshooting
 
