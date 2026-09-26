@@ -335,4 +335,6 @@ The user asked for the documents to follow `docs/DOCUMENTATION_SITE_SPEC.md`: a 
 
 **Next up:** footnotes, Mermaid and math in PDF/Word export; website search console setup (owner); keep the website changelog updated with each release.
 
-**Questions for the user:** enable GitHub Pages (Settings → Pages → Source: GitHub Actions)? Choose a license (the FAQ says one hasn't been published)?
+**Deployed:** with the user's approval, GitHub Pages was enabled (source: GitHub Actions) and the site is live at https://nasimuddinbd02.github.io/markdown-studio/. All 21 checked URLs return 200, and a missing page returns 404. The sitemap has 47 URLs, robots.txt is served, and the 23 browser checks (WCAG audits in both themes, mobile) pass against the live site.
+
+**Questions for the user:** add the site to Google Search Console (steps in `website/README.md`)? Choose a license (the FAQ says one hasn't been published)?
