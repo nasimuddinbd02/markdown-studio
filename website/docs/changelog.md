@@ -7,6 +7,18 @@ description: Release notes for every Markdown Studio version, listing what was a
 
 Every release of Markdown Studio, newest first. Dates are the GitHub release dates (UTC). Installers for each version are on the [GitHub releases page](https://github.com/nasimuddin-dev/markdown-studio/releases).
 
+## v0.13.0
+
+Released: 2026-09-26 · [Release files](https://github.com/nasimuddin-dev/markdown-studio/releases/tag/v0.13.0)
+
+### Added
+
+- **Drag headings in the Outline** to reorder sections. A line shows where the section will go, and Ctrl+Z undoes the move.
+
+### Changed
+
+- The project moved to the renamed GitHub account **nasimuddin-dev**. The update check, the release links and the website (now at nasimuddin-dev.github.io/markdown-studio) use the new address. Earlier versions still find updates through GitHub's redirect; updating to this version removes that dependency.
+
 ## v0.12.0
 
 Released: 2026-09-26 · [Release files](https://github.com/nasimuddin-dev/markdown-studio/releases/tag/v0.12.0)
