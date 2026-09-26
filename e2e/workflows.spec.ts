@@ -226,7 +226,10 @@ test("Mermaid diagrams are exported to Word as pictures", async ({ page }) => {
   expect(media.length).toBe(1);
   const png = await zip.file(media[0])!.async("uint8array");
   expect(png.length).toBeGreaterThan(2000); // a real drawing, not an empty canvas
-  expect(await zip.file("word/document.xml")!.async("string")).not.toContain("flowchart LR");
+  const xml = await zip.file("word/document.xml")!.async("string");
+  expect(xml).not.toContain("flowchart LR");
+  // The inline and display formulas are native Word equations.
+  expect(xml.match(/<m:oMath>/g)?.length).toBe(2);
 });
 
 test("outline context menu moves a section", async ({ page }) => {

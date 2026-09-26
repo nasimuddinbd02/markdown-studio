@@ -41,7 +41,7 @@ description: Fix Markdown Studio preview problems, including a paused preview, i
 
 - Check **Settings → Preview → Render Mermaid diagrams** and **Render LaTeX math**.
 - The code block must start with exactly ` ```mermaid `.
-- In **PDF** and **Word** exports, formulas are shown as LaTeX text (diagrams are drawn). Use **Export as HTML** or **Print / Save as PDF** for formulas.
+- In **PDF** exports, formulas are shown as LaTeX text (Word exports turn them into Word equations). Use **Print / Save as PDF** or **Export as HTML** for a PDF with formulas.
 
 ## Text with dollar signs turns into math
 

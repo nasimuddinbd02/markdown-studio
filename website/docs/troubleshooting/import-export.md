@@ -31,11 +31,15 @@ description: Fix Markdown Studio import and export problems, including scanned P
 
 ## Formulas appear as LaTeX text in PDF or Word
 
-**Problem:** a PDF or Word export shows formulas as their LaTeX source.
+**Problem:** a PDF export shows formulas as their LaTeX source, or a Word export shows some formulas as LaTeX.
 
-**Possible cause:** the PDF and Word exporters don't render math yet.
+**Possible causes:**
 
-**Solution:** use **File → Print / Save as PDF…** for a PDF, or **Export as HTML**. Both render formulas exactly as in the preview.
+- **Export as PDF** doesn't render math yet.
+- In **Export as Word**, formulas become Word equations, except those using something outside the supported subset, such as a matrix (`\begin{pmatrix}`), an `aligned` environment or a line break (`\\`). Those keep their LaTeX so nothing is converted wrongly. See [Math](/markdown/math#export).
+- **Settings → Preview → Render LaTeX math** is off, so `$` signs are treated as text.
+
+**Solution:** for a PDF, use **File → Print / Save as PDF…**, which renders formulas exactly as in the preview. For Word, simplify the formula, or use **Export as HTML**.
 
 ## A diagram appears as code in PDF or Word
 

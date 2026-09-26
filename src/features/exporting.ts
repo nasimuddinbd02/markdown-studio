@@ -58,6 +58,7 @@ async function exportAsDocx(src: ExportSource) {
       title: documentTitle(src.content, src.name),
       loadImage: makeImageLoader(src.path, loadImage),
       renderDiagram: await diagramRenderer(src.content),
+      math: features().math,
     });
     const saved = await backend().exportBinaryFile(exportFileName(src.name, "docx"), bytesToBase64(bytes), "docx");
     if (saved) notify("success", `Exported to ${saved}`);
@@ -98,6 +99,7 @@ async function exportAsPdf(src: ExportSource, onPrint?: () => Promise<void>) {
       title: documentTitle(src.content, src.name),
       loadImage: makeImageLoader(src.path, loadImage),
       renderDiagram: await diagramRenderer(src.content),
+      math: features().math,
     });
     const saved = await backend().exportBinaryFile(exportFileName(src.name, "pdf"), bytesToBase64(bytes), "pdf");
     if (saved) notify("success", `Exported to ${saved}`);

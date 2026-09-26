@@ -146,3 +146,37 @@ describe("Mermaid diagrams in Word export", () => {
     expect(await zip.file("word/document.xml")!.async("string")).toContain("graph TD");
   });
 });
+
+describe("math in Word export", () => {
+  const documentXml = async (md: string, opts = {}) =>
+    (await JSZip.loadAsync(await markdownToDocx(md, opts))).file("word/document.xml")!.async("string");
+
+  it("exports formulas as native Word equations", async () => {
+    const xml = await documentXml("Inline $\\frac{a}{b}$ here.\n\n$$\n\\sum_{k=1}^{n} k^2\n$$\n\nAnd $\\sqrt{x}$.");
+    expect(xml.match(/<m:oMath>/g)?.length).toBe(3);
+    expect(xml).toContain("<m:f>"); // fraction
+    expect(xml).toContain("<m:nary>"); // sum
+    expect(xml).toContain("<m:rad>"); // square root
+    expect(xml).not.toContain("\\frac");
+    expect(xml).toMatch(/<m:t[^>]*>∑<\/m:t>|m:chr m:val="∑"/);
+  });
+
+  it("sets function names such as sin and lim upright", async () => {
+    const xml = await documentXml("$\\lim_{x \\to 0} \\frac{\\sin x}{x}$");
+    expect(xml).toContain('<m:sty m:val="p"/></m:rPr><m:t>lim</m:t>');
+    expect(xml).toContain('<m:sty m:val="p"/></m:rPr><m:t>sin</m:t>');
+  });
+
+  it("keeps the LaTeX of formulas it can't convert", async () => {
+    const xml = await documentXml("$$\n\\begin{pmatrix} a & b \\end{pmatrix}\n$$\n\nand $x \\unknown y$");
+    expect(xml).not.toContain("<m:oMath>");
+    expect(xml).toContain("\\begin{pmatrix}");
+    expect(xml).toContain("$x \\unknown y$");
+  });
+
+  it("leaves dollar signs alone when math is turned off", async () => {
+    const xml = await documentXml("Costs $5 and $10.", { math: false });
+    expect(xml).not.toContain("<m:oMath>");
+    expect(xml).toContain("Costs $5 and $10.");
+  });
+});

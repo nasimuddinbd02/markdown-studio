@@ -43,7 +43,7 @@ Yes. Code blocks marked `mermaid` are drawn as diagrams in the preview and in ev
 
 ## Does it support LaTeX?
 
-Yes, LaTeX **math**: `$…$` inline and `$$…$$` for display, rendered with KaTeX. Full LaTeX documents aren't supported. See [Math / LaTeX](/markdown/math).
+Yes, LaTeX **math**: `$…$` inline and `$$…$$` for display, rendered with KaTeX. Word export turns formulas into native Word equations. Full LaTeX documents aren't supported. See [Math / LaTeX](/markdown/math).
 
 ## Can I export to PDF or Word?
 

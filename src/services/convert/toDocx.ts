@@ -8,6 +8,8 @@ import {
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import { latexToWordMath } from "./omml";
 import type { Root, RootContent, PhrasingContent, List, Table as MdTable, AlignType } from "mdast";
 import { resolveRelative } from "../paths";
 import { collectFootnotes, type Footnotes } from "./footnotes";
@@ -27,6 +29,8 @@ export interface ExportOptions {
   title?: string;
   loadImage?: DocxImageLoader;
   renderDiagram?: DiagramRenderer;
+  /** Treat $…$ and $$…$$ as math (default true, like the preview's setting). */
+  math?: boolean;
 }
 
 const MONO = "Consolas";
@@ -122,6 +126,12 @@ class DocxBuilder {
         case "html":
           out.push(this.run(n.value.replace(/<[^>]+>/g, ""), s));
           break;
+        case "inlineMath": {
+          // A native Word equation; formulas outside the supported subset keep their LaTeX.
+          const eq = latexToWordMath(n.value);
+          out.push(eq ?? this.run(`$${n.value}$`, s));
+          break;
+        }
         case "footnoteReference": {
           // A real Word footnote: Word numbers it and puts the note at the bottom of the page.
           const number = this.footnotes?.number(n.identifier);
@@ -281,6 +291,11 @@ class DocxBuilder {
       }
       case "footnoteDefinition":
         return []; // becomes a Word footnote (see footnoteContent)
+      case "math": {
+        const eq = latexToWordMath(node.value);
+        if (eq) return [new Paragraph({ indent, alignment: AlignmentType.CENTER, spacing: { before: 120, after: 120 }, children: [eq] })];
+        return [new Paragraph({ indent, children: [new TextRun({ text: `$$ ${node.value} $$`, font: MONO, size: 19 })] })];
+      }
       default: {
         const text = plainText(node).trim();
         return text ? [new Paragraph({ indent, children: [new TextRun(text)] })] : [];
@@ -306,7 +321,9 @@ class DocxBuilder {
 
 /** Markdown → Word document (.docx) bytes. */
 export async function markdownToDocx(markdown: string, opts: ExportOptions = {}): Promise<Uint8Array> {
-  const tree = unified().use(remarkParse).use(remarkGfm).parse(stripFrontMatter(markdown)) as Root;
+  const parser = unified().use(remarkParse).use(remarkGfm);
+  if (opts.math !== false) parser.use(remarkMath, { singleDollarTextMath: true });
+  const tree = parser.parse(stripFrontMatter(markdown)) as Root;
   const builder = new DocxBuilder(opts.loadImage, collectFootnotes(tree), opts.renderDiagram);
   const children: Array<Paragraph | Table> = [];
   for (const node of tree.children) children.push(...(await builder.block(node)));

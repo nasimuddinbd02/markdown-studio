@@ -61,4 +61,5 @@ KaTeX supports most of LaTeX's **math mode**: fractions, roots, operators, Greek
 | --- | --- |
 | Export as HTML | Rendered |
 | Print / Save as PDF | Rendered, as in the preview |
-| Export as PDF, Export as Word | As their LaTeX source text |
+| Export as Word | Native Word equations you can edit in Word (fractions, roots, scripts, sums, integrals, limits, brackets, Greek letters and operators). A formula using anything else, such as a matrix or an `aligned` environment, keeps its LaTeX text |
+| Export as PDF | As their LaTeX source text |
