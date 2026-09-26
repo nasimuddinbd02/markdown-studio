@@ -74,7 +74,7 @@ Status of each [SRS](SRS.md) requirement as of version 0.13.0. **Done** means im
 | Feature | Where | SRS reference |
 | --- | --- | --- |
 | Document outline, with Copy Link to Heading / Copy Markdown Link and moving sections (drag and drop, context menu, Alt+Up/Down) | `components/Outline.tsx`, `features/outline.ts`, `features/sections.ts` | §19 document outline and navigation |
-| Mermaid diagrams and LaTeX math (preview, exports; native Word equations) | `components/MermaidDiagram.tsx`, `services/markdown.ts`, `services/convert/latex.ts`, `omml.ts` | §18 v0.3 |
+| Mermaid diagrams and LaTeX math (preview, exports; native Word equations) | `components/MermaidDiagram.tsx`, `services/markdown.ts`, `services/convert/latex.ts`, `omml.ts`, `services/mathImage.ts` | §18 v0.3 |
 | Markdown lint with a Problems panel | `features/lint.ts`, `features/lintExtension.ts` | §19 Markdown linting |
 | Workspace link check (files, images, anchors) | `features/linkCheck.ts`, `components/LinkCheckPanel.tsx` | §19 Markdown linting |
 | Local file history with diff and restore | `src-tauri/src/history.rs`, `components/HistoryDialog.tsx` | §19 version history and snapshots |
@@ -101,7 +101,7 @@ Status of each [SRS](SRS.md) requirement as of version 0.13.0. **Done** means im
 
 ## Known gaps and next improvements
 
-- PDF export shows LaTeX math as its source text; Word export converts a common subset to native equations (matrices and environments stay as LaTeX); HTML export and Print → Save as PDF render all math. Documented on the website.
+- PDF export keeps inline math as LaTeX text and draws display math as pictures only where the web engine allows it (Windows/WebView2; WebKit on macOS refuses). Word export converts a common subset to native equations (matrices and environments stay as LaTeX). HTML export and Print → Save as PDF render all math. Documented on the website.
 - Code-sign the Windows installer (Authenticode) so SmartScreen doesn't warn; updates are already signature-verified.
 - macOS builds are ad-hoc signed, not notarized (needs an Apple Developer ID). In-place updates are Windows-only; macOS and Linux are offered the download page (signing their updates in CI needs the updater key as a repository secret).
 - The macOS and Linux builds haven't been run on real hardware yet, only built in CI.

@@ -35,7 +35,7 @@ description: Fix Markdown Studio import and export problems, including scanned P
 
 **Possible causes:**
 
-- **Export as PDF** doesn't render math yet.
+- **Export as PDF** draws display formulas (`$$…$$`) as pictures only on Windows; inline formulas (`$…$`) always stay LaTeX text, and on macOS (and possibly Linux) display formulas do too.
 - In **Export as Word**, formulas become Word equations, except those using something outside the supported subset, such as a matrix (`\begin{pmatrix}`), an `aligned` environment or a line break (`\\`). Those keep their LaTeX so nothing is converted wrongly. See [Math](/markdown/math#export).
 - **Settings → Preview → Render LaTeX math** is off, so `$` signs are treated as text.
 

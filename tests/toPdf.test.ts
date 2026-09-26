@@ -188,3 +188,21 @@ describe("SVG size", () => {
     expect(svgSize("<svg>")).toBeNull();
   });
 });
+
+describe("math in PDF export", () => {
+  const md = "Inline $e^{i\\pi}$ stays text.\n\n$$\n\\int_0^1 x^2 \\, dx\n$$";
+
+  it("draws display formulas as images and keeps inline ones as LaTeX", async () => {
+    const png = Uint8Array.from(atob(PNG_B64), (c) => c.charCodeAt(0));
+    const bytes = await markdownToPdf(md, { renderMath: async () => ({ data: png, width: 90, height: 40 }) });
+    expect(new TextDecoder("latin1").decode(bytes)).toMatch(/\/Subtype\s*\/Image/);
+    const text = (await pdfToMarkdown(bytes.buffer as ArrayBuffer)).markdown;
+    expect(text).toContain("$e^{i\\pi}$");
+    expect(text).not.toContain("\\int_0^1");
+  }, 30_000);
+
+  it("keeps the LaTeX when a formula can't be drawn", async () => {
+    const bytes = await markdownToPdf(md, { renderMath: async () => { throw new Error("SecurityError"); } });
+    expect((await pdfToMarkdown(bytes.buffer as ArrayBuffer)).markdown).toContain("\\int_0^1");
+  }, 30_000);
+});

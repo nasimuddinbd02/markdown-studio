@@ -310,3 +310,20 @@ test("long file names fit on one row in the tab", async ({ page }) => {
   await page.keyboard.insertText(" edited");
   expect(await label$.evaluate((el) => getComputedStyle(el).fontStyle)).toBe("italic");
 });
+
+test("display formulas and diagrams are exported to PDF as pictures", async ({ page }) => {
+  await start(page);
+  await openDemoFolder(page);
+  await page.locator(".tree-row", { hasText: /^docs$/ }).click();
+  await openFile(page, "diagrams-and-math.md");
+  await expect(page.locator(".markdown-body svg").first()).toBeVisible({ timeout: 20_000 });
+  await page.keyboard.press(`${mod}+Shift+P`);
+  await page.keyboard.type("export as pdf");
+  const download = page.waitForEvent("download");
+  await page.getByRole("option", { name: /^Export as PDF/ }).click();
+  const pdf = Buffer.concat(await (await (await download).createReadStream()).toArray()).toString("latin1");
+  // The Mermaid diagram and the $$…$$ integral are images; the inline formula stays LaTeX text.
+  // Two pictures, each stored with its alpha mask (a second image object).
+  expect(pdf.match(/\/Subtype\s*\/Image/g)?.length).toBe(4);
+  expect(pdf.match(/\/SMask\s+\d+\s+0\s+R/g)?.length).toBe(2);
+});

@@ -31,6 +31,8 @@ export interface ExportOptions {
   renderDiagram?: DiagramRenderer;
   /** Treat $…$ and $$…$$ as math (default true, like the preview's setting). */
   math?: boolean;
+  /** Draws a display formula ($$…$$) as a PNG for PDF export; null or an error keeps the LaTeX. */
+  renderMath?: DiagramRenderer;
 }
 
 const MONO = "Consolas";

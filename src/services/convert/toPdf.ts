@@ -4,6 +4,7 @@ import { stripFrontMatter } from "../frontMatter";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
 import type { Root, RootContent, PhrasingContent, List, Table as MdTable } from "mdast";
 import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
 import type { DiagramRenderer, DocxImageLoader, ExportOptions } from "./toDocx";
@@ -52,6 +53,7 @@ class PdfBuilder {
     private loadImage?: DocxImageLoader,
     private footnotes?: Footnotes,
     private renderDiagram?: DiagramRenderer,
+    private renderMath?: DiagramRenderer,
   ) {}
 
   private async inline(nodes: PhrasingContent[], style: Record<string, unknown> = {}): Promise<Inline[]> {
@@ -85,6 +87,10 @@ class PdfBuilder {
           break;
         case "html":
           out.push(n.value.replace(/<[^>]+>/g, ""));
+          break;
+        case "inlineMath":
+          // Inline formulas stay as LaTeX: PDF text can't flow around pictures.
+          out.push({ text: `$${n.value}$`, ...style, style: "inlineCode" });
           break;
         case "footnoteReference": {
           const number = this.footnotes?.number(n.identifier);
@@ -235,6 +241,15 @@ class PdfBuilder {
       }
       case "footnoteDefinition":
         return []; // collected into the Footnotes section at the end
+      case "math": {
+        const png = this.renderMath ? await this.renderMath(node.value).catch(() => null) : null;
+        if (png) {
+          let bin = "";
+          for (let i = 0; i < png.data.length; i += 0x8000) bin += String.fromCharCode(...png.data.subarray(i, i + 0x8000));
+          return [{ image: `data:image/png;base64,${btoa(bin)}`, width: Math.min(CONTENT_WIDTH, png.width * 0.75), alignment: "center", margin: [0, 4, 0, 10] }];
+        }
+        return [{ text: `$$ ${node.value} $$`, style: "code", margin: [0, 2, 0, 10] }];
+      }
       default: {
         const text = plain(node).trim();
         return text ? [{ text, margin: [0, 0, 0, 8] }] : [];
@@ -280,8 +295,10 @@ async function pdfmake() {
 
 /** Markdown → PDF bytes. */
 export async function markdownToPdf(markdown: string, opts: ExportOptions = {}): Promise<Uint8Array> {
-  const tree = unified().use(remarkParse).use(remarkGfm).parse(stripFrontMatter(markdown)) as Root;
-  const builder = new PdfBuilder(opts.loadImage, collectFootnotes(tree), opts.renderDiagram);
+  const parser = unified().use(remarkParse).use(remarkGfm);
+  if (opts.math !== false) parser.use(remarkMath, { singleDollarTextMath: true });
+  const tree = parser.parse(stripFrontMatter(markdown)) as Root;
+  const builder = new PdfBuilder(opts.loadImage, collectFootnotes(tree), opts.renderDiagram, opts.renderMath);
   const content: Content[] = [];
   for (const node of tree.children) content.push(...(await builder.block(node)));
   content.push(...(await builder.footnoteSection()));

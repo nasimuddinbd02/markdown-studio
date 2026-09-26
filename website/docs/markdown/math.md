@@ -62,4 +62,6 @@ KaTeX supports most of LaTeX's **math mode**: fractions, roots, operators, Greek
 | Export as HTML | Rendered |
 | Print / Save as PDF | Rendered, as in the preview |
 | Export as Word | Native Word equations you can edit in Word (fractions, roots, scripts, sums, integrals, limits, brackets, Greek letters and operators). A formula using anything else, such as a matrix or an `aligned` environment, keeps its LaTeX text |
-| Export as PDF | As their LaTeX source text |
+| Export as PDF | Display formulas (`$$…$$`) are drawn as sharp pictures on Windows. Inline formulas (`$…$`) stay as LaTeX text, because PDF text can't flow around pictures. On macOS, and possibly Linux, the system web engine doesn't allow drawing formulas to a picture, so display formulas stay as LaTeX too |
+
+For a PDF with every formula rendered on any system, use **Print / Save as PDF**.
