@@ -43,7 +43,7 @@ website/
 
 ## Single sources of truth
 
-- **Version and downloads.** Nothing on the site hard-codes the version. `release.data.ts` reads it from the root `package.json`, and the installer names follow the convention of `scripts/release-installer.mjs` and `.github/workflows/release.yml`. When a release is published, the documentation workflow redeploys the site.
+- **Version and downloads.** Nothing on the site hard-codes the version. `release.data.ts` reads it from the root `package.json`, and the installer names follow the convention of `scripts/release-installer.mjs` and `.github/workflows/release.yml`. The release commit's version bump redeploys the site.
 - **Keyboard shortcuts** are parsed from the app's command definitions at build time. If the structure of `src/features/commands.ts` changes so that fewer than 30 shortcuts are found, the build fails instead of publishing an incomplete table.
 - **Changelog.** `docs/changelog.md` is updated with each release, from the release's commits (see the dev log). Never add a release that isn't published.
 
@@ -57,7 +57,7 @@ website/
 
 ## Deployment
 
-`.github/workflows/documentation.yml` runs on pushes to `main` that change the website, the app version or the shortcut definitions, on published releases, and by hand. It installs the website's dependencies, runs `npm run check`, uploads the build, and deploys it with GitHub Pages. Pull requests are built and checked, not deployed.
+`.github/workflows/documentation.yml` runs on pushes to `main` that change the website, the app version or the shortcut definitions (so each release's version bump redeploys it), and by hand. It doesn't run on release events: the `github-pages` environment only accepts deployments from `main`. It installs the website's dependencies, runs `npm run check`, uploads the build, and deploys it with GitHub Pages. Pull requests are built and checked, not deployed.
 
 **One-time setup** (repository owner): in GitHub, go to **Settings → Pages → Build and deployment → Source** and choose **GitHub Actions**. Then run the workflow (**Actions → Documentation website → Run workflow**) or push a change.
 
