@@ -233,3 +233,29 @@ The user asked for a continuous loop: suggest a feature, build it, test it, push
 **Release 0.9.0:** the first release delivered through the in-app updater. Installed 0.8.0 apps offer it at startup.
 
 **Tests:** Vitest 207, Playwright 18, Rust 27. All passing.
+
+## 2026-09-25 (evening): Heading levels and clickable tasks, released as 0.10.0
+
+| # | Feature | Commit |
+| --- | --- | --- |
+| 35 | Promote / Demote Heading (Format menu, palette, Ctrl/Cmd+Alt+= and Ctrl/Cmd+Alt+-): each selected heading moves one level, staying within H1–H6. Other lines are unchanged | 0b22bef |
+| 36 | Task checkboxes in the preview can be clicked (or toggled with Space) to check or uncheck the task in the source. The change goes through the editor, so Ctrl+Z undoes it. Tasks are located with the preview's GFM parser, so code blocks, quotes, nested lists, front matter and CRLF files are handled | 704e342 |
+
+**Verification:** Vitest and a Playwright workflow in Edge: the shortcut changes H3→H2→H4 in the preview; clicking the second task checks `- [x] second` in the source and leaves the first alone. An early version of the checkbox logged a React "uncontrolled to controlled" warning. It is now an uncontrolled input keyed on its state, and the warning is gone. The preview dev server can't start in unattended runs, so browser checks ran through Playwright.
+
+**Release 0.10.0** (33742ac): standard installer 6.9 MB (SHA-256 6442eb92…); offline installer 211.9 MB (SHA-256 b9fec90b…). Both GitHub download URLs return 200, and `latest.json` shows 0.10.0, so installed apps are offered the update at startup. The README (version, links, checksums, features), INSTALL.md (the standard installer size is now ~7 MB, not ~4 MB) and TRACEABILITY are updated. **Local install skipped:** the silent install needs UAC elevation, and nobody was present to approve it. The machine still has 0.9.0, which will offer 0.10.0 at its next startup.
+
+**Tests:** Vitest 212, Playwright 18, Rust 27. All passing.
+
+**Next up:**
+
+1. Move a whole section (a heading plus its subheadings) up or down, or promote it, from the outline.
+2. Performance: a subset of highlight.js languages to shrink the preview bundle; a 10 MB document benchmark.
+3. Tauri-driver e2e against the native build.
+4. Localization: waiting on the language choice.
+
+**Questions for the user:**
+
+- Which UI languages should localization cover?
+- Code-signing certificate (Authenticode) so SmartScreen doesn't warn on install?
+- Local installs need an elevated (UAC) prompt, which unattended runs can't approve. Should the scheduled run skip the local install, or will you run the installer yourself?
