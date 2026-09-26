@@ -338,3 +338,29 @@ The user asked for the documents to follow `docs/DOCUMENTATION_SITE_SPEC.md`: a 
 **Deployed:** with the user's approval, GitHub Pages was enabled (source: GitHub Actions) and the site is live at https://nasimuddinbd02.github.io/markdown-studio/. All 21 checked URLs return 200, and a missing page returns 404. The sitemap has 47 URLs, robots.txt is served, and the 23 browser checks (WCAG audits in both themes, mobile) pass against the live site.
 
 **Questions for the user:** add the site to Google Search Console (steps in `website/README.md`)? Choose a license (the FAQ says one hasn't been published)?
+
+## 2026-09-25 (9:17–10:30 PM): Export fidelity and outline actions, released as 0.12.0
+
+The user asked to continue the loop until 10:30 PM. From this session on, every change updates its documents (see `CLAUDE.md`).
+
+| # | Feature | Commit |
+| --- | --- | --- |
+| 43 | Footnotes in PDF export (superscript numbers linked to a Footnotes section) and Word export (native Word footnotes), numbered in first-reference order; unreferenced definitions left out | 62a3feb |
+| 44 | Mermaid diagrams in PDF and Word exports: rendered with SVG labels, rasterized at 2× in the web engine, embedded as PNG, with solid edge-label backgrounds; syntax errors fall back to the code. Verified in Edge: the .docx holds the rendered diagram and no Mermaid source | 5954415 |
+| 45 | Outline: right-click a heading for Copy Link to Heading / Copy Markdown Link (GitHub slugs, duplicates numbered) and Move Section Up/Down; Alt+Up/Down on a focused heading, with focus following the moved section | 54df62b |
+| 46 | View → Fold All / Unfold All (also in the palette) | 330851b |
+| — | Documentation workflow fix: the github-pages environment only accepts `main`, so the release-event deploy failed and its concurrency group cancelled the push deploy. The release trigger is removed and deploys queue instead of cancelling. The site was redeployed and shows 0.12.0 | 413c131 |
+
+**Docs:** each feature updated the README, TRACEABILITY and the matching website pages (export tables, Mermaid, footnotes, troubleshooting, FAQ, roadmap, editor, writing tools, keyboard shortcuts, settings). The remaining export gap, LaTeX math in PDF/Word, is documented.
+
+**Release 0.12.0** (face7d8): Windows standard 6.9 MB (SHA-256 34287ae3…) and offline 211.9 MB (0dbebc86…). The macOS arm64/x64 and Linux AppImage/deb/rpm builds all pass. All 6 README release links return 200, and `latest.json` shows 0.12.0. The website changelog has the v0.12.0 entry. **Installed locally with `/S`: the registry shows 0.12.0.** CI (typecheck, unit, e2e, Rust on 3 OSes) is green.
+
+**Tests:** Vitest 234 (37 files), Playwright 24, Rust 27, website checks (47 pages; 24 browser checks). All passing.
+
+**Next up:**
+
+1. Math in PDF and Word export: native Word equations (OMML) from LaTeX, or rasterized MathML where the web engine allows it.
+2. Drag to reorder sections in the outline.
+3. Performance: startup bundle (691 KB) and a large-document benchmark.
+
+**Questions for the user:** add the site to Google Search Console (steps in `website/README.md`); choose a license; Apple Developer ID and Windows code-signing certificate.
