@@ -16,7 +16,7 @@ const importing = () => import("./importing");
 import type { StateCommand } from "@codemirror/state";
 import type { KeyBinding } from "@codemirror/view";
 import * as fmt from "./formatting";
-import { formatTableAtCursor } from "./tables";
+import { formatTableAtCursor, sortTableAtCursor } from "./tables";
 import { insertOrUpdateToc } from "./toc";
 
 export const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
@@ -60,6 +60,8 @@ export const formatCommands: Record<string, Command> = {
   footnote: formatCommand("footnote", "Insert Footnote", fmt.insertFootnote, "Mod+Alt+R"),
   table: formatCommand("table", "Insert Table", fmt.insertTable),
   formatTable: formatCommand("formatTable", "Format Table", formatTableAtCursor, "Mod+Alt+T"),
+  sortTableAsc: formatCommand("sortTableAsc", "Sort Table by Column (A to Z)", sortTableAtCursor(false)),
+  sortTableDesc: formatCommand("sortTableDesc", "Sort Table by Column (Z to A)", sortTableAtCursor(true)),
   toc: formatCommand("toc", "Insert / Update Table of Contents", insertOrUpdateToc),
   horizontalRule: formatCommand("horizontalRule", "Horizontal Rule", fmt.insertHorizontalRule),
 };

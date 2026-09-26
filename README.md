@@ -54,7 +54,7 @@ For requirements, checksum verification, silent install, uninstalling and troubl
 - Workspace folders with a file explorer: new file/folder, rename (F2), delete to the Trash/Recycle Bin, Reveal in File Explorer, Copy (Relative) Path
 - Tab context menu: Close Others, Close to the Right, Close Saved, Copy Path, Reveal
 - Tabs with dirty indicators, and Save / Don't Save / Cancel prompts on close and on quit; Save All; recent files and folders (File menu and welcome screen)
-- Link autocompletion (workspace files after `](`, images after `![](`, headings after `](#`) and Format Table (Ctrl/Cmd+Alt+T) that aligns GFM tables, CJK-aware
+- Link autocompletion (workspace files after `](`, images after `![](`, headings after `](#`) and Format Table (Ctrl/Cmd+Alt+T) that aligns GFM tables, CJK-aware; Sort Table by Column (A to Z / Z to A) sorts rows by the column under the cursor (numbers numerically, text in natural order, empty cells last)
 - Format menu and shortcuts: bold (Ctrl/Cmd+B), italic (I), link (K), inline code (E), strikethrough, headings (Ctrl/Cmd+Alt+1–3), promote/demote heading (Ctrl/Cmd+Alt+= / Ctrl/Cmd+Alt+-), lists, task lists, check/uncheck task (Ctrl/Cmd+Enter), quotes, code blocks, tables and footnotes (Insert Footnote, Ctrl/Cmd+Alt+R: numbered `[^n]` reference with its definition added at the end)
 - Paste a URL while text is selected to turn the selection into a link: `[selected text](url)`
 - CodeMirror 6 editor with Markdown syntax highlighting, code-block languages, undo/redo, multi-cursor, find & replace (case-sensitive, regex, whole word) and go to line

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { EditorSelection, EditorState } from "@codemirror/state";
-import { displayWidth, formatTable, formatTableAtCursor, splitRow } from "../src/features/tables";
+import { displayWidth, formatTable, formatTableAtCursor, sortTableAtCursor, sortTableRows, splitRow } from "../src/features/tables";
 import { applyCommand } from "../src/features/formatting";
 
 describe("table formatting", () => {
@@ -42,5 +42,27 @@ describe("table formatting", () => {
     const line = state.doc.lineAt(state.selection.main.head);
     expect(line.text).toBe("| ccc | d   |");
     expect(state.selection.main.head - line.from).toBe(8);
+  });
+});
+
+describe("sort table by column", () => {
+  const table = ["| Name | Size |", "| --- | ---: |", "| beta | 1,200 |", "| Alpha | 90 |", "| gamma |  |", "| item10 | 3.5 |", "| item9 | 3 |"];
+
+  it("sorts numbers numerically and puts empty cells last", () => {
+    expect(sortTableRows(table, 1, false)!.slice(2)).toEqual(["| item9 | 3 |", "| item10 | 3.5 |", "| Alpha | 90 |", "| beta | 1,200 |", "| gamma |  |"]);
+    expect(sortTableRows(table, 1, true)!.slice(2, 4)).toEqual(["| beta | 1,200 |", "| Alpha | 90 |"]);
+  });
+
+  it("sorts text in natural, case-insensitive order", () => {
+    expect(sortTableRows(table, 0, false)!.slice(2).map((l) => l.split("|")[1].trim())).toEqual(["Alpha", "beta", "gamma", "item9", "item10"]);
+  });
+
+  it("sorts by the cursor's column and formats the table", () => {
+    const doc = "Intro\n\n| Name | Qty |\n| --- | --- |\n| b | 2 |\n| a | 10 |\n";
+    const cursor = doc.indexOf("Qty");
+    const state = EditorState.create({ doc, selection: EditorSelection.cursor(cursor) });
+    const out = applyCommand(state, sortTableAtCursor(true)).doc.toString();
+    expect(out).toBe("Intro\n\n| Name | Qty |\n| ---- | --- |\n| a    | 10  |\n| b    | 2   |\n");
+    expect(sortTableRows(["| a |", "| b |"], 0, false)).toBeNull();
   });
 });

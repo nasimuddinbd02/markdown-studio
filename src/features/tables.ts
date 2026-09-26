@@ -135,3 +135,56 @@ export const formatTableAtCursor: StateCommand = ({ state, dispatch }) => {
   dispatch(state.update({ changes: { from, to, insert }, selection: { anchor: rowStart + offset }, userEvent: "input.format" }));
   return true;
 };
+
+/** Which cell (0-based) of a table row a column offset falls in. */
+function cellIndexAt(line: string, column: number): number {
+  let index = 0;
+  let inCode = false;
+  const leading = line.trimStart().startsWith("|");
+  for (let i = 0; i < Math.min(column, line.length); i++) {
+    const ch = line[i];
+    if (ch === "\\") i++;
+    else if (ch === "`") inCode = !inCode;
+    else if (ch === "|" && !inCode) index++;
+  }
+  return Math.max(0, leading ? index - 1 : index);
+}
+
+const NUMBER = /^[-+]?[$€£¥]?\s*[-+]?\d[\d,]*(\.\d+)?\s*%?$/;
+const toNumber = (s: string) => Number(s.replace(/[$€£¥,%\s]/g, ""));
+const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+
+/**
+ * Sorts the body rows of a table by one column: numerically when every
+ * non-empty cell is a number (1,200, 3.5%, $9), otherwise in natural text
+ * order. Empty cells always go last; equal rows keep their order.
+ */
+export function sortTableRows(lines: string[], column: number, descending: boolean): string[] | null {
+  if (lines.length < 3 || !splitRow(lines[1]).every((c) => DELIMITER_CELL.test(c))) return null;
+  const body = lines.slice(2).map((line) => ({ line, cell: (splitRow(line)[column] ?? "").trim() }));
+  const filled = body.filter((r) => r.cell !== "");
+  const numeric = filled.length > 0 && filled.every((r) => NUMBER.test(r.cell));
+  const compare = (a: string, b: string) => (numeric ? toNumber(a) - toNumber(b) : collator.compare(a, b));
+  const sorted = [...filled].sort((a, b) => (descending ? -1 : 1) * compare(a.cell, b.cell));
+  return [lines[0], lines[1], ...sorted.map((r) => r.line), ...body.filter((r) => r.cell === "").map((r) => r.line)];
+}
+
+/** Command: sort the table around the cursor by the cursor's column, then format it. */
+export function sortTableAtCursor(descending: boolean): StateCommand {
+  return ({ state, dispatch }) => {
+    const head = state.selection.main.head;
+    const line = state.doc.lineAt(head);
+    const range = tableAround(state, line.number);
+    if (!range) return false;
+    const lines: string[] = [];
+    for (let n = range.first; n <= range.last; n++) lines.push(state.doc.line(n).text);
+    const sorted = sortTableRows(lines, cellIndexAt(line.text, head - line.from), descending);
+    const formatted = sorted && formatTable(sorted);
+    if (!formatted) return false;
+    const from = state.doc.line(range.first).from;
+    const to = state.doc.line(range.last).to;
+    // The cursor goes to the start of the header row, where the column is still visible.
+    dispatch(state.update({ changes: { from, to, insert: formatted.join("\n") }, selection: { anchor: from }, userEvent: "input.sortTable" }));
+    return true;
+  };
+}
